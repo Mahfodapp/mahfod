@@ -1,0 +1,19 @@
+{
+    "expo": {
+        "name": "تطبيق محفوظ",
+        "slug": "mahfod-app",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "userInterfaceStyle": "dark",
+        "android": {
+            "adaptiveIcon": {
+                "backgroundColor": "#0B1437"
+            },
+            "package": "com.mahfod.app",
+            "permissions": []
+        },
+        "ios": {
+            "supportsTablet": false
+        }
+    }
+}
