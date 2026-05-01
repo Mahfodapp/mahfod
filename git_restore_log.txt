@@ -1,0 +1,1 @@
+HEAD is now at 68ae1e0f fix: replace react-native-worklets-core with react-native-worklets@0.8.1 for Reanimated 4.3.0 compatibility

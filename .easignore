@@ -1,0 +1,37 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.keystore
+*.p12
+*.cer
+*.mobileprovision
+*.orig.*
+
+# Android
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/build/
+.gradle/
+.idea/
+
+# iOS
+ios/build/
+ios/Pods/
+ios/.symlinks/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Backend / Binaries / Scripts / Old Backups
+android_old/
+claudememostudies/
+stitch/
+supabase/
+supabase.exe
+*.exe
+*.log
+*.zip
+deploy-ai-proxy.ps1

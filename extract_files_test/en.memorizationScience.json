@@ -1,0 +1,164 @@
+{
+  "pageTitle": "The Science of Memorization",
+  "pageSubtitle": "Scientific and neurological foundations for developing memory abilities",
+  "readingTime": "Reading time: {{minutes}} minutes",
+  "progress": "Reading progress",
+
+  "sections": {
+    "intro": {
+      "tag": "Introduction",
+      "title": "Why Do We Forget?",
+      "body": "Memorization is not a talent reserved for the few — it is a skill that can be learned and developed by understanding the scientific mechanisms that govern it. For nearly 150 years, researchers have been precisely mapping how the human brain stores and retrieves information. This map reveals that the vast majority of what we learn is lost due to the absence of structured repetition, not because of any inherent weakness in memory itself.",
+      "quote": "The mind is not a vessel to be filled, but a fire to be kindled.",
+      "quoteAuthor": "Plutarch"
+    },
+
+    "forgettingCurve": {
+      "tag": "Neuroscience",
+      "title": "The Forgetting Curve — Hermann Ebbinghaus (1885)",
+      "body": "In 1885, German psychologist Hermann Ebbinghaus conducted thousands of experiments on himself to establish the first quantitative law of forgetting. His findings were striking: the brain loses approximately 50% of new information within one hour of learning, 70% within the first day, and up to 90% within a week — unless structured review intervenes to re-anchor the memory trace.",
+      "statLabel1": "Lost after 1 hour",
+      "statValue1": "50%",
+      "statLabel2": "Lost after 1 day",
+      "statValue2": "70%",
+      "statLabel3": "Lost after 1 week",
+      "statValue3": "90%",
+      "insight": "The key scientific signal: the forgetting curve is not destiny. Every successful review raises the retention threshold and measurably slows the rate of forgetting."
+    },
+
+    "spacedRepetition": {
+      "tag": "Spaced Repetition",
+      "title": "Optimal Spacing — The Secret to Long-Term Memory",
+      "body": "Spaced Repetition is widely regarded as the most evidence-backed learning technique in history. The principle is simple: reviewing material at the critical moment when the brain is on the verge of forgetting forces a deeper retrieval effort, producing a stronger neural trace each time.",
+      "mechanismTitle": "Neural mechanism",
+      "mechanismBody": "When the brain retrieves information under the pressure of imminent forgetting, it creates new synaptic connections between neurons and reinforces existing networks. This is known as Long-Term Potentiation (LTP) — the physical substrate of durable memory.",
+      "researchBox": "A 2008 study published in Science demonstrated that learners using spaced repetition outperformed those using massed practice by 200% on tests administered one week later.",
+      "sm2Title": "The SM-2 Algorithm — Science Behind the App",
+      "sm2Body": "Mahfod is built on the SM-2 algorithm developed by Piotr Woźniak in 1987. This algorithm computes the optimal next-review interval based on how easily each card was retrieved, personalizing your review schedule to each individual text."
+    },
+
+    "activeRecall": {
+      "tag": "Active Recall",
+      "title": "The Testing Effect — The Power of Forced Retrieval",
+      "body": "Neuroscientists distinguish between two types of repetition: passive repetition (re-reading) and active recall (attempting retrieval without looking). The research consensus is clear: active recall is far superior to re-reading, even when retrieval fails — the failure itself deepens the memory trace.",
+      "pillars": {
+        "title": "Three pillars of effective recall",
+        "p1Title": "Cover and retrieve",
+        "p1Body": "Cover the text and attempt to recall it fully before looking. The mental effort in that difficult moment is precisely what consolidates the memory.",
+        "p2Title": "Regular self-testing",
+        "p2Body": "Test yourself before reviewing, not after. The brain forms stronger memories when searching for an answer than when receiving one.",
+        "p3Title": "Productive failure",
+        "p3Body": "Errors during self-testing are not failures — they are precise signals indicating exactly where your brain needs additional effort."
+      },
+      "studyRef": "Roediger & Karpicke (2011), Science: students using active recall retained 50% more material compared to those who re-read the text four times."
+    },
+
+    "neuroscience": {
+      "tag": "Neurological Basis",
+      "title": "What Happens in Your Brain During Memorization",
+      "body": "Memory is not a single file stored at a fixed point in the brain, but a dynamic network of distributed synaptic connections. Understanding this architecture explains why some memorization techniques work and others fail.",
+      "steps": {
+        "encoding": {
+          "title": "Encoding",
+          "subtitle": "Encoding",
+          "body": "When you learn something new, the hippocampus converts the sensory signal into a neural pattern. The more meaningful and connected the material, the deeper the encoding."
+        },
+        "consolidation": {
+          "title": "Consolidation",
+          "subtitle": "Consolidation",
+          "body": "During sleep, the hippocampus replays acquired neural patterns and gradually transfers them to the neocortex for long-term storage. This is why good sleep after study is not a luxury but a biological necessity."
+        },
+        "retrieval": {
+          "title": "Retrieval",
+          "subtitle": "Retrieval",
+          "body": "Every successful retrieval rewrites the memory in a stronger form — a phenomenon called reconsolidation. Memory is literally rebuilt each time it is recalled."
+        }
+      },
+      "expertQuote": "Spaced review does not merely repeat information — it rebuilds the neural network that carries it each time, making memory progressively more resistant to forgetting.",
+      "expertName": "Dr. Robert Bjork",
+      "expertTitle": "Professor of Cognitive Neuroscience — UCLA"
+    },
+
+    "interleaving": {
+      "tag": "Advanced Techniques",
+      "title": "Interleaving — Breaking the Illusion of Mastery",
+      "body": "There is a common cognitive trap known as the 'illusion of competence': when material is intensively repeated in a single session, the brain signals apparent mastery. But testing reveals that this mastery is illusory and tied to the immediate context.",
+      "techniques": {
+        "interleaving": {
+          "title": "Interleaving",
+          "body": "Rather than studying one topic to completion, alternate between different texts in the same session. Studies show a 43% improvement in long-term recall compared to blocked study."
+        },
+        "elaboration": {
+          "title": "Elaborative Interrogation",
+          "body": "After memorizing each text, ask yourself: why? How does this connect to what I already know? Linking new information to an existing knowledge network multiplies encoding power."
+        },
+        "selfExplanation": {
+          "title": "Self-Explanation",
+          "body": "Explain the material in your own words as if teaching someone else. The Feynman technique forces the brain to expose gaps in understanding before they become memory holes."
+        }
+      }
+    },
+
+    "recommendations": {
+      "tag": "Expert Recommendations",
+      "title": "What the Science Recommends",
+      "intro": "The following recommendations are distilled from the latest research in educational neuroscience and cognitive psychology:",
+      "recs": [
+        {
+          "icon": "🧠",
+          "title": "Review before forgetting — not after",
+          "body": "The optimal window for the first review is within 24 hours of memorization. Waiting longer means restarting from zero."
+        },
+        {
+          "icon": "🌙",
+          "title": "Make sleep your ally",
+          "body": "A short session before bed followed by sufficient sleep (7-8 hours) outperforms a long intensive session. Neural consolidation occurs during REM sleep."
+        },
+        {
+          "icon": "⏱️",
+          "title": "Short, frequent sessions",
+          "body": "20-30 minutes of focused repetition is neurologically superior to 2 consecutive hours. Sustained attention has a physiological ceiling."
+        },
+        {
+          "icon": "🏃",
+          "title": "Exercise boosts memory",
+          "body": "20 minutes of aerobic exercise stimulates the release of BDNF, a protein that promotes neuronal growth and encoding capacity in the hippocampus."
+        },
+        {
+          "icon": "❌",
+          "title": "Avoid the illusion of mastery",
+          "body": "Re-reading gives you a feeling of familiarity, not mastery. Always test yourself — the mental difficulty in those moments is the sign of real learning."
+        },
+        {
+          "icon": "🔗",
+          "title": "Build semantic associations",
+          "body": "Connecting each new text to something already known multiplies encoding power. Memory is a network, not a list."
+        }
+      ]
+    },
+
+    "mahfodNote": {
+      "tag": "Mahfod & Science",
+      "title": "How Mahfod Embodies These Principles",
+      "body": "Mahfod was built from the ground up on the principles of educational neuroscience. The spaced repetition algorithm is computed individually for each text, the progressive text-fading technique forces your brain into active recall rather than passive reading, and daily reminders identify the optimal review window with scientific precision.",
+      "features": ["SM-2 algorithm adapted per text", "Progressive fading activating active recall", "Critical-moment notifications", "Personalized memory statistics"]
+    },
+
+    "conclusion": {
+      "tag": "Conclusion",
+      "title": "Memorization as Discipline",
+      "body": "Modern science confirms powerfully: structured, repeated, and early memorization does not merely leave a trace in memory — it reshapes the very architecture of the brain. Investing in understanding how to memorize is an investment in your intellectual capacity for decades to come.",
+      "finalQuote": "An investment in knowledge pays the best interest.",
+      "finalQuoteAuthor": "Benjamin Franklin"
+    }
+  },
+
+  "labels": {
+    "research": "Scientific Study",
+    "tip": "Practical Tip",
+    "neuralMechanism": "Neural Mechanism",
+    "backToTop": "Back to top",
+    "shareArticle": "Share article",
+    "tableOfContents": "Table of Contents"
+  }
+}

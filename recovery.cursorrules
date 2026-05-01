@@ -1,0 +1,579 @@
+WHO YOU ARE
+You are rebuilding Mahfod (محفوظ) — a production React Native + Expo app for students to memorize Islamic texts, poetry, hadiths, and the Holy Quran using Spaced Repetition (SM-2). This app was fully built, lost due to an accidental overwrite, and is now being restored from a decompiled APK analysis. Every architectural decision below is recovered fact — not suggestion. Follow it exactly.
+
+TECH STACK (non-negotiable)
+React Native 0.81.4
+React 19.1.1
+Expo SDK (managed workflow)
+TypeScript 5.9.2
+Drizzle ORM + expo-sqlite  (local SQLite DB — file: mahfod.db)
+Supabase                   (cloud sync + auth)
+React Navigation           (bottom tabs + native stack)
+react-native-reanimated    (all animations)
+react-native-worklets-core (worklets for reanimated)
+lucide-react-native        (icons)
+nanoid 3.3.11              (ID generation)
+i18next + react-i18next    (AR / EN / FR — default Arabic)
+expo-av                    (audio record + playback)
+expo-image-picker          (camera + gallery)
+expo-document-picker       (JSON import/export)
+expo-notifications         (local reminders)
+expo-haptics               (haptic feedback)
+expo-font                  (Cairo + ScheherazadeNew)
+
+PROJECT STRUCTURE
+mahfod/
+├── app/                        # Expo Router OR src/navigation/
+│   ├── (tabs)/
+│   │   ├── browse.tsx          # BrowseTab — memo library
+│   │   ├── review.tsx          # ReviewTab — daily review session
+│   │   ├── progress.tsx        # ProgressTab — study notes
+│   │   └── quran.tsx           # TatbeetTab — Quran memorization
+│   └── _layout.tsx
+├── src/
+│   ├── db/
+│   │   ├── schema.ts           # Drizzle schema — ALL tables below
+│   │   ├── client.ts           # expo-sqlite connection
+│   │   └── migrations/
+│   ├── screens/
+│   │   ├── HomeScreen.tsx
+│   │   ├── AddMemoScreen.tsx
+│   │   ├── MemoListScreen.tsx
+│   │   ├── ReviewScreen.tsx
+│   │   ├── TestScreen.tsx
+│   │   ├── LessonsScreen.tsx
+│   │   ├── SharingScreen.tsx
+│   │   ├── StudyNotesScreen.tsx
+│   │   ├── QuranScreen.tsx
+│   │   ├── SettingsScreen.tsx
+│   │   ├── LoginScreen.tsx
+│   │   ├── OnboardingScreen.tsx
+│   │   └── AboutScreen.tsx
+│   ├── components/             # Shared components
+│   ├── logic/
+│   │   ├── sm2.ts              # SM-2 algorithm
+│   │   └── sync.ts             # Supabase sync queue
+│   ├── store/                  # Zustand or Context stores
+│   ├── i18n/
+│   │   ├── ar.ts
+│   │   ├── en.ts
+│   │   └── fr.ts
+│   ├── theme/
+│   │   └── colors.ts           # Color tokens (see below)
+│   └── utils/
+├── assets/
+│   ├── fonts/
+│   │   ├── Cairo-*.ttf         # weights 200–900
+│   │   └── ScheherazadeNew-*.ttf
+│   └── images/
+│       ├── mahfodap_bg.png
+│       ├── mahfodap_title.png
+│       ├── mahfodap_icon.png
+│       ├── miliana_logo_1.png
+│       ├── islamic_pattern.png
+│       └── shelf_bg.png
+└── .cursorrules
+
+DATABASE SCHEMA (Drizzle ORM — exact recovered schema)
+typescript// src/db/schema.ts
+
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+
+export const memos = sqliteTable('memos', {
+  id:             text('id').primaryKey(),
+  title:          text('title').notNull(),
+  text:           text('text').notNull(),
+  label:          text('label').notNull(),
+  tags:           text('tags').notNull().default('[]'),         // JSON array
+  relatedMemoId:  text('related_memo_id'),                      // chain link
+  audioUri:       text('audio_uri'),
+  imageUri:       text('image_uri'),
+  createdAt:      text('created_at').notNull(),
+  updatedAt:      text('updated_at').notNull().default(''),
+  lastReviewedAt: text('last_reviewed_at'),
+  reviewCount:    integer('review_count').notNull().default(0),
+  stage:          text('stage').notNull().default('LEARNING'),  // LEARNING | REVIEWING | MASTERED
+  isFavorite:     integer('is_favorite').notNull().default(0),
+});
+
+export const books = sqliteTable('books', {
+  id:            text('id').primaryKey(),
+  title:         text('title').notNull(),
+  author:        text('author').notNull(),
+  subject:       text('subject').notNull(),
+  sectionLevels: text('section_levels').notNull(),             // JSON array
+  createdAt:     text('created_at').notNull(),
+});
+
+export const notes = sqliteTable('notes', {
+  id:           text('id').primaryKey(),
+  bookId:       text('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
+  text:         text('text').notNull(),
+  label:        text('label').notNull(),
+  sectionTitle: text('section_title').notNull(),
+  pageNumber:   text('page_number'),
+  createdAt:    text('created_at').notNull(),
+});
+
+export const quranProgress = sqliteTable('quran_progress', {
+  id:        text('id').primaryKey(),
+  type:      text('type').notNull(),   // memorized | review | tatbeet | rep | tatbeet_history
+  thumnId:   integer('thumn_id').notNull(),
+  value:     text('value').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const lessonsMatns = sqliteTable('lessons_matns', {
+  id:        text('id').primaryKey(),
+  title:     text('title').notNull(),
+  author:    text('author').notNull().default(''),
+  subject:   text('subject').notNull().default(''),
+  verses:    text('verses').notNull().default('[]'),           // JSON: [{num, text, audio_uri, explanation}]
+  createdAt: text('created_at').notNull(),
+});
+
+export const kvStore = sqliteTable('kv_store', {
+  key:       text('key').primaryKey(),
+  value:     text('value').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+SM-2 SPACED REPETITION ALGORITHM
+typescript// src/logic/sm2.ts
+
+export type Stage = 'LEARNING' | 'REVIEWING' | 'MASTERED';
+
+export interface SM2State {
+  reviewCount:    number;
+  easeFactor:     number;   // default: 2.5
+  intervalDays:   number;   // default: 0
+  nextReviewAt:   string | null;
+  lastReviewedAt: string | null;
+  stage:          Stage;
+}
+
+export interface Settings {
+  initialRepetitions:   number;   // default: 10
+  reinforceRepetitions: number;   // default: 5
+  reviewRepetitions:    number;   // default: 5
+  masteryThreshold:     number;   // default: 30 (days until MASTERED)
+}
+
+/** quality: 0 = forgot, 1 = hard, 2 = ok, 3 = easy */
+export function calculateNextReview(
+  state: SM2State,
+  quality: 0 | 1 | 2 | 3,
+  settings: Settings
+): SM2State {
+  const MIN_EF = 1.3;
+  let { easeFactor, intervalDays, reviewCount } = state;
+
+  if (quality < 2) {
+    // Failed — reset interval
+    intervalDays = 1;
+  } else {
+    if (reviewCount === 0)      intervalDays = 1;
+    else if (reviewCount === 1) intervalDays = 6;
+    else                        intervalDays = Math.round(intervalDays * easeFactor);
+
+    // SM-2 ease factor update
+    easeFactor = Math.max(
+      MIN_EF,
+      easeFactor + (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02))
+    );
+  }
+
+  reviewCount += 1;
+
+  const nextDate = new Date();
+  nextDate.setDate(nextDate.getDate() + intervalDays);
+
+  // Stage progression
+  let stage: Stage = state.stage;
+  if (stage === 'LEARNING' && reviewCount >= settings.initialRepetitions) {
+    stage = 'REVIEWING';
+  }
+  if (stage === 'REVIEWING' && reviewCount >= settings.masteryThreshold) {
+    stage = 'MASTERED';
+  }
+
+  return {
+    reviewCount,
+    easeFactor,
+    intervalDays,
+    nextReviewAt:   nextDate.toISOString(),
+    lastReviewedAt: new Date().toISOString(),
+    stage,
+  };
+}
+
+export function isDueForReview(memo: SM2State): boolean {
+  if (!memo.nextReviewAt) return true;
+  return new Date(memo.nextReviewAt) <= new Date();
+}
+
+VANISH MODES (progressive text fading — core feature)
+typescriptexport type VanishMode = 'none' | 'opacity' | 'words' | 'all';
+
+// 'none'    — text always visible
+// 'opacity' — text opacity fades after each repetition (from 1.0 → 0.0 over vanishAllAfter reps)
+// 'words'   — individual words replaced by '···' one by one per rep
+// 'all'     — entire text hidden after vanishAllAfter repetitions
+// Default: 'opacity', vanishAllAfter: 5
+
+DESIGN SYSTEM (exact recovered colors)
+typescript// src/theme/colors.ts  — DARK THEME ONLY
+
+export const colors = {
+  // Backgrounds
+  primary:        '#0D0E10',
+  primaryMid:     '#121316',
+  primaryLight:   '#181A1C',
+
+  // Surfaces
+  surface:        '#121316',
+  surfaceRaised:  '#181A1C',
+  surfaceHigh:    '#1E2022',
+  surfaceHighest: '#242629',
+  surfaceBright:  '#2B2C2F',
+
+  // Glass
+  glassCard:      'rgba(255,255,255,0.03)',
+  glassBorder:    'rgba(255,255,255,0.10)',
+
+  // Borders
+  border:         'rgba(255,255,255,0.08)',
+  borderStrong:   'rgba(255,255,255,0.16)',
+  borderAccent:   'rgba(204,255,0,0.25)',
+
+  // Accent — LIME GREEN signature color
+  accent:         '#CCFF00',
+  accentDim:      '#BEEE00',
+  accentSoft:     'rgba(204,255,0,0.10)',
+  accentBorder:   'rgba(204,255,0,0.22)',
+
+  // Text
+  textPrimary:    '#FDFBFE',
+  textSecondary:  '#ABABAD',
+  textMuted:      '#757578',
+  textAccent:     '#CCFF00',
+
+  // Semantic
+  success:        '#00EDB4',
+  successSoft:    'rgba(0,237,180,0.12)',
+  warning:        '#CCFF00',
+  error:          '#FF7351',
+  errorSoft:      'rgba(255,115,81,0.12)',
+  info:           '#AAFFDC',
+
+  // Stage badges
+  stageLearning:  '#AAFFDC',
+  stageReview:    '#CCFF00',
+  stageMastered:  '#00EDB4',
+} as const;
+
+FONTS
+typescript// Load in app entry point:
+await Font.loadAsync({
+  'Cairo-ExtraLight':  require('./assets/fonts/Cairo-ExtraLight.ttf'),
+  'Cairo-Light':       require('./assets/fonts/Cairo-Light.ttf'),
+  'Cairo-Regular':     require('./assets/fonts/Cairo-Regular.ttf'),
+  'Cairo-Medium':      require('./assets/fonts/Cairo-Medium.ttf'),
+  'Cairo-SemiBold':    require('./assets/fonts/Cairo-SemiBold.ttf'),
+  'Cairo-Bold':        require('./assets/fonts/Cairo-Bold.ttf'),
+  'Cairo-ExtraBold':   require('./assets/fonts/Cairo-ExtraBold.ttf'),
+  'Cairo-Black':       require('./assets/fonts/Cairo-Black.ttf'),
+  'ScheherazadeNew-Regular': require('./assets/fonts/ScheherazadeNew-Regular.ttf'),
+  'ScheherazadeNew-Bold':    require('./assets/fonts/ScheherazadeNew-Bold.ttf'),
+});
+
+// Usage:
+// Arabic UI text    → Cairo-SemiBold / Cairo-Bold
+// Arabic body text  → ScheherazadeNew-Regular
+// Latin text        → Cairo-Regular
+
+NAVIGATION STRUCTURE
+RootNavigator
+├── OnboardingStack  (shown if onboardingDone === false)
+│   └── OnboardingScreen  (4 slides)
+├── AuthStack        (shown if not logged in — optional, can continue as guest)
+│   └── LoginScreen
+└── MainTabs  (bottom tab navigator)
+    ├── BrowseTab      → MemoListScreen → AddMemoScreen / MemoDetailScreen
+    ├── [FAB center]   → AddMemoScreen  (new memo shortcut)
+    ├── ReviewTab      → ReviewScreen
+    ├── ProgressTab    → StudyNotesScreen
+    └── TatbeetTab     → QuranScreen
+    
+    # Also accessible via navigation.navigate():
+    ├── TestScreen
+    ├── LessonsScreen  → MatnDetailScreen
+    ├── SharingScreen  (3 tabs: Browse / Mine / Received)
+    ├── SettingsScreen
+    ├── AboutScreen
+    └── StatsScreen
+
+SETTINGS — DEFAULT VALUES
+typescriptexport const DEFAULT_SETTINGS = {
+  language:             'ar',          // 'ar' | 'en' | 'fr'
+  initialRepetitions:   10,
+  reinforceRepetitions: 5,
+  reviewRepetitions:    5,
+  masteryThreshold:     30,
+  vanishMode:           'opacity' as VanishMode,
+  vanishAllAfter:       5,
+  fontSizeScale:        1,
+  notificationsEnabled: false,
+  notificationHour:     8,
+  notificationMinute:   0,
+  weeklyTestHour:       9,
+  weeklyTestMinute:     0,
+  onboardingDone:       false,
+  aiAgent:              'fast',        // 'fast' | 'analytical'
+  aiDifficulty:         'medium',      // 'beginner' | 'medium' | 'advanced'
+  aiSubject:            '',
+  aiQuestionsCount:     5,
+};
+
+ASYNCSTORAGE / KV KEYS
+typescriptexport const STORAGE_KEYS = {
+  MEMOS:          'mahfod_memos',
+  SETTINGS:       'mahfod_settings',
+  PROGRESS:       'mahfod_progress',
+  BOOKS:          'mahfod_books',
+  REPS:           'mahfod_reps',
+  STREAK:         'mahfod_streak',
+  MEMO_PREFS:     'mahfod_memo_prefs',
+  QURAN_STATE:    'mahfod_quran_state',
+  QURAN_SETTINGS: 'mahfod_quran_settings',
+  SYNC_QUEUE:     'mahfod_sync_queue',
+};
+
+SUPABASE CONFIG
+typescript// src/lib/supabase.ts
+import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const SUPABASE_URL  = 'https://fqypyxissuzpaohauuqw.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxeXB5eGlzc3V6cGFvaGF1dXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwODIxNjcsImV4cCI6MjA4ODY1ODE2N30.KSztbK9jg54RU_6Y1IyWmYZFmX91SFiKc4PSgJFP0ec';
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    storage:          AsyncStorage,
+    autoRefreshToken: true,
+    persistSession:   true,
+    detectSessionInUrl: false,
+  },
+});
+
+I18N KEYS REFERENCE (critical UI strings)
+Arabic (ar) — default language
+typescriptexport const ar = {
+  common: {
+    save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل',
+    back: 'رجوع', done: 'تم', confirm: 'تأكيد', yes: 'نعم', no: 'لا',
+    loading: 'جارٍ التحميل...', error: 'خطأ', search: 'بحث...',
+    close: 'إغلاق', skip: 'تخطي', next: 'التالي →', finish: 'إنهاء ✓',
+  },
+  home: {
+    totalMemos: 'إجمالي المحفوظات',
+    streak: 'السلسلة', streakUnit: 'يوم',
+    review: 'للمراجعة', mastered: 'محكم',
+    allDone: 'أتممت مراجعة اليوم ✓',
+    addNew: 'إضافة محفوظ جديد',
+    welcomeGuest: 'قليلٌ دائم خير من كثير منقطع',
+    lessonsBtn: 'الدروس — سجّل ما تلقيته عند الشيخ',
+    viewAll: 'عرض الكل',
+  },
+  addMemo: {
+    headerNew: 'محفوظ جديد', headerEdit: 'تعديل المحفوظ',
+    labelTitle: 'العنوان', labelText: 'النص',
+    labelCategory: 'التصنيفات', labelMedia: 'الوسائط',
+    textOptional: 'اختياري إذا أضفت صوتاً أو صورة',
+    textPlaceholder: 'أدخل نص المحفوظ...',
+    titlePlaceholder: 'عنوان المحفوظ',
+    titleRequired: 'العنوان مطلوب',
+    poetryMode: 'شعر (شطرين)', saveBtnNew: 'ابدإ التكرار',
+    saveBtnEdit: 'حفظ التعديلات',
+    generateQuiz: 'توليد أسئلة بالذكاء الاصطناعي 🧠',
+    extractBtn: 'استخراج النص من الصورة 🔍',
+  },
+  memoList: {
+    emptyTitle: 'مكتبتك فارغة',
+    emptySub: 'ابدأ بإضافة أول محفوظاتك',
+    stages: { learning: 'يُحفظ', reviewing: 'مراجعة', mastered: 'محكم' },
+  },
+  review: {
+    title: 'المراجعة اليومية',
+    reviewDay: 'مراجعة اليوم {{day}} / 30',
+    infoText: 'ستُراجع هذا المحفوظ لمدة 30 يوماً لترسيخه في الذاكرة طويلة الأمد.',
+    allDoneTitle: 'أحسنت!',
+    allDoneSub: 'انتهت مراجعة اليوم. تفقّد غداً.',
+    finishReview: 'إنهاء المراجعة',
+    backHome: 'العودة للرئيسية',
+  },
+  testScreen: {
+    emptyTitle: 'لا توجد محفوظات للاختبار',
+    emptyText: 'أضف محفوظات أولاً',
+    hintRemember: 'تذكّر',
+  },
+  studyNotes: {
+    empty: 'لا توجد ملاحظات',
+    emptySub: 'ابدأ بإنشاء كتابك الأول',
+  },
+  lessons: {
+    titleLabel: 'عنوان المتن', titlePlaceholder: 'اسم المتن...',
+    newMatn: 'متن جديد', newVerse: 'بيت جديد',
+    shareMatn: 'مشاركة المتن',
+  },
+  sharingScreen: { title: 'مشاركة المتون' },
+  settings: {
+    title: 'الإعدادات',
+    labels: {
+      language: 'اللغة', initialReps: 'عدد التكرارات الابتدائية',
+      reinforceReps: 'تكرارات التعزيز', reviewReps: 'تكرارات المراجعة',
+      masteryThreshold: 'عتبة الإتقان (أيام)',
+      vanishMode: 'وضع التلاشي', vanishAfter: 'تلاشٍ بعد',
+      notifications: 'تذكير يومي بالمراجعة',
+      weeklyTest: 'تذكير أسبوعي بالاختبار',
+      exportData: 'تصدير البيانات', importData: 'استيراد البيانات',
+      eraseData: 'مسح البيانات', account: 'الحساب',
+    },
+  },
+  login: { title: 'تسجيل الدخول' },
+  quran: {
+    tatbeet: {
+      errors: 'الأخطاء', errorsCount: '{{count}} خطأ',
+      errorSummary: 'ملخص جلسة التثبيت',
+    },
+  },
+  onboarding: {
+    slide1Title: 'مرحباً بك في محفوظ',
+    slide1Sub: 'تطبيقك الذكي لحفظ المتون والأحاديث والقرآن الكريم',
+    slide2Title: 'حفظٌ منظّم',
+    slide2Sub: 'أضف محفوظاتك وتقدّم فيها بنظام التكرار المتباعد الذكي',
+    slide3Title: 'مراجعة يومية',
+    slide3Sub: 'راجع محفوظاتك يومياً لمدة 30 يوماً لترسيخها في الذاكرة طويلة الأمد',
+    slide4Title: 'ابدأ الآن',
+    slide4Sub: 'انطلق في رحلة الحفظ والمراجعة',
+  },
+};
+
+KEY FEATURE SPECS
+Memo Card (MemoListScreen)
+
+Two view modes: Face (cover cards, full art) and Spine (bookshelf row view)
+Shows: title, label badge, stage badge, relative date (now / X hours ago / yesterday / X days ago)
+Long press → options: Edit, Delete, Open & Save
+Chain parts shown as Part 1 / Part 2 / ...
+Favorites section at top
+
+Poetry Mode (AddMemoScreen)
+
+Toggle splits text field into two inputs side by side:
+
+Sadr (صدر) — first hemistich
+Ajz (عجز) — second hemistich
+
+
+Both stored together in text field as JSON: {"sadr":"...","ajz":"..."}
+
+Audio Recording
+
+Per-memo and per-verse (Lessons)
+Uses expo-av — record to temp file, save URI to DB
+Playback with waveform progress bar
+
+Chain Linking
+
+A memo can be linked to a parent memo via related_memo_id
+Creates a chain: Part 1 → Part 2 → Part 3 ...
+AddMemoScreen has a search-and-link UI
+
+AI Quiz Generation
+
+Sends memo text to an AI endpoint
+Config: agent (fast/analytical), difficulty, subject/discipline, question count
+Returns Q&A flashcard pairs stored as tags JSON on the memo
+
+Quran Module — Tatbeet
+
+Organized: Juz → Hizb → Thumn (⅛ of a Hizb)
+Tatbeet session: user recites, taps error counter for each mistake
+Session summary shown after completion
+Supported reciters: المنشاوي، الحصري، العفاسي، الشاطري، أبو بكر الشاطري، أحمد العجمي، عبدالله بسفر، عبدالرحمن السديس
+
+Sharing (SharingScreen) — 3 tabs
+
+Browse (تصفح) — public matns searchable
+Mine (متوني) — my shared matns, toggle public/private
+Received (مُرسَلة) — matns sent to me directly
+
+Export / Import
+
+Export: full app data as JSON file (via expo-document-picker)
+Import: merge JSON backup into local DB
+Export PDF for study notes (light/dark theme)
+
+
+CODING RULES
+
+TypeScript strict mode — no any, always type everything
+RTL-first — use I18nManager.isRTL, test all layouts in Arabic
+Offline-first — all reads from SQLite, writes go to SQLite first then sync queue
+Never hardcode strings — always use i18n keys
+Use nanoid for all ID generation: import { nanoid } from 'nanoid/non-secure'
+Drizzle queries only — no raw SQL strings except migrations
+Reanimated for ALL animations — no Animated API from RN core
+Colors from theme only — never hardcode hex values inline
+Cairo font for all UI — ScheherazadeNew for Quran/hadith body text
+Commit to GitHub after every working screen — this is mandatory
+
+
+BUILD ORDER (implement in this exact order)
+Phase 1 — Foundation
+  [ ] DB schema + Drizzle client
+  [ ] i18n setup (ar/en/fr)
+  [ ] Theme + fonts
+  [ ] Navigation shell (tabs + stacks)
+  [ ] SM-2 logic (sm2.ts)
+
+Phase 2 — Core Loop
+  [ ] AddMemoScreen (new memo)
+  [ ] MemoListScreen (browse)
+  [ ] ReviewScreen (daily review)
+  [ ] HomeScreen (dashboard)
+
+Phase 3 — Rich Features
+  [ ] TestScreen
+  [ ] AddMemoScreen: poetry mode, audio, image, chain linking
+  [ ] SettingsScreen (all settings)
+  [ ] Vanish modes
+
+Phase 4 — Content Modules
+  [ ] LessonsScreen + MatnDetail
+  [ ] StudyNotesScreen + PDF export
+  [ ] QuranScreen / TatbeetTab
+
+Phase 5 — Social + Sync
+  [ ] LoginScreen + Supabase auth
+  [ ] SharingScreen (3 tabs)
+  [ ] Cloud sync queue
+  [ ] OnboardingScreen (4 slides)
+
+Phase 6 — Polish
+  [ ] StatsScreen
+  [ ] AboutScreen
+  [ ] Push notifications
+  [ ] AI Quiz integration
+
+IMPORTANT NOTES
+
+The app's contact email is contact@mahfod.com
+The app is built by Hadirat Miliana (حاضرة مليانة) team, Algeria
+App bundle ID: com.mahfod.app.prod
+The original app had exceptional UI/UX — do not simplify or cut corners on design
+Every screen must support RTL layout (Arabic is default)
+Guest mode is supported — Supabase login is optional, sync only when logged in
+The streak system tracks daily consecutive review days
+The "Mem Science" screen (accessible from Home) explains the neuroscience behind the app — include it

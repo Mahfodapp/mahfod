@@ -1,0 +1,316 @@
+
+
+
+
+1. Application Overview
+Mahfod (محفوظ) is a React Native mobile application built for students to memorize and review academic texts, poetry, hadiths, and the Holy Quran. It was developed by the Hadirat Miliana team in Algeria and supports Arabic, English, and French.
+
+
+
+2. Navigation Structure
+The app uses a bottom tab navigator (MainTabs) with a native stack for sub-screens. There is also a login/onboarding stack shown before the main tabs.
+
+2.1 Bottom Tab Navigator — MainTabs
+
+2.2 Stack Screens (accessible from tabs or navigation)
+
+
+3. Screens — Detailed Specification
+3.1 Home Screen
+The main dashboard. Shows a greeting (guest: 'Consistency beats intensity' / user: 'Hello, {{name}}'), a streak counter, a guest cloud-sync banner if not logged in, and three action cards.
+
+
+Streak dialog: shows count-day streak with explanation
+'Lessons' button at bottom: navigates to LessonsScreen
+'View All' link to full memo list
+Progress stages shown: Learning (حفظ) · Review (مراجعة) · Mastered (محكم)
+'Study note' shortcut to studyNotesScreen
+AI Quiz label and Mem-Science label also displayed
+
+3.2 Add Memo Screen (AddMemoScreen)
+Dual mode: New Memo / Edit Memo. This is the richest screen in the app.
+
+Fields:
+Title (required) — text input
+Text (optional if audio/image present) — multi-line, supports poetry mode
+Poetry Mode — splits input into Sadr (صدر) and Ajz (عجز) hemistiches
+Category/Label (required, multi-select) — user-defined labels with colors
+Media section: Audio recording (microphone), Image (camera or gallery)
+
+Chain linking:
+Link this memo as part of a longer chain (series of parts)
+Shows Part 1, Part 2, ... chain linking UI
+Search existing memos to link to
+
+AI Features:
+Extract text from image using AI (camera OCR)
+Generate AI Quiz — creates flashcard Q&A cards from the memo text
+Configurable: agent type (fast/deep), difficulty (beginner/medium/advanced), subject/discipline, number of questions
+
+Save actions:
+New: 'Start Memorizing' (ابدإ التكرار)
+Edit: 'Save Changes'
+FAB: 'Save' (floating action button)
+
+3.3 Memo List / Library (BrowseTab)
+Search bar with placeholder 'Search memos...'
+Filter: All / by label
+Two view modes: Face view (cover cards 🗂) and Spine view (bookshelf style)
+Each card shows: title, label badge, stage badge, date (now/hours ago/yesterday/N days ago), memo count for chains
+Long press for options: Edit, Delete, Open & Save
+Stage labels: Learning (يُحفظ) · Reviewing (مراجعة) · Mastered (محكم)
+Chain parts visible in the card
+Favorites section
+
+3.4 Review Screen
+Daily spaced-repetition review session. Reviews memos due today based on the SM-2 schedule.
+Progress shown as: Day {{day}} / 30
+Repetition counter: Repeated ({{count}}/{{max}})
+Navigation: Next Memo, Finish Review, Back to Home
+All-done state: 'Well done! Today's review is complete. Check back tomorrow.'
+Info text: 'You will review this memo for 30 days to solidify it in long-term memory.'
+
+3.5 Test Screen (testScreen)
+Self-testing / quiz screen with multiple test modes:
+Flashcard flip mode — 'Tap to flip'
+Typing mode — type the answer, get hint
+Match mode — match answer
+Controls: Reveal, Check, Correct Answer, Did not remember, Remembered
+Navigation: Next Memo, Another Memo
+Empty state: shown when no memos available for testing
+
+3.6 Lessons Screen (LessonsScreen)
+Record what was studied with a sheikh. Organized as Matns (متون — classical Islamic texts).
+Create a Matn: title, author, subject, verses
+Each Matn has multiple verses (أبيات) with verse number and text
+Audio recording per verse
+Explanation per verse (optional)
+Import Matn from shared library
+Share Matn to the public library
+Delete Matn with confirmation
+
+3.7 Sharing Screen (sharingScreen)
+Community sharing of Matns (requires login). Three tabs:
+
+Import matn into your library
+Visibility: Public / Private toggle
+Login required to share
+
+3.8 Study Notes Screen (studyNotesScreen)
+Rich note-taking organized as books with sections.
+Create books with title, author, subject, section levels
+Notes within books: text, label, section title, page number
+Export to PDF (light/dark theme)
+Table of contents
+Map view of notes
+Section management: add/edit/delete sections
+
+3.9 Quran Section (TatbeetTab)
+Dedicated Quran memorization and consolidation (تثبيت) module.
+Organized by Juz and Hizb and Thumn (eighths of a Hizb)
+New memorization: choose Thumn, count repetitions with repsLeft counter
+Tatbeet (تثبيت): verify memorized Ahzab by recording errors (not repetitions)
+Session summary: errors count, Tatbeet history
+Supported reciters: المنشاوي، الحصري، العفاسي، الشاطري، أبو بكر الشاطري، أحمد العجمي، عبدالله بسفر، عبدالرحمن السديس
+
+3.10 Settings Screen
+Extensive configuration:
+
+
+3.11 Onboarding (4 slides)
+
+
+4. Database Schema (SQLite — mahfod.db)
+The app uses Expo SQLite with Drizzle ORM. Below is the complete recovered SQL schema.
+
+4.1 Table: memos
+CREATE TABLE IF NOT EXISTS memos (
+  id                TEXT PRIMARY KEY,
+  title             TEXT NOT NULL,
+  text              TEXT NOT NULL,
+  label             TEXT NOT NULL,
+  tags              TEXT NOT NULL DEFAULT '[]',
+  related_memo_id   TEXT,  -- chain link to parent memo
+  audio_uri         TEXT,
+  image_uri         TEXT,
+  created_at        TEXT NOT NULL,
+  updated_at        TEXT NOT NULL DEFAULT '',
+  last_reviewed_at  TEXT,
+  review_count      INTEGER NOT NULL DEFAULT 0,
+  stage             TEXT NOT NULL DEFAULT 'LEARNING', -- LEARNING | REVIEWING | MASTERED
+  is_favorite       INTEGER NOT NULL DEFAULT 0
+);
+
+4.2 Table: books (Study Notes)
+CREATE TABLE IF NOT EXISTS books (
+  id              TEXT PRIMARY KEY,
+  title           TEXT NOT NULL,
+  author          TEXT NOT NULL,
+  subject         TEXT NOT NULL,
+  section_levels  TEXT NOT NULL,  -- JSON array
+  created_at      TEXT NOT NULL
+);
+
+4.3 Table: notes
+CREATE TABLE IF NOT EXISTS notes (
+  id             TEXT PRIMARY KEY,
+  book_id        TEXT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+  text           TEXT NOT NULL,
+  label          TEXT NOT NULL,
+  section_title  TEXT NOT NULL,
+  page_number    TEXT,
+  created_at     TEXT NOT NULL
+);
+
+4.4 Table: quran_progress
+CREATE TABLE IF NOT EXISTS quran_progress (
+  id          TEXT PRIMARY KEY,
+  type        TEXT NOT NULL,  -- memorized | review | tatbeet | rep | tatbeet_history
+  thumn_id    INTEGER NOT NULL,
+  value       TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+
+4.5 Table: lessons_matns
+CREATE TABLE IF NOT EXISTS lessons_matns (
+  id          TEXT PRIMARY KEY,
+  title       TEXT NOT NULL,
+  author      TEXT NOT NULL DEFAULT '',
+  subject     TEXT NOT NULL DEFAULT '',
+  verses      TEXT NOT NULL DEFAULT '[]',  -- JSON array of verse objects
+  created_at  TEXT NOT NULL
+);
+
+4.6 Table: kv_store (Key-Value)
+CREATE TABLE IF NOT EXISTS kv_store (
+  key         TEXT PRIMARY KEY,
+  value       TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+
+4.7 Database Indexes
+CREATE INDEX IF NOT EXISTS idx_notes_book_id      ON notes(book_id);
+CREATE INDEX IF NOT EXISTS idx_qp_thumn_id        ON quran_progress(thumn_id);
+CREATE INDEX IF NOT EXISTS idx_memos_stage        ON memos(stage);
+CREATE INDEX IF NOT EXISTS idx_memos_last_reviewed ON memos(last_reviewed_at);
+CREATE INDEX IF NOT EXISTS idx_memos_related       ON memos(related_memo_id);
+
+4.8 AsyncStorage / KV Keys
+
+
+5. Spaced Repetition System
+5.1 Algorithm
+The app uses SM-2 (SuperMemo 2, Piotr Woźniak, 1987) with Leitner-inspired stages.
+
+5.2 Memo Stages
+
+5.3 SM-2 Progress Data Structure
+{
+  id: string | null,
+  reviewCount: number,     // 0 on init
+  easeFactor: number | null,
+  intervalDays: number,    // 0 on init
+  nextReviewAt: string | null,  // ISO date
+  lastReviewedAt: string | null
+}
+
+5.4 Default Settings
+
+5.5 Vanish Modes
+none — text always visible
+opacity — text fades gradually with each repetition
+words — words replaced with dots (···) one by one
+all — entire text hidden after vanishAllAfter repetitions
+This progressive text-fading forces the brain into active recall (not passive reading).
+
+
+6. Design System & Theme
+6.1 Color Palette (Dark Theme)
+
+6.2 Typography
+
+6.3 Animation Library
+react-native-reanimated with react-native-worklets. Supported entry/exit animations include: FadeIn/Out, SlideIn/Out (all directions), ZoomIn/Out, FlipIn/Out, RotateIn/Out, BounceIn, LightSpeedIn/Out, StretchIn/Out, PinwheelIn/Out, RollIn/Out.
+
+6.4 Assets
+
+
+7. Dependencies
+7.1 Core / Runtime
+
+7.2 Dev Dependencies
+
+
+8. Supabase Backend Configuration
+
+
+8.1 Sync Queue
+The app maintains a mahfod_sync_queue in AsyncStorage for offline-first operation. Changes are queued locally and synced to Supabase when online. The sync mechanism uses supabase.auth for user identity.
+
+8.2 Supabase Tables (inferred)
+Based on sync logic, the following Supabase tables should exist:
+memos — mirrors local SQLite memos table
+books / notes — study notes sync
+lessons_matns — public matn sharing
+quran_progress — Quran sync
+
+
+9. Complete Translation Strings
+The app supports Arabic (default), English, and French. Below are the complete recovered strings for all three languages, organized by screen namespace.
+
+9.1 Common
+
+9.2 Home Screen
+
+9.3 Add Memo Screen
+
+9.4 Memo List
+
+9.5 Review Screen
+
+9.6 Lessons Screen
+
+
+10. Rebuilding the App — Step-by-Step Guide
+Step 1: Initialize the Project
+npx create-expo-app mahfod --template expo-template-blank-typescript
+cd mahfod
+npx expo install expo-sqlite expo-file-system expo-font expo-av
+npx expo install expo-image-picker expo-document-picker expo-notifications
+npx expo install expo-haptics expo-splash-screen expo-application
+npm install @react-navigation/native @react-navigation/bottom-tabs @react-navigation/native-stack
+npm install react-native-screens react-native-safe-area-context
+npm install react-native-reanimated react-native-worklets-core
+npm install @supabase/supabase-js
+npm install drizzle-orm drizzle-kit
+npm install lucide-react-native nanoid
+npm install @react-native-masked-view/masked-view @react-native-clipboard/clipboard
+
+Step 2: Set Up Database (src/db/schema.ts)
+Create the schema using Drizzle ORM matching the SQL tables in Section 4.
+
+Step 3: Set Up Navigation (src/navigation/index.tsx)
+Create RootNavigator → conditionally show OnboardingStack or AuthStack or MainTabNavigator. MainTabNavigator contains: BrowseTab, NewMemTab, ReviewTab, ProgressTab (study notes), TatbeetTab.
+
+Step 4: Implement Screens (in order of priority)
+
+Step 5: Implement SM-2 Algorithm (src/logic/sm2.ts)
+Implement the SM-2 calculation function that takes (easeFactor, intervalDays, quality) and returns (newEaseFactor, newIntervalDays, nextReviewAt). Stages: LEARNING → REVIEWING → MASTERED based on masteryThreshold.
+
+Step 6: Apply the Design System
+Use the color tokens from Section 6.1. Dark theme with accent #CCFF00. Import Cairo and ScheherazadeNew fonts. Use react-native-reanimated for animations.
+
+Step 7: Set Up i18n
+Create translations for AR (default), EN, FR using the strings from Section 9. Use a library such as i18next with react-i18next.
+
+Step 8: Connect Supabase
+Use the URL and anon key from Section 8. Implement offline-first sync queue. Auth: email/password + guest mode.
+
+
+Appendix: App Description (from bundle)
+
+
+
+
+— End of Mahfod Recovery Document —
+Recovered April 2026 · Hadirat Miliana Team · محفوظ

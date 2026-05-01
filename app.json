@@ -5,6 +5,12 @@
         "version": "1.0.0",
         "orientation": "portrait",
         "userInterfaceStyle": "dark",
+        "updates": {
+            "url": "https://u.expo.dev/7047d73b-a34a-4566-89b6-c73b847128a2"
+        },
+        "runtimeVersion": {
+            "policy": "appVersion"
+        },
         "android": {
             "adaptiveIcon": {
                 "backgroundColor": "#0B1437"

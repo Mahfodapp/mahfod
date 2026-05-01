@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="dark" dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&amp;family=Cairo:wght@400;700;900&amp;family=Space+Grotesk:wght@300;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary": "#aaffdc",
+              "surface-container-lowest": "#000000",
+              "on-tertiary-fixed": "#004734",
+              "on-secondary-fixed": "#374400",
+              "tertiary-fixed": "#00fdc1",
+              "on-primary-fixed": "#3a4a00",
+              "error": "#ff7351",
+              "secondary-fixed": "#caf300",
+              "error-container": "#b92902",
+              "on-background": "#fdfbfe",
+              "secondary-dim": "#bde300",
+              "outline": "#757578",
+              "outline-variant": "#47484a",
+              "primary-dim": "#beee00",
+              "on-tertiary-container": "#005c44",
+              "surface": "#0d0e10",
+              "surface-container-low": "#121316",
+              "on-secondary-container": "#f0ffb6",
+              "on-tertiary": "#00654b",
+              "surface-dim": "#0d0e10",
+              "surface-container": "#181a1c",
+              "tertiary-container": "#00fdc1",
+              "inverse-primary": "#516700",
+              "primary": "#f3ffca",
+              "surface-tint": "#f3ffca",
+              "tertiary-fixed-dim": "#00edb4",
+              "on-tertiary-fixed-variant": "#00664c",
+              "on-secondary-fixed-variant": "#516200",
+              "tertiary-dim": "#00edb4",
+              "primary-container": "#cafd00",
+              "on-error-container": "#ffd2c8",
+              "secondary-fixed-dim": "#bde300",
+              "inverse-on-surface": "#555557",
+              "on-error": "#450900",
+              "secondary-container": "#536600",
+              "background": "#0d0e10",
+              "primary-fixed-dim": "#beee00",
+              "surface-container-high": "#1e2022",
+              "on-primary-container": "#4a5e00",
+              "surface-container-highest": "#242629",
+              "on-surface": "#fdfbfe",
+              "surface-variant": "#242629",
+              "error-dim": "#d53d18",
+              "on-primary": "#516700",
+              "on-surface-variant": "#ababad",
+              "on-primary-fixed-variant": "#526900",
+              "primary-fixed": "#cafd00",
+              "secondary": "#caf300",
+              "inverse-surface": "#faf9fb",
+              "on-secondary": "#485800",
+              "surface-bright": "#2b2c2f"
+            },
+            fontFamily: {
+              "headline": ["Inter", "Cairo"],
+              "body": ["Inter", "Cairo"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px) saturate(150%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-primary {
+            box-shadow: 0 0 20px rgba(204, 255, 0, 0.15);
+        }
+        .arabic-text {
+            font-family: 'Cairo', sans-serif;
+            line-height: 1.8;
+        }
+        .vanish-text {
+            filter: blur(4px);
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+        .vanish-text:hover {
+            filter: blur(0);
+            opacity: 1;
+        }
+        body {
+            background-color: #0d0e10;
+            color: #fdfbfe;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body selection:bg-secondary selection:text-surface overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-[#0d0e10]/80 backdrop-blur-xl text-[#fdfbfe]/60 font-['Inter'] font-black tracking-tighter text-2xl docked full-width top-0 border-b border-white/10 shadow-[0_0_20px_rgba(204,255,0,0.05)] flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-white/10 overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a young person with soft studio lighting and a clean dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP6JXxMPJzgr_WxrR7rxPDHHuFpSMWZbxqh24LN3zRxsPMvexM22ixjMDs5dG1Y-rcuMGP7MRfRLLBLHl6iwr5KYzWgSnFswz5ytPf5UtZK63IMf9NhmZ3w8HT2X3kDrCEuL6hi40CT2ORbM-W5narLl1c9cOsmNgTbS7AyyyLaPf6kTj4awATiIY4dmATYsodIsFiNR2EXeeCgIvFNKgJUgM6MX2LmY12SioX0FwIdiHtfXWHOlRy4p8bQtpGkBBLK0O4BKGXbw"/>
+</div>
+<span class="text-[#CCFF00] font-black tracking-tighter text-2xl">MAHFOD</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-white/5 transition-all p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#fdfbfe]/60">settings</span>
+</button>
+</div>
+</header>
+<main class="relative h-[calc(100vh-160px)] overflow-y-auto px-6 pt-8 pb-32">
+<!-- Background Geometric Watermark -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03] z-0 flex items-end justify-start p-10">
+<svg fill="none" height="400" viewbox="0 0 100 100" width="400" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 0L61.23 38.77H100L68.77 61.23L80 100L50 77.54L20 100L31.23 61.23L0 38.77H38.77L50 0Z" fill="#CCFF00"></path>
+</svg>
+</div>
+<!-- Section: Learning Canvas -->
+<div class="relative z-10 flex flex-col items-center justify-center min-h-full">
+<div class="w-full max-w-2xl glass-card rounded-[40px] p-8 md:p-12 text-center shadow-2xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl">auto_awesome</span>
+</div>
+<div class="mb-10 inline-flex items-center gap-2 bg-white/5 px-4 py-1 rounded-full border border-white/10">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Vanish Mode Active</span>
+</div>
+<div class="arabic-text text-4xl md:text-6xl font-black text-on-surface leading-loose mb-8">
+<span>بِسْمِ اللَّهِ</span>
+<span class="vanish-text">الرَّحْمَنِ</span>
+<span>الرَّحِيمِ</span>
+<br/>
+<span>الْحَمْدُ لِلَّهِ</span>
+<span class="vanish-text">رَبِّ</span>
+<span>الْعَالَمِينَ</span>
+</div>
+<div class="flex justify-center gap-4 mt-12">
+<button class="bg-white/5 hover:bg-white/10 border-b-2 border-transparent hover:border-secondary transition-all px-6 py-3 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">visibility</span>
+<span class="font-label text-xs uppercase tracking-wider">Reveal All</span>
+</button>
+<button class="bg-white/5 hover:bg-white/10 border-b-2 border-transparent hover:border-secondary transition-all px-6 py-3 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">refresh</span>
+<span class="font-label text-xs uppercase tracking-wider">Shuffle</span>
+</button>
+</div>
+</div>
+<!-- Action Cluster -->
+<div class="grid grid-cols-2 gap-4 w-full max-w-2xl mt-8">
+<button class="glass-card hover:bg-white/10 transition-all p-6 rounded-[24px] flex flex-col items-center gap-3 group">
+<div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-secondary">quiz</span>
+</div>
+<span class="font-label text-[11px] uppercase tracking-widest text-on-surface">Generate Quiz via AI</span>
+</button>
+<button class="glass-card hover:bg-white/10 transition-all p-6 rounded-[24px] flex flex-col items-center gap-3 group">
+<div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-secondary">document_scanner</span>
+</div>
+<span class="font-label text-[11px] uppercase tracking-widest text-on-surface">Scan Text (OCR)</span>
+</button>
+</div>
+</div>
+<!-- Floating Microphone Button -->
+<div class="fixed bottom-32 left-1/2 -translate-x-1/2 z-40">
+<button class="bg-gradient-to-br from-primary to-secondary text-surface px-12 py-6 rounded-full font-black text-lg flex items-center gap-4 shadow-[0_0_40px_rgba(204,255,0,0.3)] hover:scale-105 active:scale-90 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">mic</span>
+<span class="font-label uppercase tracking-tighter">Check Speech via AI</span>
+</button>
+</div>
+</main>
+<!-- Bottom Sheet / AI Feedback Modal -->
+<div class="fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-black/60 backdrop-blur-sm -z-10 h-screen translate-y-[-100%]"></div>
+<!-- Modal Content -->
+<div class="w-full max-w-4xl bg-surface-container-high rounded-t-[48px] border-t border-white/10 p-10 pb-16 shadow-[0_-20px_60px_rgba(0,0,0,0.5)] transform translate-y-0">
+<div class="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-8"></div>
+<div class="flex flex-col md:flex-row items-center gap-10">
+<div class="relative">
+<div class="w-48 h-48 rounded-full border-4 border-white/5 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-secondary opacity-5 animate-pulse"></div>
+<span class="text-7xl font-black text-secondary tracking-tighter">94%</span>
+</div>
+<!-- Decorative glow -->
+<div class="absolute inset-0 bg-secondary/20 blur-[60px] -z-10 rounded-full"></div>
+</div>
+<div class="flex-1 text-right md:text-right">
+<h3 class="font-headline text-3xl font-black mb-4 text-on-surface">أداء ممتاز!</h3>
+<p class="text-on-surface-variant text-lg leading-relaxed arabic-text">
+                        لقد تمكنت من نطق الكلمات بوضوح عالٍ. لاحظتُ تردداً بسيطاً في كلمة "العالمين". جرب التركيز على مخارج الحروف في الآية الثانية لتحقيق نتيجة 100%.
+                    </p>
+<div class="mt-8 flex gap-4">
+<button class="bg-secondary text-surface px-8 py-3 rounded-xl font-bold font-label text-sm uppercase">Keep Practicing</button>
+<button class="bg-white/5 hover:bg-white/10 px-8 py-3 rounded-xl font-bold font-label text-sm uppercase">Share Progress</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar: Floating Glass Dock -->
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50 flex justify-around items-center px-8 py-4 bg-[#0d0e10]/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_30px_rgba(204,255,0,0.1)]">
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Quran</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">local_library</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#CCFF00] drop-shadow-[0_0_8px_rgba(204,255,0,0.8)] animate-pulse active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">AI</span>
+</a>
+</nav>
+</body></html>

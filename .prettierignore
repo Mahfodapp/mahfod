@@ -1,0 +1,10 @@
+node_modules
+android
+android_backup
+.expo
+dist
+build
+coverage
+*.apk
+*.zip
+*.log

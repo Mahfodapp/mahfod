@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="dark" dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&amp;family=Cairo:wght@400;700&amp;family=Space+Grotesk:wght@300;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary": "#aaffdc",
+              "surface-container-lowest": "#000000",
+              "on-tertiary-fixed": "#004734",
+              "on-secondary-fixed": "#374400",
+              "tertiary-fixed": "#00fdc1",
+              "on-primary-fixed": "#3a4a00",
+              "error": "#ff7351",
+              "secondary-fixed": "#caf300",
+              "error-container": "#b92902",
+              "on-background": "#fdfbfe",
+              "secondary-dim": "#bde300",
+              "outline": "#757578",
+              "outline-variant": "#47484a",
+              "primary-dim": "#beee00",
+              "on-tertiary-container": "#005c44",
+              "surface": "#0d0e10",
+              "surface-container-low": "#121316",
+              "on-secondary-container": "#f0ffb6",
+              "on-tertiary": "#00654b",
+              "surface-dim": "#0d0e10",
+              "surface-container": "#181a1c",
+              "tertiary-container": "#00fdc1",
+              "inverse-primary": "#516700",
+              "primary": "#f3ffca",
+              "surface-tint": "#f3ffca",
+              "tertiary-fixed-dim": "#00edb4",
+              "on-tertiary-fixed-variant": "#00664c",
+              "on-secondary-fixed-variant": "#516200",
+              "tertiary-dim": "#00edb4",
+              "primary-container": "#cafd00",
+              "on-error-container": "#ffd2c8",
+              "secondary-fixed-dim": "#bde300",
+              "inverse-on-surface": "#555557",
+              "on-error": "#450900",
+              "secondary-container": "#536600",
+              "background": "#0d0e10",
+              "primary-fixed-dim": "#beee00",
+              "surface-container-high": "#1e2022",
+              "on-primary-container": "#4a5e00",
+              "surface-container-highest": "#242629",
+              "on-surface": "#fdfbfe",
+              "surface-variant": "#242629",
+              "error-dim": "#d53d18",
+              "on-primary": "#516700",
+              "on-surface-variant": "#ababad",
+              "on-primary-fixed-variant": "#526900",
+              "primary-fixed": "#cafd00",
+              "secondary": "#caf300",
+              "inverse-surface": "#faf9fb",
+              "on-secondary": "#485800",
+              "surface-bright": "#2b2c2f"
+            },
+            fontFamily: {
+              "headline": ["Inter", "Cairo"],
+              "body": ["Inter", "Cairo"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px) saturate(150%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .neo-glow {
+            box-shadow: 0 0 20px rgba(204, 255, 0, 0.05);
+        }
+        .active-pill {
+            position: relative;
+        }
+        .active-pill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 12px;
+            background-color: #f3ffca;
+            border-radius: 9999px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="bg-[#0d0e10]/80 backdrop-blur-xl text-[#fdfbfe]/60 font-['Inter'] font-black tracking-tighter text-2xl docked full-width top-0 border-b border-white/10 shadow-[0_0_20px_rgba(204,255,0,0.05)] flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-white/10">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="minimalist 3d avatar of a person with dark hair and glasses in a professional modern style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvAn8UALoTJzMUr83EUkWreUAa0cW-l0DuX03-_6N3KafyBkMGrAJcGejfUB-KvTTuzJ1nGd7Mbcef3g-00kyGEunReeNEVpfHFbLDBthy7SDCDEoxxuMpecSMq3e7ee5H4WXYODaHC6jCW0yUtn48pNKUQgBxFhhH9n8Yz8WTNxGro7SBXjCSTo20JSShIqWys7yzuFa7scSYMQ9yBPCZPkQ6IZQtgd31tdyADMdJBehwqNvQ0NlfJxO0Ic0EHrvpH0diurjQxA"/>
+</div>
+<span class="text-[#CCFF00] font-black tracking-tighter text-2xl uppercase">MAHFOD</span>
+</div>
+<button class="hover:bg-white/5 transition-all p-2 rounded-lg active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#fdfbfe]/60">settings</span>
+</button>
+</header>
+<main class="max-w-4xl mx-auto px-6 pt-8 pb-32">
+<!-- Animated Search Bar (Visual Implementation) -->
+<div class="relative mb-10 group">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</div>
+<input class="w-full bg-surface-container-high/50 border-none rounded-2xl py-5 pr-12 pl-6 backdrop-blur-xl focus:ring-2 focus:ring-primary/20 transition-all text-lg placeholder:text-on-surface-variant/50 font-headline" placeholder="البحث في المكتبة..." type="text"/>
+<div class="absolute inset-0 rounded-2xl border-t border-white/10 pointer-events-none"></div>
+</div>
+<!-- Segmented Control / Tab Bar -->
+<nav class="flex space-x-reverse space-x-2 mb-12 overflow-x-auto pb-4 no-scrollbar">
+<button class="px-8 py-3 rounded-full bg-primary text-on-primary-container font-label text-[10px] uppercase tracking-widest font-bold shadow-[0_0_15px_rgba(243,255,202,0.2)]">
+            Books
+        </button>
+<button class="px-8 py-3 rounded-full bg-white/5 text-on-surface-variant font-label text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors">
+            Notes
+        </button>
+<button class="px-8 py-3 rounded-full bg-white/5 text-on-surface-variant font-label text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors">
+            Mutoon
+        </button>
+<button class="px-8 py-3 rounded-full bg-white/5 text-on-surface-variant font-label text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors">
+            Memos
+        </button>
+</nav>
+<!-- Bento Grid / Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Card 1 -->
+<div class="glass-card p-6 rounded-[2rem] flex flex-col justify-between group cursor-pointer hover:bg-white/[0.05] transition-all duration-300">
+<div class="flex justify-between items-start mb-8">
+<div class="flex flex-col gap-1">
+<span class="text-primary text-[10px] font-label uppercase tracking-[0.2em] mb-2 px-3 py-1 bg-primary/10 rounded-full w-fit">Grammar</span>
+<h3 class="text-2xl font-headline font-black text-on-surface leading-tight">متن الآجرومية</h3>
+</div>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors">menu_book</span>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-reverse space-x-2">
+<div class="w-2 h-12 bg-primary rounded-full"></div>
+<div class="flex flex-col justify-center pr-3">
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Last Access</p>
+<p class="text-xs font-body text-on-surface/60">2 hours ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30">chevron_left</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="glass-card p-6 rounded-[2rem] flex flex-col justify-between group cursor-pointer hover:bg-white/[0.05] transition-all duration-300">
+<div class="flex justify-between items-start mb-8">
+<div class="flex flex-col gap-1">
+<span class="text-tertiary text-[10px] font-label uppercase tracking-[0.2em] mb-2 px-3 py-1 bg-tertiary/10 rounded-full w-fit">Fiqh</span>
+<h3 class="text-2xl font-headline font-black text-on-surface leading-tight">زاد المستقنع</h3>
+</div>
+<span class="material-symbols-outlined text-tertiary/40 group-hover:text-tertiary transition-colors">bookmark</span>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-reverse space-x-2">
+<div class="w-2 h-12 bg-tertiary rounded-full"></div>
+<div class="flex flex-col justify-center pr-3">
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Last Access</p>
+<p class="text-xs font-body text-on-surface/60">Yesterday</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30">chevron_left</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="glass-card p-6 rounded-[2rem] flex flex-col justify-between group cursor-pointer hover:bg-white/[0.05] transition-all duration-300 md:col-span-2 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 100 100" width="100%">
+<path d="M0 0 L100 0 L100 100 L0 100 Z" fill="none" stroke="currentColor" stroke-dasharray="2 2" stroke-width="0.5"></path>
+<circle cx="50" cy="50" fill="none" r="40" stroke="currentColor" stroke-width="0.1"></circle>
+</svg>
+</div>
+<div class="flex justify-between items-start mb-12">
+<div class="flex flex-col gap-1">
+<span class="text-secondary text-[10px] font-label uppercase tracking-[0.2em] mb-2 px-3 py-1 bg-secondary/10 rounded-full w-fit">Aqidah</span>
+<h3 class="text-3xl font-headline font-black text-on-surface leading-tight">العقيدة الواسطية</h3>
+<p class="text-on-surface-variant/60 text-sm mt-2 max-w-md">مراجعة شاملة للأصول الثلاثة والقواعد الأربع مع شرح ميسر.</p>
+</div>
+<div class="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl">auto_stories</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2 space-x-reverse">
+<img alt="Participant" class="w-8 h-8 rounded-full border-2 border-surface" data-alt="abstract geometric shape on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAM6NFGN56crG_7l9DpX-AbBo82wq-p77ApnVLoh2MTpXfaw5vIeaHb9X1BE-DYpA9PuYtdyD3NApXdmgmFO0n_Lctm5aTYlLNLh6I1pStAjFlkcL_sl_TCPeYwshUsdDGU8zYuhJ3l1DzbeMaEtDEa6fy3RsCSOrEmlNuT7e3NFQYTr-y0I4BgZWPeNK69X7Pp7IwrQmKeQ_SQlkct48Zmu9xAIQZ3FvIOWHeyaVSotFeKtmGH7iOgH_UMQWRni29k7EJYTXXOA"/>
+<img alt="Participant" class="w-8 h-8 rounded-full border-2 border-surface" data-alt="abstract geometric shape on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsXTs9FUzjAosO51NVTJBKCFxKCeDeECyNMP5McnuNuHsU4XL6sL7Cwy8rqFynhMBPn_CAW_DklbmkcB3shm9vqs2Q9jFOBmW9s6cTV60Air8GmHFb8uUAO6yh-sIZs7qAELXt5J5Zyg4Yfoz8KZzFQz43E4iarUDw9ZvGZ7SZXe1xnc9IwUQHcoGZEjeIX6sQo2QAyy1JasKk6CaWv62pheUQUXTDZfGNP298BgOZO94B2rjBvaC7CCf61cx5-FTG-KM23HC56w"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container-highest flex items-center justify-center text-[10px] text-primary">+12</div>
+</div>
+<p class="text-xs font-label text-on-surface-variant uppercase tracking-widest">Active Study Group</p>
+</div>
+<button class="bg-primary text-on-primary-container px-6 py-2 rounded-xl font-bold text-sm transition-transform active:scale-95">Open Study</button>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="glass-card p-6 rounded-[2rem] flex flex-col justify-between group cursor-pointer hover:bg-white/[0.05] transition-all duration-300">
+<div class="flex justify-between items-start mb-8">
+<div class="flex flex-col gap-1">
+<span class="text-primary text-[10px] font-label uppercase tracking-[0.2em] mb-2 px-3 py-1 bg-primary/10 rounded-full w-fit">History</span>
+<h3 class="text-2xl font-headline font-black text-on-surface leading-tight">سيرة ابن هشام</h3>
+</div>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors">history_edu</span>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-reverse space-x-2">
+<div class="w-2 h-12 bg-primary rounded-full opacity-20"></div>
+<div class="flex flex-col justify-center pr-3">
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Last Access</p>
+<p class="text-xs font-body text-on-surface/60">3 days ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30">chevron_left</span>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="glass-card p-6 rounded-[2rem] flex flex-col justify-between group cursor-pointer hover:bg-white/[0.05] transition-all duration-300">
+<div class="flex justify-between items-start mb-8">
+<div class="flex flex-col gap-1">
+<span class="text-error text-[10px] font-label uppercase tracking-[0.2em] mb-2 px-3 py-1 bg-error/10 rounded-full w-fit">Hadith</span>
+<h3 class="text-2xl font-headline font-black text-on-surface leading-tight">الأربعون النووية</h3>
+</div>
+<span class="material-symbols-outlined text-error/40 group-hover:text-error transition-colors">description</span>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-reverse space-x-2">
+<div class="w-2 h-12 bg-error rounded-full"></div>
+<div class="flex flex-col justify-center pr-3">
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Last Access</p>
+<p class="text-xs font-body text-on-surface/60">Just now</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30">chevron_left</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50 flex justify-around items-center px-8 py-4 bg-[#0d0e10]/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_30px_rgba(204,255,0,0.1)]">
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Quran</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#CCFF00] drop-shadow-[0_0_8px_rgba(204,255,0,0.8)] animate-pulse active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_library</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">AI</span>
+</a>
+</nav>
+<!-- Decorative Background Patterns -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+<div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-secondary/5 blur-[100px] rounded-full"></div>
+<!-- Subtle Pattern Watermark -->
+<svg class="absolute bottom-10 right-10 w-64 h-64 opacity-[0.02] text-on-surface" viewbox="0 0 100 100">
+<path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z" fill="currentColor"></path>
+</svg>
+</div>
+</body></html>

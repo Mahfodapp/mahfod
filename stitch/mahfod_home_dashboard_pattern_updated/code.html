@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MAHFOD - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&amp;family=Space+Grotesk:wght@300;500;700&amp;family=Cairo:wght@400;700;900&amp;family=Tajawal:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary": "#aaffdc",
+              "surface-container-lowest": "#000000",
+              "on-tertiary-fixed": "#004734",
+              "on-secondary-fixed": "#374400",
+              "tertiary-fixed": "#00fdc1",
+              "on-primary-fixed": "#3a4a00",
+              "error": "#ff7351",
+              "secondary-fixed": "#caf300",
+              "error-container": "#b92902",
+              "on-background": "#fdfbfe",
+              "secondary-dim": "#bde300",
+              "outline": "#757578",
+              "outline-variant": "#47484a",
+              "primary-dim": "#beee00",
+              "on-tertiary-container": "#005c44",
+              "surface": "#0d0e10",
+              "surface-container-low": "#121316",
+              "on-secondary-container": "#f0ffb6",
+              "on-tertiary": "#00654b",
+              "surface-dim": "#0d0e10",
+              "surface-container": "#181a1c",
+              "tertiary-container": "#00fdc1",
+              "inverse-primary": "#516700",
+              "primary": "#f3ffca",
+              "surface-tint": "#f3ffca",
+              "tertiary-fixed-dim": "#00edb4",
+              "on-tertiary-fixed-variant": "#00664c",
+              "on-secondary-fixed-variant": "#516200",
+              "tertiary-dim": "#00edb4",
+              "primary-container": "#cafd00",
+              "on-error-container": "#ffd2c8",
+              "secondary-fixed-dim": "#bde300",
+              "inverse-on-surface": "#555557",
+              "on-error": "#450900",
+              "secondary-container": "#536600",
+              "background": "#0d0e10",
+              "primary-fixed-dim": "#beee00",
+              "surface-container-high": "#1e2022",
+              "on-primary-container": "#4a5e00",
+              "surface-container-highest": "#242629",
+              "on-surface": "#fdfbfe",
+              "surface-variant": "#242629",
+              "error-dim": "#d53d18",
+              "on-primary": "#516700",
+              "on-surface-variant": "#ababad",
+              "on-primary-fixed-variant": "#526900",
+              "primary-fixed": "#cafd00",
+              "secondary": "#caf300",
+              "inverse-surface": "#faf9fb",
+              "on-secondary": "#485800",
+              "surface-bright": "#2b2c2f"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"],
+              "arabic": ["Cairo"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>body {
+    background-color: #0d0e10;
+    color: #fdfbfe;
+    font-family: "Inter", sans-serif;
+    overflow-x: hidden
+    }
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px) saturate(150%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1)
+    }
+.neon-glow {
+    box-shadow: 0 0 20px rgba(204, 255, 0, 0.15)
+    }
+.orb-blur {
+    filter: blur(80px);
+    background: radial-gradient(circle, rgba(202, 243, 0, 0.15) 0%, rgba(13, 14, 16, 0) 70%)
+    }
+.pulse-orb {
+    animation: pulse-glow 8s infinite ease-in-out;
+    filter: blur(100px);
+    background: radial-gradient(circle, rgba(204, 255, 0, 0.25) 0%, rgba(204, 255, 0, 0) 70%)
+    }
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1);
+        } 50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.2);
+        }
+    }
+.andalusian-pattern {
+    background-image: url(https://lh3.googleusercontent.com/aida/ADBb0ugFNCuUBQfWuJmS8DPolKh4k018l97d92a-7AnmQksqTgaXMhZb5t_9DBkJgr_a1oEzlPKvp8ui2YNAsF7ozJoPgm8erUzimiLhxlleGR1NUjBE33vVGwKwSJd9wSx9uxGdZzcnbxlcilw0zCeREEmfkVWk-ZVS7mpO_SVPcR3phUkU533WbgDsjpj4St8Jp74EBYY5HFiQoqz2H2pO3tPR4L02TLOWCYGbn0r8cbW0A51VN4l4mEGT6XQYeekJzZdUxU4jR3E);
+    background-size: 300px;
+    background-repeat: repeat
+    }
+.cyber-grid {
+    position: relative
+    }
+.cyber-grid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url(https://lh3.googleusercontent.com/aida/ADBb0ugFNCuUBQfWuJmS8DPolKh4k018l97d92a-7AnmQksqTgaXMhZb5t_9DBkJgr_a1oEzlPKvp8ui2YNAsF7ozJoPgm8erUzimiLhxlleGR1NUjBE33vVGwKwSJd9wSx9uxGdZzcnbxlcilw0zCeREEmfkVWk-ZVS7mpO_SVPcR3phUkU533WbgDsjpj4St8Jp74EBYY5HFiQoqz2H2pO3tPR4L02TLOWCYGbn0r8cbW0A51VN4l4mEGT6XQYeekJzZdUxU4jR3E);
+    background-size: 400px;
+    opacity: 0.08;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    filter: brightness(0) saturate(100%) invert(88%) sepia(87%) font-weight(900) hue-rotate(20deg) brightness(107%) contrast(106%)
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+body {
+    min-height: max(884px, 100dvh)
+    }</style>
+</head>
+<body class="bg-background min-h-screen pb-44">
+<!-- TopAppBar -->
+<header class="bg-[#0d0e10]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50 border-b border-white/10 shadow-[0_0_20px_rgba(204,255,0,0.05)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-white/10 flex items-center justify-center overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Stylized 3D avatar of a young man with a modern tech aesthetic wearing a dark hoodie, flat design illustration" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMjVdFcWLnta4mt7pFDES7l-CGFAh3WUf15vw1L3eQQuTP0IeAbz8_0RyS5C4qRM1mLB0rVw0jVw4k9GC3nzQsZw9W5AmTtm5NygBXVvBQu3kM9XbYO1wRP--ezAlP6Qgv0TnIvLqPSdLy4UaD7AYLhB46gxyIzJgS1O2xHcBwO9eouESUmMgeePIriPkJHV3g8-eiSAnVyJ7c4ToVfiUBxC0YKzwrSuGC61FPhatSyZXMlGr9L1wZj6umi5HsFiPkFmCqnK2-kw"/>
+</div>
+<span class="font-['Inter'] font-black tracking-tighter text-2xl text-[#CCFF00]">MAHFOD</span>
+</div>
+<button class="text-[#fdfbfe]/60 hover:bg-white/5 transition-all p-2 rounded-xl active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#CCFF00]">settings</span>
+</button>
+</header>
+<main class="relative px-6 pt-8 max-w-2xl mx-auto">
+<!-- Background Visuals -->
+<div class="absolute inset-x-0 top-0 h-[600px] cyber-grid -z-10 pointer-events-none"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] pulse-orb -z-20 pointer-events-none"></div>
+<div class="absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-80 orb-blur -z-10 rounded-full"></div>
+<!-- User Greeting Section (RTL Optimized for Arabic context) -->
+<section class="mb-10 text-right" dir="rtl">
+<h2 class="font-arabic font-black text-4xl mb-2 text-on-surface">السلام عليكم، أحمد</h2>
+<p class="font-arabic text-on-surface-variant text-lg">مرحباً بك في مرصدك الروحي اليومي.</p>
+</section>
+<!-- Stat Banner Card -->
+<section class="relative mb-8">
+<!-- Pulsing neon orb specifically placed behind this card -->
+<div class="absolute inset-0 w-full h-full bg-[#CCFF00]/5 blur-[60px] rounded-full scale-110 -z-10 animate-pulse"></div>
+<div class="glass-card rounded-[32px] p-8 relative overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+<!-- Islamic Geometric Pattern Overlay from DATA:IMAGE:IMAGE_6 -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.08] mix-blend-overlay" style="background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugFNCuUBQfWuJmS8DPolKh4k018l97d92a-7AnmQksqTgaXMhZb5t_9DBkJgr_a1oEzlPKvp8ui2YNAsF7ozJoPgm8erUzimiLhxlleGR1NUjBE33vVGwKwSJd9wSx9uxGdZzcnbxlcilw0zCeREEmfkVWk-ZVS7mpO_SVPcR3phUkU533WbgDsjpj4St8Jp74EBYY5HFiQoqz2H2pO3tPR4L02TLOWCYGbn0r8cbW0A51VN4l4mEGT6XQYeekJzZdUxU4jR3E'); background-size: 200px; filter: brightness(0) saturate(100%) invert(88%) sepia(87%) font-weight(900) hue-rotate(20deg) brightness(107%) contrast(106%);"></div>
+<div class="flex justify-between items-center relative z-10 text-center">
+<div class="flex-1">
+<div class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant mb-2">Total Memos</div>
+<div class="text-[34px] font-black text-[#CCFF00] leading-none">128</div>
+</div>
+<div class="w-px h-12 bg-white/10"></div>
+<div class="flex-1">
+<div class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant mb-2">Quran Progress</div>
+<div class="text-[34px] font-black text-[#CCFF00] leading-none">64%</div>
+</div>
+<div class="w-px h-12 bg-white/10"></div>
+<div class="flex-1">
+<div class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant mb-2">Current Streak</div>
+<div class="text-[34px] font-black text-[#CCFF00] leading-none">12</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Grid -->
+<section class="grid grid-cols-2 gap-4 mb-12">
+<button class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-all active:scale-95 duration-200 group border-b-2 border-transparent hover:border-[#CCFF00]/40">
+<span class="material-symbols-outlined text-[#CCFF00] text-3xl">library_add</span>
+<span class="font-label text-xs uppercase tracking-widest font-bold">Add Book</span>
+</button>
+<button class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-all active:scale-95 duration-200 group border-b-2 border-transparent hover:border-[#CCFF00]/40">
+<span class="material-symbols-outlined text-[#CCFF00] text-3xl">note_add</span>
+<span class="font-label text-xs uppercase tracking-widest font-bold">Add Note</span>
+</button>
+<button class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-all active:scale-95 duration-200 group border-b-2 border-transparent hover:border-[#CCFF00]/40">
+<span class="material-symbols-outlined text-[#CCFF00] text-3xl">history_edu</span>
+<span class="font-label text-xs uppercase tracking-widest font-bold">Add Memo</span>
+</button>
+<button class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-all active:scale-95 duration-200 group border-b-2 border-transparent hover:border-[#CCFF00]/40">
+<span class="material-symbols-outlined text-[#CCFF00] text-3xl">menu_book</span>
+<span class="font-label text-xs uppercase tracking-widest font-bold">Update Quran</span>
+</button>
+</section>
+<!-- Featured Section -->
+<section class="mb-20">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-arabic font-bold text-xl">المراجعة الحالية</h3>
+<span class="font-label text-[10px] uppercase tracking-widest text-[#CCFF00]">View All</span>
+</div>
+<div class="glass-card rounded-[32px] overflow-hidden p-1">
+<div class="bg-surface-container-high rounded-[28px] p-6 flex items-center gap-5">
+<div class="w-16 h-16 rounded-2xl bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#CCFF00] text-3xl" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<div class="flex-1">
+<h4 class="font-arabic text-lg leading-none mb-1">سورة الكهف</h4>
+<p class="font-label text-[10px] text-on-surface-variant tracking-widest uppercase">Last reviewed 2 hours ago</p>
+</div>
+<div class="w-12 h-12 rounded-full border-2 border-[#CCFF00]/20 flex items-center justify-center relative">
+<div class="absolute inset-0 rounded-full border-2 border-[#CCFF00] border-t-transparent -rotate-45"></div>
+<span class="text-[10px] font-bold">85%</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (Highlighter) -->
+<div class="fixed bottom-32 left-1/2 -translate-x-1/2 z-[60]">
+<button class="w-16 h-16 rounded-full bg-gradient-to-br from-[#f3ffca] to-[#CCFF00] flex items-center justify-center text-[#0d0e10] shadow-[0_0_30px_rgba(204,255,0,0.4)] active:scale-90 transition-transform duration-300">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'wght' 600;">add</span>
+</button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50 flex justify-around items-center px-8 py-4 bg-[#0d0e10]/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_30px_rgba(204,255,0,0.1)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-[#CCFF00] drop-shadow-[0_0_8px_rgba(204,255,0,0.8)] active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Home</span>
+</a>
+<!-- Quran -->
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Quran</span>
+</a>
+<!-- Library -->
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">local_library</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">Library</span>
+</a>
+<!-- AI -->
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-white/60 transition-colors active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.2em] font-bold mt-1">AI</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,164 @@
+{
+  "pageTitle": "La Science de la Mémorisation",
+  "pageSubtitle": "Fondements scientifiques et neurologiques pour développer les capacités de mémoire",
+  "readingTime": "Temps de lecture : {{minutes}} minutes",
+  "progress": "Progression de lecture",
+
+  "sections": {
+    "intro": {
+      "tag": "Introduction",
+      "title": "Pourquoi oublions-nous ?",
+      "body": "La mémorisation n'est pas un don réservé à quelques-uns — c'est une compétence qui s'acquiert et se développe dès lors que l'on en comprend les mécanismes scientifiques. Depuis près de cent cinquante ans, les chercheurs cartographient avec précision la façon dont le cerveau humain stocke et récupère l'information. Cette cartographie révèle que la majorité de ce que nous apprenons se perd faute de répétition organisée, et non par faiblesse intrinsèque de la mémoire.",
+      "quote": "La mémoire n'est pas un vase que l'on remplit, mais une flamme que l'on allume.",
+      "quoteAuthor": "Plutarque"
+    },
+
+    "forgettingCurve": {
+      "tag": "Neurosciences",
+      "title": "La Courbe de l'Oubli — Hermann Ebbinghaus (1885)",
+      "body": "En 1885, le psychologue allemand Hermann Ebbinghaus mena sur lui-même des milliers d'expériences afin d'établir la première loi quantitative de l'oubli. Ses résultats furent saisissants : le cerveau perd environ 50 % des nouvelles informations dans l'heure suivant l'apprentissage, 70 % dans la journée, et jusqu'à 90 % en l'espace d'une semaine — en l'absence de toute révision structurée.",
+      "statLabel1": "Perdu après 1 heure",
+      "statValue1": "50 %",
+      "statLabel2": "Perdu après 1 jour",
+      "statValue2": "70 %",
+      "statLabel3": "Perdu après 1 semaine",
+      "statValue3": "90 %",
+      "insight": "Signal clé : la courbe de l'oubli n'est pas une fatalité. Chaque révision réussie relève le seuil de rétention et ralentit mesurablément le taux d'oubli."
+    },
+
+    "spacedRepetition": {
+      "tag": "Répétition Espacée",
+      "title": "Les Intervalles — Le secret de la mémoire à long terme",
+      "body": "La répétition espacée (Spaced Repetition) est unanimement considérée comme la technique d'apprentissage la mieux étayée scientifiquement. Son principe est simple : réviser la matière au moment critique où le cerveau est sur le point d'oublier le force à un effort de récupération plus profond, produisant à chaque fois une trace neuronale plus solide.",
+      "mechanismTitle": "Mécanisme neuronal",
+      "mechanismBody": "Lorsque le cerveau récupère une information sous la pression de l'oubli imminent, il crée de nouvelles connexions synaptiques entre les neurones et renforce les réseaux existants. C'est ce que l'on nomme la potentialisation à long terme (Long-Term Potentiation, LTP) — le substrat physique de la mémoire durable.",
+      "researchBox": "Une étude publiée dans Science en 2008 a démontré que les apprenants utilisant la répétition espacée surpassaient de 200 % ceux ayant recours au bachotage lors de tests réalisés après une semaine.",
+      "sm2Title": "L'algorithme SM-2 — La science derrière l'application",
+      "sm2Body": "Mahfod s'appuie sur l'algorithme SM-2 développé par Piotr Woźniak en 1987. Cet algorithme calcule l'intervalle optimal pour la prochaine révision en fonction de la facilité de récupération de chaque carte, personnalisant ainsi votre planning de révision pour chaque texte mémorisé."
+    },
+
+    "activeRecall": {
+      "tag": "Rappel Actif",
+      "title": "L'Effet Test — La puissance du rappel forcé",
+      "body": "Les neuroscientifiques distinguent deux types de répétition : la répétition passive (relire) et le rappel actif (tenter de récupérer sans regarder). La recherche est unanime : le rappel actif est de loin supérieur à la relecture, même si vous échouez parfois à récupérer — l'échec lui-même approfondit la trace mémorielle.",
+      "pillars": {
+        "title": "Trois piliers du rappel efficace",
+        "p1Title": "Couvrir et récupérer",
+        "p1Body": "Couvrez le texte et essayez de le restituer intégralement avant de regarder. L'effort mental dans ce moment difficile est ce qui consolide la mémorisation.",
+        "p2Title": "Auto-test régulier",
+        "p2Body": "Testez-vous avant de réviser, pas après. Le cerveau forme une mémoire plus solide en cherchant une réponse plutôt qu'en la recevant.",
+        "p3Title": "L'erreur productive",
+        "p3Body": "Les erreurs lors de l'auto-test ne sont pas des échecs, mais des signaux précis indiquant exactement où votre cerveau a besoin d'un effort supplémentaire."
+      },
+      "studyRef": "Roediger & Karpicke (2011), Science : les étudiants utilisant le rappel actif ont retenu 50 % de matière supplémentaire par rapport à ceux ayant relu le texte quatre fois."
+    },
+
+    "neuroscience": {
+      "tag": "Bases Neurologiques",
+      "title": "Ce qui se passe dans votre cerveau pendant la mémorisation",
+      "body": "La mémoire n'est pas un fichier unique stocké en un point précis du cerveau, mais un réseau dynamique de connexions synaptiques distribuées. Comprendre cette architecture explique pourquoi certaines techniques de mémorisation fonctionnent et d'autres échouent.",
+      "steps": {
+        "encoding": {
+          "title": "Encodage",
+          "subtitle": "Encoding",
+          "body": "Lors de l'apprentissage d'une nouvelle information, l'hippocampe convertit le signal sensoriel en pattern neuronal. Plus la matière est porteuse de sens et d'associations, plus l'encodage est profond."
+        },
+        "consolidation": {
+          "title": "Consolidation",
+          "subtitle": "Consolidation",
+          "body": "Durant le sommeil, l'hippocampe rejoue les patterns neuronaux acquis et les transfère progressivement vers le néocortex pour un stockage durable. C'est pourquoi un bon sommeil après l'étude n'est pas un luxe, mais une nécessité biologique."
+        },
+        "retrieval": {
+          "title": "Récupération",
+          "subtitle": "Retrieval",
+          "body": "Chaque récupération réussie réécrit la mémoire de manière plus solide — phénomène appelé reconsolidation. La mémoire se reconstruit littéralement à chaque rappel."
+        }
+      },
+      "expertQuote": "La révision espacée ne fait pas que répéter l'information — elle reconstruit à chaque fois le réseau neuronal qui la porte, rendant la mémoire progressivement plus résistante à l'oubli.",
+      "expertName": "Dr Robert Bjork",
+      "expertTitle": "Professeur de neurosciences cognitives — UCLA"
+    },
+
+    "interleaving": {
+      "tag": "Techniques Avancées",
+      "title": "L'Entrelacement — Briser l'illusion de maîtrise",
+      "body": "Il existe un piège cognitif répandu appelé « illusion de compétence » : lorsqu'on répète intensément une matière lors d'une seule session, le cerveau signale une maîtrise apparente. Mais les tests révèlent que cette maîtrise est illusoire et liée au contexte immédiat.",
+      "techniques": {
+        "interleaving": {
+          "title": "Entrelacement (Interleaving)",
+          "body": "Plutôt que d'étudier un sujet jusqu'à sa complétion, alternez entre différents textes lors d'une même session. Les études montrent une amélioration du rappel à long terme de 43 % comparé à l'étude en blocs."
+        },
+        "elaboration": {
+          "title": "Questionnement élaboratif",
+          "body": "Après chaque texte mémorisé, posez-vous : pourquoi ? Comment cela se connecte-t-il à ce que je sais déjà ? Relier les nouvelles informations à un réseau de connaissances existant multiplie la puissance de l'encodage."
+        },
+        "selfExplanation": {
+          "title": "Auto-explication",
+          "body": "Expliquez la matière avec vos propres mots comme si vous l'enseigniez. La technique Feynman force le cerveau à révéler les lacunes de compréhension avant qu'elles ne deviennent des trous de mémoire."
+        }
+      }
+    },
+
+    "recommendations": {
+      "tag": "Recommandations",
+      "title": "Ce que la science recommande",
+      "intro": "Voici des recommandations distillées des dernières recherches en neurosciences éducatives et en psychologie cognitive :",
+      "recs": [
+        {
+          "icon": "🧠",
+          "title": "Révisez avant d'oublier — pas après",
+          "body": "La fenêtre optimale pour la première révision est dans les 24 heures suivant la mémorisation. Attendre plus signifie recommencer à zéro."
+        },
+        {
+          "icon": "🌙",
+          "title": "Faites du sommeil votre allié",
+          "body": "Une courte session avant le coucher suivie d'un sommeil suffisant (7-8 heures) surpasse une longue session intensive. La consolidation neuronale se produit pendant le sommeil paradoxal (REM)."
+        },
+        {
+          "icon": "⏱️",
+          "title": "Sessions courtes et fréquentes",
+          "body": "20-30 minutes de répétition concentrée valent mieux neurologiquement que 2 heures consécutives. L'attention soutenue a un plafond physiologique infranchissable."
+        },
+        {
+          "icon": "🏃",
+          "title": "L'exercice physique booste la mémoire",
+          "body": "20 minutes d'exercice aérobique stimulent la sécrétion de BDNF, une protéine qui favorise la croissance neuronale et la capacité d'encodage de l'hippocampe."
+        },
+        {
+          "icon": "❌",
+          "title": "Évitez l'illusion de maîtrise",
+          "body": "La relecture vous donne un sentiment de familiarité, pas de maîtrise. Testez-vous toujours — la difficulté mentale ressentie dans ces moments est le signe d'un apprentissage réel."
+        },
+        {
+          "icon": "🔗",
+          "title": "Construisez des associations sémantiques",
+          "body": "Relier chaque nouveau texte à une information déjà connue multiplie la puissance de l'encodage. La mémoire est un réseau, pas une liste."
+        }
+      ]
+    },
+
+    "mahfodNote": {
+      "tag": "Mahfod & la Science",
+      "title": "Comment Mahfod incarne ces principes",
+      "body": "Mahfod a été conçu dès le départ sur les principes des neurosciences éducatives. L'algorithme de répétition espacée est calculé individuellement pour chaque texte, la technique de disparition progressive du texte force votre cerveau au rappel actif plutôt qu'à la lecture passive, et les rappels quotidiens identifient avec précision la fenêtre de révision optimale.",
+      "features": ["Algorithme SM-2 adapté par texte", "Disparition progressive activant le rappel actif", "Notifications au moment critique", "Statistiques mémoire personnalisées"]
+    },
+
+    "conclusion": {
+      "tag": "Conclusion",
+      "title": "La mémorisation : une discipline",
+      "body": "La science moderne le confirme avec éclat : la mémorisation structurée, répétée et précoce ne laisse pas seulement une empreinte dans la mémoire — elle remodèle la structure même du cerveau. Investir dans la compréhension de la mémorisation, c'est investir dans votre capacité intellectuelle pour les décennies à venir.",
+      "finalQuote": "L'investissement dans la connaissance rapporte le meilleur intérêt.",
+      "finalQuoteAuthor": "Benjamin Franklin"
+    }
+  },
+
+  "labels": {
+    "research": "Étude scientifique",
+    "tip": "Conseil pratique",
+    "neuralMechanism": "Mécanisme neuronal",
+    "backToTop": "Haut de page",
+    "shareArticle": "Partager l'article",
+    "tableOfContents": "Table des matières"
+  }
+}

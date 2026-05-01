@@ -24,6 +24,13 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
-  ]
+    "node_modules",
+    "**/__tests__/**",
+    "supabase/functions/**",
+    "tmpscript/**",
+    "extract_files_test/**",
+    "tailwind.config.ts",
+    "app/**"
+  ],
+  "extends": "expo/tsconfig.base"
 }

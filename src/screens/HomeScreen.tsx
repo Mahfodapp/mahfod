@@ -1,220 +1,215 @@
-import React from 'react';
-import {
-    View, Text, StyleSheet, TouchableOpacity,
-    ScrollView, SafeAreaView,
-} from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App';
-import { useMemoStore } from '../store/useMemoStore';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuthStore } from '../store/auth.store';
+import { useMemoStore } from '../store/memo.store';
+import { useSettingsStore } from '../store/settings.store';
+import { Settings, Search, BookOpen, PlusCircle, Shuffle, Star } from 'lucide-react-native';
 import { colors } from '../theme/colors';
-import { BookOpen, Star, Shuffle, Plus, Settings, List } from 'lucide-react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/types';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+export default function HomeScreen() {
+  const { user, isGuest } = useAuthStore();
+  const { memos, fetchMemos } = useMemoStore();
+  const { settings } = useSettingsStore();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { t } = useTranslation();
 
-export default function HomeScreen({ navigation }: Props) {
-    const memos = useMemoStore(s => s.memos);
-    const getTodayReviewMemos = useMemoStore(s => s.getTodayReviewMemos);
-    const getRandomTestMemos = useMemoStore(s => s.getRandomTestMemos);
+  const [activeSlide, setActiveSlide] = useState(0);
 
-    const learningCount = memos.filter(m => m.stage === 'LEARNING').length;
-    const reviewCount = getTodayReviewMemos().length;
-    const testCount = getRandomTestMemos().length;
+  useEffect(() => {
+    fetchMemos();
+  }, [fetchMemos]);
 
-    return (
-        <SafeAreaView style={styles.safe}>
-            <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+  const totalMemos = memos.length;
+  const learningCount = memos.filter((m) => m.stage === 'LEARNING').length;
+  const reviewCount = memos.filter((m) => m.stage === 'REVIEWING').length;
+  const masteredCount = memos.filter((m) => m.stage === 'MASTERED').length;
+  
+  // Calculate due today
+  const now = new Date();
+  const dueCount = memos.filter((m) => {
+    if (m.stage !== 'REVIEWING') return false;
+    if (!m.next_review_at) return true;
+    return new Date(m.next_review_at) <= now;
+  }).length;
 
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.brand}>حاضرة مليانة</Text>
-                        <Text style={styles.title}>تطبيق محفوظ</Text>
-                        <Text style={styles.subtitle}>طريقك إلى الحفظ المتقن</Text>
-                    </View>
-                    <TouchableOpacity style={styles.settingsBtn} onPress={() => navigation.navigate('Settings')}>
-                        <Settings size={22} color={colors.accent} />
-                    </TouchableOpacity>
-                </View>
+  const streak = 0; // Replace with actual streak from settings or kv later
 
-                {/* Stats row */}
-                <View style={styles.statsRow}>
-                    <StatCard label="قيد الحفظ" value={learningCount} color={colors.info} />
-                    <StatCard label="للمراجعة" value={reviewCount} color={colors.warning} />
-                    <StatCard label="محكم" value={memos.filter(m => m.stage === 'MASTERED').length} color={colors.success} />
-                </View>
-
-                {/* Action cards */}
-                <Text style={styles.sectionTitle}>ابدأ جلستك</Text>
-
-                <ActionCard
-                    icon={<BookOpen size={28} color={colors.accent} />}
-                    title="حفظ محفوظ جديد"
-                    subtitle="ابدأ حفظ متن أو شعر أو حديث جديد"
-                    badge={learningCount}
-                    badgeColor={colors.info}
-                    onPress={() => navigation.navigate('MemoList')}
-                />
-
-                <ActionCard
-                    icon={<Star size={28} color={colors.warning} />}
-                    title="المراجعة اليومية"
-                    subtitle={reviewCount > 0 ? `لديك ${reviewCount} محفوظ للمراجعة اليوم` : 'أحسنت! أنهيت مراجعة اليوم'}
-                    badge={reviewCount}
-                    badgeColor={colors.warning}
-                    onPress={() => navigation.navigate('Review')}
-                />
-
-                <ActionCard
-                    icon={<Shuffle size={28} color={colors.success} />}
-                    title="الاختبار العشوائي"
-                    subtitle="اختبر نفسك في المحفوظات القديمة"
-                    badge={testCount}
-                    badgeColor={colors.success}
-                    onPress={() => navigation.navigate('Test')}
-                />
-
-                {/* Quick add */}
-                <TouchableOpacity style={styles.addBtn} onPress={() => navigation.navigate('AddMemo')}>
-                    <Plus size={20} color={colors.primary} />
-                    <Text style={styles.addBtnText}>أضف محفوظاً جديداً</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.listBtn} onPress={() => navigation.navigate('MemoList')}>
-                    <List size={18} color={colors.textSecondary} />
-                    <Text style={styles.listBtnText}>عرض جميع المحفوظات</Text>
-                </TouchableOpacity>
-
-            </ScrollView>
-        </SafeAreaView>
-    );
-}
-
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
-    return (
-        <View style={[styles.statCard, { borderColor: color + '44' }]}>
-            <Text style={[styles.statValue, { color }]}>{value}</Text>
-            <Text style={styles.statLabel}>{label}</Text>
-        </View>
-    );
-}
-
-function ActionCard({
-    icon, title, subtitle, badge, badgeColor, onPress
-}: {
-    icon: React.ReactNode;
-    title: string;
-    subtitle: string;
-    badge: number;
-    badgeColor: string;
-    onPress: () => void;
-}) {
-    return (
-        <TouchableOpacity style={styles.actionCard} onPress={onPress} activeOpacity={0.8}>
-            <View style={[styles.iconBox, { borderColor: badgeColor + '44' }]}>
-                {icon}
-            </View>
-            <View style={styles.actionText}>
-                <Text style={styles.actionTitle}>{title}</Text>
-                <Text style={styles.actionSubtitle}>{subtitle}</Text>
-            </View>
-            {badge > 0 && (
-                <View style={[styles.badge, { backgroundColor: badgeColor }]}>
-                    <Text style={styles.badgeText}>{badge}</Text>
-                </View>
-            )}
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* HEADER ROW */}
+      <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('SettingsScreen')}>
+          <Settings color={colors.accent} size={20} />
         </TouchableOpacity>
-    );
+        <Text style={styles.logo}>{t('home.logo', 'محفوظ')}</Text>
+        <TouchableOpacity style={styles.iconBtn}>
+          <Search color={colors.accent} size={20} />
+        </TouchableOpacity>
+      </Animated.View>
+
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {/* GREETING */}
+        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.greetingSection}>
+          {user && !isGuest ? (
+            <Text style={styles.greetingTitle}>
+              {t('home.greeting', 'السلام عليكم ،')} <Text style={styles.username}>{user.user_metadata?.full_name || user.email?.split('@')[0] || t('home.user', 'المستخدم')}</Text>
+            </Text>
+          ) : (
+            <Text style={styles.guestTitle}>{t('home.guestTitle', 'قليلٌ دائم خير من كثير منقطع')}</Text>
+          )}
+          <Text style={styles.quote}>
+            {t('home.quote', 'ليس بعلم ما حوى القمطر — ما العلم إلا ما حواه الصدر')}
+          </Text>
+        </Animated.View>
+
+        {/* STATS CARD */}
+        <Animated.View entering={FadeInDown.delay(300).springify()} style={styles.cardContainer}>
+          <View style={styles.cardBg}>
+            {activeSlide === 0 && (
+              <Animated.View entering={FadeInUp} style={styles.slide1}>
+                <View style={styles.statCol}>
+                  <Text style={styles.statValue}>{totalMemos}</Text>
+                  <Text style={styles.statLabel}>{t('home.stats.total', 'إجمالي المحفوظات')}</Text>
+                </View>
+                <View style={styles.statCol}>
+                  <Text style={styles.statValue}>{reviewCount}</Text>
+                  <Text style={styles.statLabel}>{t('home.stats.review', 'المراجعة')}</Text>
+                </View>
+                <View style={styles.statCol}>
+                  <Text style={styles.statValue}>{streak}</Text>
+                  <Text style={styles.statLabel}>{t('home.stats.streak', 'السلسلة')}</Text>
+                </View>
+              </Animated.View>
+            )}
+            {activeSlide === 1 && (
+              <Animated.View entering={FadeInUp} style={styles.slide2}>
+                <Text style={styles.stageText}>
+                  <Text style={{ color: colors.stageLearning }}>{t('stages.learning', 'يُحفظ')} [{learningCount}]</Text> ·{' '}
+                  <Text style={{ color: colors.stageReview }}>{t('stages.reviewing', 'مراجعة')} [{reviewCount}]</Text> ·{' '}
+                  <Text style={{ color: colors.stageMastered }}>{t('stages.mastered', 'محكم')} [{masteredCount}]</Text>
+                </Text>
+              </Animated.View>
+            )}
+            {activeSlide === 2 && (
+              <Animated.View entering={FadeInUp} style={styles.slide3}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Star color={colors.accent} size={24} />
+                  <Text style={styles.streakText}>{streak} يوم متواصل</Text>
+                </View>
+              </Animated.View>
+            )}
+          </View>
+          <View style={styles.pagination}>
+            {[0, 1, 2].map((i) => (
+              <TouchableOpacity key={i} onPress={() => setActiveSlide(i)}>
+                <View style={[styles.dot, activeSlide === i && styles.dotActive]} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Animated.View>
+
+        {/* ACTION GRID */}
+        <View style={styles.grid}>
+          <Animated.View entering={FadeInDown.delay(400).springify()} style={{ width: '47%', aspectRatio: 1 }}>
+            <TouchableOpacity style={styles.gridItem} onPress={() => navigation.navigate('MemoLibraryScreen')}>
+              <BookOpen color={colors.accent} size={28} />
+              <Text style={styles.gridLabel}>المحفوظات</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          
+          <Animated.View entering={FadeInDown.delay(500).springify()} style={{ width: '47%', aspectRatio: 1 }}>
+            <TouchableOpacity style={styles.gridItem} onPress={() => navigation.navigate('AddMemoScreen')}>
+              <PlusCircle color={colors.accent} size={28} />
+              <Text style={styles.gridLabel}>+ إضافة محفوظ جديد</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          
+          <Animated.View entering={FadeInDown.delay(600).springify()} style={{ width: '47%', aspectRatio: 1 }}>
+            <TouchableOpacity style={styles.gridItem} onPress={() => navigation.navigate('MohkamSessionScreen')}>
+              <Shuffle color={colors.accent} size={28} />
+              <Text style={styles.gridLabel}>الاختبار</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          
+          <Animated.View entering={FadeInDown.delay(700).springify()} style={{ width: '47%', aspectRatio: 1 }}>
+            <TouchableOpacity style={styles.gridItem} onPress={() => navigation.navigate('ReviewSessionScreen')}>
+              <Star color={colors.accent} size={28} />
+              <Text style={styles.gridLabel}>المراجعة</Text>
+              {dueCount > 0 && <View style={styles.badge} />}
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    safe: { flex: 1, backgroundColor: colors.background },
-    container: { flex: 1 },
-    content: { padding: 20, paddingBottom: 40 },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 28,
-        marginTop: 16,
-    },
-    brand: { color: colors.textGold, fontSize: 12, fontWeight: '600', letterSpacing: 1 },
-    title: { color: colors.textPrimary, fontSize: 28, fontWeight: '800', marginTop: 2 },
-    subtitle: { color: colors.textSecondary, fontSize: 14, marginTop: 4 },
-    settingsBtn: {
-        backgroundColor: colors.surface,
-        padding: 10,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    statsRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
-    statCard: {
-        flex: 1,
-        backgroundColor: colors.surface,
-        borderRadius: 14,
-        padding: 14,
-        alignItems: 'center',
-        borderWidth: 1,
-    },
-    statValue: { fontSize: 26, fontWeight: '800' },
-    statLabel: { color: colors.textSecondary, fontSize: 11, marginTop: 4, textAlign: 'center' },
-    sectionTitle: {
-        color: colors.textSecondary,
-        fontSize: 13,
-        fontWeight: '700',
-        letterSpacing: 0.5,
-        textTransform: 'uppercase',
-        marginBottom: 12,
-    },
-    actionCard: {
-        backgroundColor: colors.surface,
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    iconBox: {
-        width: 52,
-        height: 52,
-        borderRadius: 14,
-        backgroundColor: colors.primaryLight,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 14,
-        borderWidth: 1,
-    },
-    actionText: { flex: 1 },
-    actionTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
-    actionSubtitle: { color: colors.textSecondary, fontSize: 13, marginTop: 3 },
-    badge: {
-        minWidth: 26,
-        height: 26,
-        borderRadius: 13,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 6,
-    },
-    badgeText: { color: '#fff', fontSize: 12, fontWeight: '800' },
-    addBtn: {
-        backgroundColor: colors.accent,
-        borderRadius: 14,
-        padding: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        marginTop: 8,
-    },
-    addBtnText: { color: colors.primary, fontSize: 16, fontWeight: '800' },
-    listBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        marginTop: 14,
-    },
-    listBtnText: { color: colors.textSecondary, fontSize: 14 },
+  container: { flex: 1, backgroundColor: colors.primary },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  iconBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  logo: {
+    color: colors.accent,
+    fontSize: 24, fontWeight: '800',
+    textShadowColor: colors.accent,
+    textShadowRadius: 10,
+  },
+  scroll: { padding: 20 },
+  greetingSection: { marginBottom: 24 },
+  greetingTitle: { fontSize: 22, fontWeight: '700', color: colors.textPrimary, textAlign: 'right' },
+  username: { color: colors.accent },
+  guestTitle: { fontSize: 16, fontStyle: 'italic', color: colors.textSecondary, textAlign: 'right' },
+  quote: { color: colors.textMuted, fontSize: 13, textAlign: 'right', marginTop: 8 },
+  cardContainer: {
+    backgroundColor: colors.primaryLight,
+    borderWidth: 0.5, borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 32,
+  },
+  cardBg: { padding: 20, minHeight: 120, justifyContent: 'center' },
+  slide1: { flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center' },
+  statCol: { alignItems: 'center' },
+  statValue: { fontSize: 28, fontWeight: '800', color: colors.accent },
+  statLabel: { fontSize: 12, color: colors.textMuted, marginTop: 4 },
+  slide2: { alignItems: 'center' },
+  stageText: { fontSize: 16, fontWeight: '700' },
+  slide3: { alignItems: 'center' },
+  streakText: { fontSize: 24, fontWeight: '800', color: colors.accent },
+  pagination: { flexDirection: 'row', justifyContent: 'center', paddingBottom: 16, gap: 8 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.16)' },
+  dotActive: { backgroundColor: colors.accent },
+  grid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 16 },
+  gridItem: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: colors.primaryLight,
+    borderRadius: 16,
+    borderWidth: 0.5, borderColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center', alignItems: 'center',
+    padding: 16,
+    position: 'relative',
+  },
+  gridLabel: { color: colors.textPrimary, fontSize: 13, textAlign: 'center', marginTop: 8 },
+  badge: {
+    position: 'absolute', top: 16, right: 16,
+    width: 10, height: 10, borderRadius: 5, backgroundColor: colors.error,
+  },
 });

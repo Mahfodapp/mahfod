@@ -1,0 +1,1512 @@
+
+
+============================================================
+  HomeScreenTsx  (15 occurrences)
+============================================================
+
+                    r3['progress'] = r0;
+                    r1 = function(a0) { // Original name: HomeScreenTsx1Factory, environment: r0
+                        r2 = a0;
+                        r1 = r2._worklet_11891965362295_init_data;
+                        r4 = r2.beamOpacity;
+                        var _closure4_slot0 = r4;
+                        r3 = r2.progress;
+                        var _closure4_slot1 = r3;
+                        r0 = function(a0) { // Original name: HomeScreenTsx1, environment: r0
+                            _fun30916: for(var _fun30916_ip = 0; ; ) switch(_fun30916_ip) {
+case 0:
+                                r0 = a0;
+                                if(!r0) { _fun30916_ip = 31; continue _fun30916 }
+case 6:
+                                r2 = _closure4_slot0;
+                                r1 = 0;
+                                r2['value'] = r1;
+                                r0 = _closure4_slot1;
+                                r0['value'] = r1;
+case 31:
+                                r0 = undefined;
+                                return r0;
+                            }
+                        };
+                        r2 = {};
+                        r2['beamOpacity'] = r4;
+                        r2['progress'] = r3;
+                        r0['__closure'] = r2;
+                        r2 = 11891965362295.0;
+                        r0['__workletHash'] = r2;
+                        r0['__initData'] = r1;
+                        return r0;
+                    };
+                    r0 = undefined;
+                    r3 = r1.bind(r0)(r3);
+                    r1 = 2;
+                    r1 = r5.bind(r0)(r1, r4, r3);
+                    r2['value'] = r1;
+                    return r0;
+                };
+                r1 = new Array(0);
+                r1 = r8.bind(r3)(r2, r1);
+                var _closure2_slot3 = r1;
+                r2 = _closure1_slot4;
+                r8 = r2.useEffect;
+                r2 = new Array(1);
+                r2[0] = r1;
+                r1 = function() { // Environment: r0
+                    _fun30917: for(var _fun30917_ip = 0; ; ) switch(_fun30917_ip) {
+case 0:
+                        r1 = _closure2_slot0;
+                        if(!r1) { _fun30917_ip = 24; continue _fun30917 }
+case 10:
+                        r1 = _closure2_slot0;
+                        r0 = _closure2_slot3;
+                        r1['current'] = r0;
+case 24:
+                        r0 = undefined;
+                        return r0;
+                    }
+                };
+                r1 = r8.bind(r3)(r1, r2);
+                r1 = _closure1_slot12;
+                r2 = r1.useAnimatedProps;
+                r8 = {};
+                r1 = _closure1_slot25;
+                r8['_worklet_12215814876930_init_data'] = r1;
+                r8['progress'] = r9;
+                r8['perim'] = r12;
+                r8['beamOpacity'] = r7;
+                r1 = function(a0) { // Original name: HomeScreenTsx2Factory, environment: r0
+                    r2 = a0;
+                    r1 = r2._worklet_12215814876930_init_data;
+                    r5 = r2.progress;
+                    var _closure3_slot0 = r5;
+                    r4 = r2.perim;
+                    var _closure3_slot1 = r4;
+                    r3 = r2.beamOpacity;
+                    var _closure3_slot2 = r3;
+                    r0 = function() { // Original name: HomeScreenTsx2, environment: r0
+                        r0 = {};
+                        r2 = _closure3_slot0;
+                        r3 = r2.value;
+                        r2 = 1;
+                        r2 = r3 % r2;
+                        r3 = _closure3_slot1;
+                        r2 = -r2;
+                        r2 = r2 * r3;
+                        r0['strokeDashoffset'] = r2;
+                        r1 = _closure3_slot2;
+                        r2 = r1.value;
+                        r1 = 0.5;
+                        r1 = r2 * r1;
+                        r0['strokeOpacity'] = r1;
+                        return r0;
+                    };
+                    r2 = {};
+                    r2['progress'] = r5;
+                    r2['perim'] = r4;
+                    r2['beamOpacity'] = r3;
+                    r0['__closure'] = r2;
+                    r2 = 12215814876930.0;
+                    r0['__workletHash'] = r2;
+                    r0['__initData'] = r1;
+                    return r0;
+                };
+                r1 = r1.bind(r3)(r8);
+                r8 = r2.bind(r3)(r1);
+                r1 = _closure1_slot12;
+                r2 = r1.useAnimatedProps;
+                r11 = {};
+                r1 = _closure1_slot26;
+                r11['_worklet_14678062662364_init_data'] = r1;
+                r11['progress'] = r9;
+                r11['perim'] = r12;
+                r11['beamLen'] = r23;
+                r19 = 10;
+                r11['dOuter'] = r19;
+                r11['beamOpacity'] = r7;
+                r1 = function(a0) { // Original name: HomeScreenTsx3Factory, environment: r0
+                    r2 = a0;
+                    r1 = r2._worklet_14678062662364_init_data;
+                    r7 = r2.progress;
+                    var _closure3_slot0 = r7;
+                    r6 = r2.perim;
+                    var _closure3_slot1 = r6;
+                    r5 = r2.beamLen;
+                    var _closure3_slot2 = r5;
+                    r4 = r2.dOuter;
+                    var _closure3_slot3 = r4;
+                    r3 = r2.beamOpacity;
+                    var _closure3_slot4 = r3;
+                    r0 = function() { // Original name: HomeScreenTsx3, environment: r0
+                        r0 = {};
+                        r2 = _closure3_slot0;
+                        r3 = r2.value;
+                        r2 = 1;
+                        r2 = r3 % r2;
+                        r3 = _closure3_slot1;
+                        r2 = -r2;
+                        r3 = r2 * r3;
+                        r2 = _closure3_slot2;
+                        r3 = r3 - r2;
+                        r4 = _closure3_slot3;
+                        r2 = 2;
+                        r2 = r4 / r2;
+                        r2 = r3 + r2;
+                        r0['strokeDashoffset'] = r2;
+                        r1 = _closure3_slot4;
+                        r2 = r1.value;
+                        r1 = 0.1;
+                        r1 = r2 * r1;
+                        r0['strokeOpacity'] = r1;
+                        return r0;
+                    };
+                    r2 = {};
+                    r2['progress'] = r7;
+                    r2['perim'] = r6;
+                    r2['beamLen'] = r5;
+                    r2['dOuter'] = r4;
+                    r2['beamOpacity'] = r3;
+                    r0['__closure'] = r2;
+                    r2 = 14678062662364.0;
+                    r0['__workletHash'] = r2;
+                    r0['__initData'] = r1;
+                    return r0;
+                };
+                r1 = r1.bind(r3)(r11);
+                r21 = r2.bind(r3)(r1);
+                r1 = _closure1_slot12;
+                r2 = r1.useAnimatedProps;
+                r11 = {};
+                r1 = _closure1_slot27;
+                r11['_worklet_13815672821369_init_data'] = r1;
+                r11['progress'] = r9;
+                r11['perim'] = r12;
+                r11['beamLen'] = r23;
+                r20 = 6;
+                r11['dMid'] = r20;
+                r11['beamOpacity'] = r7;
+                r1 = function(a0) { // Original name: HomeScreenTsx4Factory, environment: r0
+                    r2 = a0;
+                    r1 = r2._worklet_13815672821369_init_data;
+                    r7 = r2.progress;
+                    var _closure3_slot0 = r7;
+                    r6 = r2.perim;
+                    var _closure3_slot1 = r6;
+                    r5 = r2.beamLen;
+                    var _closure3_slot2 = r5;
+                    r4 = r2.dMid;
+                    var _closure3_slot3 = r4;
+                    r3 = r2.beamOpacity;
+                    var _closure3_slot4 = r3;
+                    r0 = function() { // O
+
+============================================================
+  LearnScreen  (10 occurrences)
+============================================================
+:
+                return r0;
+            }
+        };
+        r0 = function(a0) { // Original name: LearnScreen, environment: r2
+            _fun31495: for(var _fun31495_ip = 0; ; ) switch(_fun31495_ip) {
+case 0:
+                r1 = a0;
+                r0 = r1.route;
+                r1 = r1.navigation;
+                var _closure2_slot0 = r1;
+                r0 = r0.params;
+                r0 = r0.memoId;
+                var _closure2_slot1 = r0;
+                r1 = _closure1_slot6;
+                r1 = r1.useSafeAreaInsets;
+                r3 = undefined;
+                r7 = r1.bind(r3)();
+                r1 = _closure1_slot17;
+                r1 = r1.useTranslation;
+                r1 = r1.bind(r3)();
+                r28 = r1.t;
+                r1 = _closure1_slot9;
+                r2 = r1.useMemoStore;
+                r1 = function(a0) { // Environment: r8
+                    r0 = a0;
+                    r2 = r0.memos;
+                    r1 = r2.find;
+                    r0 = function(a0) { // Environment: r0
+                        r0 = a0;
+                        r1 = r0.id;
+                        r0 = _closure2_slot1;
+                        r0 = r1 === r0;
+                        return r0;
+                    };
+                    r0 = r1.bind(r2)(r0);
+                    return r0;
+                };
+                r25 = r2.bind(r3)(r1);
+                var _closure2_slot2 = r25;
+                r1 = _closure1_slot9;
+                r2 = r1.useMemoStore;
+                r1 = function(a0) { // Environment: r8
+                    r0 = a0;
+                    r0 = r0.settings;
+                    return r0;
+                };
+                r50 = r2.bind(r3)(r1);
+                r1 = _closure1_slot9;
+                r2 = r1.useMemoStore;
+                r1 = function(a0) { // Environment: r8
+                    _fun31499: for(var _fun31499_ip = 0; ; ) switch(_fun31499_ip) {
+case 0:
+                        r0 = a0;
+                        r1 = r0.memoPrefs;
+                        r0 = _closure2_slot1;
+                        r0 = r1[r0];
+                        if(r0) { _fun31499_ip = 25; continue _fun31499 }
+case 23:
+                        r0 = {};
+case 25:
+                        return r0;
+                    }
+                };
+                r1 = r2.bind(r3)(r1);
+                r2 = _closure1_slot9;
+                r4 = r2.useMemoStore;
+                r2 = function(a0) { // Environment: r8
+                    r0 = a0;
+                    r0 = r0.updateMemoPrefs;
+                    return r0;
+                };
+                r6 = r4.bind(r3)(r2);
+                var _closure2_slot3 = r6;
+                r67 = r1.fontSizeScale;
+                r21 = null;
+                if(!(r67 == r21)) { _fun31495_ip = 176; continue _fun31495 }
+case 170:
+                r67 = r50.fontSizeScale;
+case 176:
+                if(!(r67 == r21)) { _fun31495_ip = 183; continue _fun31495 }
+case 180:
+                r67 = 1;
+case 183:
+                var _closure2_slot4 = r67;
+                r2 = _closure1_slot9;
+                r4 = r2.useMemoStore;
+                r2 = function(a0) { // Environment: r8
+                    r0 = a0;
+                    r0 = r0.updateSettings;
+                    return r0;
+                };
+                r2 = r4.bind(r3)(r2);
+                r66 = new Array(3);
+                r2 = {'family': 'Cairo_800ExtraBold', 'label': 'ك', 'hint': 'كوفي'};
+                r66[0] = r2;
+                r2 = {'family': 'Amiri_400Regular', 'label': 'أ', 'hint': 'أميري'};
+                r66[1] = r2;
+                r2 = {'family': 'ScheherazadeNew_400Regular', 'label': 'ش', 'hint': 'شهرزاد'};
+                r66[2] = r2;
+                var _closure2_slot5 = r66;
+                r2 = _closure1_slot4;
+                r2 = r2.useState;
+                r1 = r1.fontIdx;
+                if(!(r1 == r21)) { _fun31495_ip = 277; continue _fun31495 }
+case 275:
+                r1 = 0;
+case 277:
+                r2 = r2.bind(r3)(r1);
+                r1 = _closure1_slot3;
+                r1 = r1.default;
+                r41 = 2;
+                r1 = r1.bind(r3)(r2, r41);
+                r45 = 0;
+                r65 = r1[r45];
+                r27 = 1;
+                r1 = r1[r27];
+                var _closure2_slot6 = r1;
+                r1 = r66[r65];
+                r46 = r1.family;
+                var _closure2_slot7 = r46;
+                r1 = _closure1_slot4;
+                r1 = r1.useState;
+                r2 = r1.bind(r3)(r21);
+                r1 = _closure1_slot3;
+                r1 = r1.default;
+                r1 = r1.bind(r3)(r2, r41);
+                r63 = r1[r45];
+                var _closure2_slot8 = r63;
+                r1 = r1[r27];
+                var _closure2_slot9 = r1;
+                r1 = _closure1_slot4;
+                r1 = r1.useState;
+                r12 = false;
+                r2 = r1.bind(r3)(r12);
+                r1 = _closure1_slot3;
+                r1 = r1.default;
+                r1 = r1.bind(r3)(r2, r41);
+                r59 = r1[r45];
+                r1 = r1[r27];
+                var _closure2_slot10 = r1;
+                r1 = _closure1_slot4;
+                r1 = r1.useRef;
+                r10 = r1.bind(r3)(r67);
+                r1 = _closure1_slot4;
+                r1 = r1.useRef;
+                r9 = r1.bind(r3)(r67);
+                r1 = _closure1_slot18;
+                r2 = r1.Gesture;
+                r1 = r2.Pinch;
+                r4 = r1.bind(r2)();
+                r2 = r4.onBegin;
+                r11 = {};
+                r1 = _closure1_slot26;
+                r11['_worklet_3601496232704_init_data'] = r1;
+                r11['pinchBaseScale'] = r10;
+                r11['lastApplied'] = r9;
+                r1 = function(a0) { // Original name: LearnScreenTsx3Factory, environment: r8
+                    r2 = a0;
+                    r1 = r2._worklet_3601496232704_init_data;
+                    r4 = r2.pinchBaseScale;
+                    var _closure3_slot0 = r4;
+                    r3 = r2.lastApplied;
+                    var _closure3_slot1 = r3;
+                    r0 = function() { // Original name: LearnScreenTsx3, environment: r0
+                        r1 = _closure3_slot0;
+                        r0 = _closure3_slot1;
+                        r0 = r0.current;
+                        r1['current'] = r0;
+                        r0 = undefined;
+                        return r0;
+                    };
+                    r2 = {};
+                    r2['pinchBaseScale'] = r4;
+                    r2['lastApplied'] = r3;
+                    r0['__closure'] = r2;
+                    r2 = 3601496232704.0;
+                    r0['__workletHash'] = r2;
+                    r0['__initData'] = r1;
+                    return r0;
+                };
+                r1 = r1.bind(r3)(r11);
+                r4 = r2.bind(r4)(r1);
+                r2 = r4.onUpdate;
+                r11 = {};
+                r1 = _closure1_slot25;
+                r11['_worklet_14031187381327_init_data'] = r1;
+                r11['pinchBaseScale'] = r10;
+                r11['lastApplied'] = r9;
+                r11['updateMemoPrefs'] = r6;
+                r11['memoId'] = r0;
+                r1 = function(a0) { // Original name: LearnScreenTsx2Factory, environment: r8
+                    r2 = a0;
+                    r1 = r2._worklet_14031187381327_init_data;
+                    r6 = r2.pinchBaseScale;
+                    var _closure3_slot0 = r6;
+                    r5 = r2.lastApplied;
+                    var _closure3_slot1 = r5;
+                    r4 = r2.updateMemoPrefs;
+                    var _closure3_slot2 = r4;
+                    r3 = r2.memoId;
+                    var _closure3_slot3 = r3;
+                    r0 = function(a0) { // Original name: LearnScreenTsx2, environment: r0
+                        _fun31507: for(var _fun31507_ip = 0; ; ) switch(_fun31507_ip) {
+case 0:
+                            r2 = global;
+                            r4 = r2.parseFloat;
+                            r6 = r2.Math;
+                     
+
+============================================================
+  DailyReview  (10 occurrences)
+============================================================
+if(r5) { _fun6956_ip = 168; continue _fun6956 }
+case 141:
+                            r5 = r4.cancelDailyReviewReminder;
+                            r7 = r5.bind(r0)();
+                            r6 = r7.catch;
+                            r5 = function() { // Environment: r1
+                                r0 = undefined;
+                                return r0;
+                            };
+                            r5 = r6.bind(r7)(r5);
+                            _fun6956_ip = 212; continue _fun6956;
+case 168:
+                            r5 = r4.scheduleDailyReviewReminder;
+                            r4 = r3.notificationHour;
+                            r3 = null;
+                            if(!(r4 == r3)) { _fun6956_ip = 189; continue _fun6956 }
+case 186:
+                            r4 = 8;
+case 189:
+                            r3 = 0;
+                            r5 = r5.bind(r0)(r4, r3);
+                            r4 = r5.catch;
+                            r3 = function() { // Environment: r1
+                                r0 = undefined;
+                                return r0;
+                            };
+                            r3 = r4.bind(r5)(r3);
+case 212:
+                            r3 = _closure1_slot44;
+                            r4 = r3.useAuthStore;
+                            r3 = r4.getState;
+                            r3 = r3.bind(r4)();
+                            r3 = r3.user;
+                            r4 = null;
+                            r5 = r3 == r4;
+                            r4 = undefined;
+                            if(r5) { _fun6956_ip = 253; continue _fun6956 }
+case 248:
+                            r4 = r3.id;
+case 253:
+                            if(!r4) { _fun6956_ip = 363; continue _fun6956 }
+case 256:
+                            r4 = _closure1_slot26;
+                            r6 = r4.errorMonitoring;
+                            r5 = r6.setUser;
+                            r4 = {};
+                            r7 = r3.id;
+                            r4['id'] = r7;
+                            r7 = r3.email;
+                            r4['email'] = r7;
+                            r4 = r5.bind(r6)(r4);
+                            r4 = _closure1_slot21;
+                            r4 = r4.loginSync;
+                            r3 = r3.id;
+                            r5 = r4.bind(r0)(r3);
+                            r4 = r5.catch;
+                            r3 = function(a0) { // Environment: r1
+                                _fun6961: for(var _fun6961_ip = 0; ; ) switch(_fun6961_ip) {
+case 0:
+                                    r0 = a0;
+                                    r3 = _closure1_slot46;
+                                    r2 = r3.warn;
+                                    r1 = null;
+                                    r4 = r0 == r1;
+                                    r1 = undefined;
+                                    if(r4) { _fun6961_ip = 31; continue _fun6961 }
+case 26:
+                                    r1 = r0.message;
+case 31:
+                                    r0 = 'Background sync error:';
+                                    r0 = r2.bind(r3)(r0, r1);
+                                    return r0;
+                                }
+                            };
+                            r3 = r4.bind(r5)(r3);
+                            r2 = _closure1_slot22;
+                            r2 = r2.flushSyncQueue;
+                            r3 = r2.bind(r0)();
+                            r2 = r3.catch;
+                            r1 = function() { // Environment: r1
+                                r0 = undefined;
+                                return r0;
+                            };
+                            r1 = r2.bind(r3)(r1);
+case 363:
+                            return r0;
+                        }
+                    };
+                    r3 = r2.bind(r3)(r1);
+                    r2 = r3.catch;
+                    r1 = function(a0) { // Environment: r0
+                        r0 = global;
+                        r2 = r0.clearTimeout;
+                        r1 = _closure3_slot0;
+                        r0 = undefined;
+                        r1 = r2.bind(r0)(r1);
+                        r5 = _closure1_slot46;
+                        r4 = r5.error;
+                        r3 = 'Init error:';
+                        r2 = a0;
+                        r2 = r4.bind(r5)(r3, r2);
+                        r1 = _closure1_slot44;
+                        r3 = r1.useAuthStore;
+                        r2 = r3.setState;
+                        r1 = {};
+                        r4 = false;
+                        r1['loading'] = r4;
+                        r1 = r2.bind(r3)(r1);
+                        r2 = _closure2_slot3;
+                        r1 = true;
+                        r1 = r2.bind(r0)(r1);
+                        return r0;
+                    };
+                    r1 = r2.bind(r3)(r1);
+                    r0 = function() { // Environment: r0
+                        r0 = global;
+                        r2 = r0.clearTimeout;
+                        r1 = _closure3_slot0;
+                        r0 = undefined;
+                        r0 = r2.bind(r0)(r1);
+                        return r0;
+                    };
+                    return r0;
+                };
+                r0 = new Array(0);
+                r0 = r2.bind(r3)(r1, r0);
+                r0 = _closure1_slot5;
+                r2 = r0.useEffect;
+                r1 = function() { // Environment: r16
+                    r1 = _closure1_slot6;
+                    r4 = r1.AppState;
+                    r3 = r4.addEventListener;
+                    r2 = 'change';
+                    r1 = function(a0) { // Environment: r0
+                        _fun6966: for(var _fun6966_ip = 0; ; ) switch(_fun6966_ip) {
+case 0:
+                            r5 = a0;
+                            r0 = _closure1_slot44;
+                            r3 = r0.useAuthStore;
+                            r0 = r3.getState;
+                            r0 = r0.bind(r3)();
+                            r3 = r0.user;
+                            r0 = null;
+                            r6 = r3 == r0;
+                            r0 = undefined;
+                            r4 = undefined;
+                            if(r6) { _fun6966_ip = 51; continue _fun6966 }
+case 46:
+                            r4 = r3.id;
+case 51:
+                            if(r4) { _fun6966_ip = 56; continue _fun6966 }
+case 54:
+                            return r0;
+case 56:
+                            r4 = 'active';
+                            if(!(r5 !== r4)) { _fun6966_ip = 117; continue _fun6966 }
+case 64:
+                            r4 = 'background';
+                            if(!(r5 !== r4)) { _fun6966_ip = 80; continue _fun6966 }
+case 72:
+                            r4 = 'inactive';
+                            if(!(r5 === r4)) { _fun6966_ip = 146; continue _fun6966 }
+case 80:
+                            r4 = _closure1_slot21;
+                            r4 = r4.pushSync;
+                            r3 = r3.id;
+                            r5 = r4.bind(r0)(r3);
+                            r4 = r5.catch;
+                            r3 = function() { // Environment: r1
+                                r0 = undefined;
+                                return r0;
+                            };
+                            r3 = r4.bind(r5)(r3);
+                            _fun6966_ip = 146; continue _fun6966;
+case 117:
+                            r2 = _closure1_slot22;
+                            r2 = r2.flushSyncQueue;
+                            r3 = r2.bind(r0)();
+                            r2 = r3.catch;
+                            r1 = function() { // Environment: r1
+                                r0 = undefined;
+                                return r0;
+                            };
+                            r1 = r2.bind(r3)(r1);
+case 146:
+                            return r0;
+                        }
+                    };
+                    r1 = r3.bind(r4)(r2, r1
+
+============================================================
+  ToolsScreen  (2 occurrences)
+============================================================
+eturn r0;
+        };
+        var _closure1_slot27 = r0;
+        r0 = function() { // Original name: ToolsScreen, environment: r2
+            _fun34909: for(var _fun34909_ip = 0; ; ) switch(_fun34909_ip) {
+case 0:
+                r0 = _closure1_slot6;
+                r0 = r0.useSafeAreaInsets;
+                r3 = undefined;
+                r6 = r0.bind(r3)();
+                r0 = _closure1_slot11;
+                r0 = r0.useScrollHideTabBar;
+                r15 = r0.bind(r3)();
+                r0 = _closure1_slot4;
+                r1 = r0.useState;
+                r0 = null;
+                r4 = r1.bind(r3)(r0);
+                r1 = _closure1_slot2;
+                r2 = r1.default;
+                r1 = 2;
+                r1 = r2.bind(r3)(r4, r1);
+                r2 = 0;
+                r10 = r1[r2];
+                var _closure2_slot0 = r10;
+                r11 = 1;
+                r1 = r1[r11];
+                var _closure2_slot1 = r1;
+                r1 = _closure1_slot4;
+                r4 = r1.useRef;
+                r1 = _closure1_slot5;
+                r1 = r1.Animated;
+                r1 = r1.Value;
+                r5 = r1.prototype;
+                r5 = Object.create(r5, {constructor: {value: r1}});
+                r25 = r5;
+                r24 = r11;
+                r1 = new r25[r1](r24, r23);
+                r1 = r1 instanceof Object ? r1 : r5;
+                r1 = r4.bind(r3)(r1);
+                r8 = r1.current;
+                var _closure2_slot2 = r8;
+                r1 = function(a0) { // Original name: navigateTo, environment: r7
+                    r1 = a0;
+                    var _closure3_slot0 = r1;
+                    r1 = _closure1_slot5;
+                    r4 = r1.Animated;
+                    r3 = r4.timing;
+                    r2 = _closure2_slot2;
+                    r1 = {'toValue': 0, 'duration': 150, 'useNativeDriver': true};
+                    r2 = r3.bind(r4)(r2, r1);
+                    r1 = r2.start;
+                    r0 = function() { // Environment: r0
+                        r3 = _closure2_slot1;
+                        r2 = _closure3_slot0;
+                        r0 = undefined;
+                        r2 = r3.bind(r0)(r2);
+                        r2 = _closure1_slot5;
+                        r4 = r2.Animated;
+                        r3 = r4.timing;
+                        r2 = _closure2_slot2;
+                        r1 = {'toValue': 1, 'duration': 200, 'useNativeDriver': true};
+                        r2 = r3.bind(r4)(r2, r1);
+                        r1 = r2.start;
+                        r1 = r1.bind(r2)();
+                        return r0;
+                    };
+                    r0 = r1.bind(r2)(r0);
+                    r0 = undefined;
+                    return r0;
+                };
+                var _closure2_slot3 = r1;
+                r5 = _closure1_slot17;
+                r4 = r5.find;
+                r1 = function(a0) { // Environment: r7
+                    r0 = a0;
+                    r1 = r0.id;
+                    r0 = _closure2_slot0;
+                    r0 = r1 === r0;
+                    return r0;
+                };
+                r12 = r4.bind(r5)(r1);
+                if(!(r12 == r0)) { _fun34909_ip = 191; continue _fun34909 }
+case 183:
+                r1 = _closure1_slot17;
+                r12 = r1[r2];
+case 191:
+                if(!(r10 === r0)) { _fun34909_ip = 834; continue _fun34909 }
+case 198:
+                r0 = _closure1_slot12;
+                r2 = r0.jsxs;
+                r0 = _closure1_slot5;
+                r0 = r0.Animated;
+                r1 = r0.View;
+                r0 = {};
+                r4 = _closure1_slot18;
+                r5 = r4.root;
+                r4 = new Array(2);
+                r4[0] = r5;
+                r5 = {};
+                r5['opacity'] = r8;
+                r4[1] = r5;
+                r0['style'] = r4;
+                r4 = _closure1_slot12;
+                r13 = r4.jsxs;
+                r4 = _closure1_slot5;
+                r5 = r4.View;
+                r4 = {};
+                r14 = _closure1_slot18;
+                r16 = r14.header;
+                r14 = new Array(2);
+                r14[0] = r16;
+                r16 = {};
+                r18 = r6.top;
+                r17 = 14;
+                r17 = r18 + r17;
+                r16['paddingTop'] = r17;
+                r14[1] = r16;
+                r4['style'] = r14;
+                r14 = _closure1_slot12;
+                r17 = r14.jsx;
+                r14 = _closure1_slot5;
+                r16 = r14.Text;
+                r14 = {};
+                r18 = _closure1_slot18;
+                r18 = r18.headerTitle;
+                r14['style'] = r18;
+                r18 = 'الأدوات';
+                r14['children'] = r18;
+                r16 = r17.bind(r3)(r16, r14);
+                r14 = new Array(2);
+                r14[0] = r16;
+                r16 = _closure1_slot12;
+                r18 = r16.jsx;
+                r16 = _closure1_slot5;
+                r17 = r16.Text;
+                r16 = {};
+                r19 = _closure1_slot18;
+                r19 = r19.headerSub;
+                r16['style'] = r19;
+                r19 = 'ميزات المنصة وأدوات الطالب';
+                r16['children'] = r19;
+                r16 = r18.bind(r3)(r17, r16);
+                r14[1] = r16;
+                r4['children'] = r14;
+                r5 = r13.bind(r3)(r5, r4);
+                r4 = new Array(2);
+                r4[0] = r5;
+                r5 = _closure1_slot12;
+                r14 = r5.jsxs;
+                r5 = _closure1_slot5;
+                r13 = r5.ScrollView;
+                r5 = {};
+                r16 = _closure1_slot18;
+                r16 = r16.scroll;
+                r5['style'] = r16;
+                r16 = _closure1_slot18;
+                r17 = r16.scrollContent;
+                r16 = new Array(2);
+                r16[0] = r17;
+                r17 = {};
+                r19 = r6.bottom;
+                r18 = 140;
+                r18 = r18 + r19;
+                r17['paddingBottom'] = r18;
+                r16[1] = r17;
+                r5['contentContainerStyle'] = r16;
+                r5['onScroll'] = r15;
+                r15 = 16;
+                r5['scrollEventThrottle'] = r15;
+                r15 = false;
+                r5['showsVerticalScrollIndicator'] = r15;
+                r15 = _closure1_slot12;
+                r17 = r15.jsx;
+                r15 = _closure1_slot5;
+                r16 = r15.View;
+                r15 = {};
+                r18 = _closure1_slot18;
+                r18 = r18.quoteBar;
+                r15['style'] = r18;
+                r18 = _closure1_slot12;
+                r20 = r18.jsx;
+                r18 = _closure1_slot5;
+                r19 = r18.Text;
+                r18 = {};
+                r21 = _closure1_slot18;
+                r21 = r21.quoteText;
+                r18['style'] = r21;
+                r21 = '«من طلب العلم فليُعِدّ له عُدّته»';
+                r18['children'] = r21;
+                r18 = r20.bind(r3)(r19, r18);
+                r15['children'] = r18;
+                r16 = r17.bind(r3)(r16, r15);
+                r15 = new Array(3);
+                r15[0] = r16;
+                r16 = _closure1_slot12;
+                r18 = r16.jsx;
+                r16 = _closure1_slot5;
+                r17 = r16.View;
+                r16 = {};
+                r19 = _closure1_slot18;
+                r19 = r19.list;
+                r16['style'] = r19;
+                r21 = _closure1_slot17;
+                r20 = r21.map;
+                r19 = function(a0, a1) { // Environment: r7
+                    r0 = a0;
+                    var _closure3_slot0 = r0;
+                    r3 = _closure1_slot12;
+                    r4 = r3.jsx;
+                    r3 = _closure1_slot22;
+                    r2 = {};
+                    r2['item'] = r0;
+                    r5 = a1;
+                    r2['index'] = r5;
+                    r1 = function() { // Original name: onPress, environment: r1
+                        r2 = _closure2_slot3;
+                        r0 = _closure3_slot0;
+   
+
+============================================================
+  SettingsScreen  (1 occurrences)
+============================================================
+        };
+            var _closure1_slot29 = r0;
+            r0 = function(a0) { // Original name: SettingsScreen, environment: r2
+                _fun34222: for(var _fun34222_ip = 0; ; ) switch(_fun34222_ip) {
+case 0:
+                    r0 = a0;
+                    r0 = r0.navigation;
+                    var _closure2_slot0 = r0;
+                    r0 = _closure1_slot20;
+                    r0 = r0.useTranslation;
+                    r3 = undefined;
+                    r0 = r0.bind(r3)();
+                    r28 = r0.t;
+                    var _closure2_slot1 = r28;
+                    r0 = r0.i18n;
+                    r0 = r0.language;
+                    var _closure2_slot2 = r0;
+                    r0 = _closure1_slot4;
+                    r0 = r0.useSafeAreaInsets;
+                    r12 = r0.bind(r3)();
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.settings;
+                        return r0;
+                    };
+                    r19 = r1.bind(r3)(r0);
+                    var _closure2_slot3 = r19;
+                    r0 = {};
+                    r54 = 'none';
+                    r0['key'] = r54;
+                    r1 = 'settings.vanishNone';
+                    r1 = r28.bind(r3)(r1);
+                    r0['label'] = r1;
+                    r1 = 'settings.vanishNoneDesc';
+                    r1 = r28.bind(r3)(r1);
+                    r0['desc'] = r1;
+                    r21 = new Array(4);
+                    r21[0] = r0;
+                    r0 = {};
+                    r1 = 'opacity';
+                    r0['key'] = r1;
+                    r1 = 'settings.vanishOpacity';
+                    r1 = r28.bind(r3)(r1);
+                    r0['label'] = r1;
+                    r1 = 'settings.vanishOpacityDesc';
+                    r1 = r28.bind(r3)(r1);
+                    r0['desc'] = r1;
+                    r21[1] = r0;
+                    r0 = {};
+                    r47 = 'words';
+                    r0['key'] = r47;
+                    r1 = 'settings.vanishWords';
+                    r1 = r28.bind(r3)(r1);
+                    r0['label'] = r1;
+                    r1 = 'settings.vanishWordsDesc';
+                    r1 = r28.bind(r3)(r1);
+                    r0['desc'] = r1;
+                    r21[2] = r0;
+                    r0 = {};
+                    r18 = 'all';
+                    r0['key'] = r18;
+                    r1 = 'settings.vanishAll';
+                    r1 = r28.bind(r3)(r1);
+                    r0['label'] = r1;
+                    r1 = 'settings.vanishAllDesc';
+                    r1 = r28.bind(r3)(r1);
+                    r0['desc'] = r1;
+                    r21[3] = r0;
+                    var _closure2_slot4 = r21;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.updateSettings;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot5 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.addLabel;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot6 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.deleteLabel;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot7 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.renameLabel;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot8 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.updateLabelColor;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot9 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.deleteAllMemos;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot10 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.addNoteLabel;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot11 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.deleteNoteLabel;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot12 = r0;
+                    r0 = _closure1_slot5;
+                    r1 = r0.useMemoStore;
+                    r0 = function(a0) { // Environment: r23
+                        r0 = a0;
+                        r0 = r0.renameNoteLabel;
+                        return r0;
+                    };
+                    r0 = r1.bind(r3)(r0);
+                    var _closure2_slot13 = r0;
+                    r0 = _closure1_slot2;
+                    r0 = r0.useState;
+                    r38 = '';
+                    r1 = r0.bind(r3)(r38);
+                    r0 = _closure1_slot1;
+                    r0 = r0.default;
+                    r44 = 2;
+                    r0 = r0.bind(r3)(r1, r44);
+                    r34 = 0;
+                    r42 = r0[r34];
+                    var _closure2_slot14 = r42;
+                    r51 = 1;
+                    r41 = r0[r51];
+                    var _closure2_slot15 = r41;
+                    r0 = _closure1_slot2;
+                    r0 = r0.useState;
+                    r20 = null;
+                    r1 = r0.bind(r3)(r20);
+                    r0 = _closure1_slot1;
+                    r0 = r0.default;
+                    r0 = r0.bind(r3)(r1, r44);
+                    r1 = r0[r34];
+                    var _closure2_slot16 = r1;
+                    r0 = r0[r51];
+                    var _closure2_slot17 = r0;
+                    r0 = _closure1_slot2;
+                    r0 = r0.useState;
+                    r1 = r0.bind(r3)(r38);
+                    r0 = _closure1_slot1;
+                    r0 = r0.default;
+                    r0 = r0.bind(r3)(r1, r44);
+                    r1 = r0[r34];
+                    var _closure2_slot18 = r1;
+                    r0 = r0[r51];
+                    var _closure2_slot19 = r0;
+                    r0 = _closure1_slot2;
+                    r0 = r0.useState;
+                    r1 = r0.bind(r3)(r20);
+                    r0 = _closure1_slot1;
+                    r0 = r0.default;
+                    r0 = r0.bind(r3)(r1, r44);
+                    r25 = r0[r34];
+                    r0 = r0[r51];
+                    var _closure2_slot20 = r0;
+                    r0 = _closure1_slot2;
+                    r1 = r0.useState;
+                    r0 = _closure1_slot23;
+                    r1 = r1.bin
+
+============================================================
+  AuthScreen  (0 occurrences)
+============================================================
+
+
+============================================================
+  SplashScreen  (2 occurrences)
+============================================================
+:
+                return r0;
+            }
+        };
+        r0 = function(a0) { // Original name: SplashScreen, environment: r2
+            _fun6912: for(var _fun6912_ip = 0; ; ) switch(_fun6912_ip) {
+case 0:
+                r1 = a0;
+                r2 = r1.onDone;
+                var _closure2_slot0 = r2;
+                r14 = r1.fontsLoaded;
+                r1 = _closure1_slot5;
+                r2 = r1.useRef;
+                r1 = _closure1_slot6;
+                r1 = r1.Animated;
+                r1 = r1.Value;
+                r3 = r1.prototype;
+                r3 = Object.create(r3, {constructor: {value: r1}});
+                r20 = r3;
+                r19 = 0;
+                r1 = new r20[r1](r19, r18);
+                r1 = r1 instanceof Object ? r1 : r3;
+                r3 = undefined;
+                r1 = r2.bind(r3)(r1);
+                r6 = r1.current;
+                var _closure2_slot1 = r6;
+                r1 = _closure1_slot5;
+                r2 = r1.useRef;
+                r1 = _closure1_slot6;
+                r1 = r1.Animated;
+                r7 = r1.Value;
+                r1 = r7.prototype;
+                r4 = Object.create(r1, {constructor: {value: r7}});
+                r19 = 0.8;
+                r20 = r4;
+                r1 = new r20[r7](r19, r18);
+                r1 = r1 instanceof Object ? r1 : r4;
+                r1 = r2.bind(r3)(r1);
+                r9 = r1.current;
+                var _closure2_slot2 = r9;
+                r1 = _closure1_slot5;
+                r2 = r1.useRef;
+                r1 = _closure1_slot6;
+                r1 = r1.Animated;
+                r1 = r1.Value;
+                r4 = r1.prototype;
+                r4 = Object.create(r4, {constructor: {value: r1}});
+                r20 = r4;
+                r19 = 0;
+                r1 = new r20[r1](r19, r18);
+                r1 = r1 instanceof Object ? r1 : r4;
+                r1 = r2.bind(r3)(r1);
+                r2 = r1.current;
+                var _closure2_slot3 = r2;
+                r1 = _closure1_slot5;
+                r4 = r1.useRef;
+                r1 = false;
+                r1 = r4.bind(r3)(r1);
+                var _closure2_slot4 = r1;
+                r1 = _closure1_slot5;
+                r4 = r1.useEffect;
+                r1 = function() { // Environment: r0
+                    r4 = function() { // Original name: safeDone, environment: r0
+                        _fun6914: for(var _fun6914_ip = 0; ; ) switch(_fun6914_ip) {
+case 0:
+                            r1 = _closure2_slot4;
+                            r1 = r1.current;
+                            if(r1) { _fun6914_ip = 39; continue _fun6914 }
+case 15:
+                            r2 = _closure2_slot4;
+                            r1 = true;
+                            r2['current'] = r1;
+                            r1 = _closure2_slot0;
+                            r0 = undefined;
+                            r1 = r1.bind(r0)();
+                            return r0;
+case 39:
+                            r0 = undefined;
+                            return r0;
+                        }
+                    };
+                    var _closure3_slot0 = r4;
+                    r1 = global;
+                    r3 = r1.setTimeout;
+                    r2 = undefined;
+                    r1 = 5000;
+                    r1 = r3.bind(r2)(r4, r1);
+                    var _closure3_slot1 = r1;
+                    r2 = _closure1_slot10;
+                    r1 = r2.hideAsync;
+                    r3 = r1.bind(r2)();
+                    r2 = r3.catch;
+                    r1 = function() { // Environment: r0
+                        r0 = undefined;
+                        return r0;
+                    };
+                    r1 = r2.bind(r3)(r1);
+                    r1 = _closure1_slot6;
+                    r3 = r1.Animated;
+                    r2 = r3.sequence;
+                    r1 = _closure1_slot6;
+                    r9 = r1.Animated;
+                    r6 = r9.parallel;
+                    r1 = _closure1_slot6;
+                    r10 = r1.Animated;
+                    r8 = r10.timing;
+                    r7 = _closure2_slot1;
+                    r1 = {'toValue': 1, 'duration': 600, 'useNativeDriver': true};
+                    r8 = r8.bind(r10)(r7, r1);
+                    r1 = new Array(2);
+                    r1[0] = r8;
+                    r8 = _closure1_slot6;
+                    r13 = r8.Animated;
+                    r12 = r13.timing;
+                    r11 = _closure2_slot2;
+                    r8 = 500;
+                    r10 = {'toValue': 1, 'duration': 500, 'useNativeDriver': true};
+                    r10 = r12.bind(r13)(r11, r10);
+                    r1[1] = r10;
+                    r6 = r6.bind(r9)(r1);
+                    r1 = new Array(5);
+                    r1[0] = r6;
+                    r6 = _closure1_slot6;
+                    r9 = r6.Animated;
+                    r6 = r9.timing;
+                    r10 = _closure2_slot3;
+                    r5 = {'toValue': 1, 'duration': 400, 'useNativeDriver': true};
+                    r5 = r6.bind(r9)(r10, r5);
+                    r1[1] = r5;
+                    r5 = _closure1_slot6;
+                    r9 = r5.Animated;
+                    r6 = r9.timing;
+                    r5 = {'toValue': 0, 'duration': 300, 'useNativeDriver': true};
+                    r5 = r6.bind(r9)(r10, r5);
+                    r1[2] = r5;
+                    r5 = _closure1_slot6;
+                    r6 = r5.Animated;
+                    r5 = r6.delay;
+                    r5 = r5.bind(r6)(r8);
+                    r1[3] = r5;
+                    r4 = _closure1_slot6;
+                    r6 = r4.Animated;
+                    r5 = r6.timing;
+                    r4 = {'toValue': 0, 'duration': 450, 'useNativeDriver': true};
+                    r4 = r5.bind(r6)(r7, r4);
+                    r1[4] = r4;
+                    r3 = r2.bind(r3)(r1);
+                    r2 = r3.start;
+                    r1 = function() { // Environment: r0
+                        r0 = global;
+                        r3 = r0.clearTimeout;
+                        r2 = _closure3_slot1;
+                        r0 = undefined;
+                        r2 = r3.bind(r0)(r2);
+                        r1 = _closure3_slot0;
+                        r1 = r1.bind(r0)();
+                        return r0;
+                    };
+                    r1 = r2.bind(r3)(r1);
+                    r0 = function() { // Environment: r0
+                        r0 = global;
+                        r2 = r0.clearTimeout;
+                        r1 = _closure3_slot1;
+                        r0 = undefined;
+                        r0 = r2.bind(r0)(r1);
+                        return r0;
+                    };
+                    return r0;
+                };
+                r0 = new Array(0);
+                r0 = r4.bind(r3)(r1, r0);
+                r1 = r2.interpolate;
+                r0 = {};
+                r4 = [0, 1];
+                r0['inputRange'] = r4;
+                r4 = [0.7, 1];
+                r0['outputRange'] = r4;
+                r16 = r1.bind(r2)(r0);
+                r0 = _closure1_slot45;
+                r2 = r0.jsxs;
+                r0 = _closure1_slot6;
+                r0 = r0.Animated;
+                r1 = r0.View;
+                r0 = {};
+                r4 = _closure1_slot49;
+                r5 = r4.container;
+                r4 = new Array(2);
+                r4[0] = r5;
+                r5 = {};
+                r5['opacity'] = r6;
+                r4[1] = r5;
+                r0['style'] = r4;
+                r4 = _closure1_slot45;
+                r6 = r4.jsx;
+                r4 = _closure1_slot9;
+                r5 = r4.StatusBar;
+                r4 = {};
+                r7 = 'light';
+                r4['style'] = r7;
+                r5 = r6.bind(r3)(r5, r4);
+                r4 = new Array(4);
+                r4[0] = r5;
+                r5 = _closure1_slot45;
+                r7 = r5.jsx;
+                r5 = _closure1_slot6;
+                r6 = r5.Image;
+                r5 = {};
+                r15 = _closure1_sl
+
+============================================================
+  BottomTabBar  (7 occurrences)
+============================================================
+           r0 = r0.default;
+            return r0;
+        };
+        r7['get'] = r6;
+        r6 = 'BottomTabBar';
+        r6 = r9.bind(r10)(r8, r6, r7);
+        r10 = r1.Object;
+        r9 = r10.defineProperty;
+        r7 = {};
+        r7['enumerable'] = r0;
+        r6 = function() { // Original name: get, environment: r2
+            r0 = _closure1_slot2;
+            r0 = r0.default;
+            return r0;
+        };
+        r7['get'] = r6;
+        r6 = 'BottomTabView';
+        r6 = r9.bind(r10)(r8, r6, r7);
+        r10 = r1.Object;
+        r9 = r10.defineProperty;
+        r7 = {};
+        r7['enumerable'] = r0;
+        r6 = function() { // Original name: get, environment: r2
+            r0 = _closure1_slot3;
+            r0 = r0.default;
+            return r0;
+        };
+        r7['get'] = r6;
+        r6 = 'BottomTabBarHeightCallbackContext';
+        r6 = r9.bind(r10)(r8, r6, r7);
+        r10 = r1.Object;
+        r9 = r10.defineProperty;
+        r7 = {};
+        r7['enumerable'] = r0;
+        r6 = function() { // Original name: get, environment: r2
+            r0 = _closure1_slot4;
+            r0 = r0.default;
+            return r0;
+        };
+        r7['get'] = r6;
+        r6 = 'BottomTabBarHeightContext';
+        r6 = r9.bind(r10)(r8, r6, r7);
+        r7 = r1.Object;
+        r6 = r7.defineProperty;
+        r1 = {};
+        r1['enumerable'] = r0;
+        r0 = function() { // Original name: get, environment: r2
+            r0 = _closure1_slot5;
+            r0 = r0.default;
+            return r0;
+        };
+        r1['get'] = r0;
+        r0 = 'useBottomTabBarHeight';
+        r0 = r6.bind(r7)(r8, r0, r1);
+        r0 = 0;
+        r1 = r5[r0];
+        r0 = undefined;
+        r1 = r4.bind(r0)(r1);
+        r1 = r3.bind(r0)(r1);
+        var _closure1_slot0 = r1;
+        r1 = 1;
+        r1 = r5[r1];
+        r1 = r4.bind(r0)(r1);
+        r1 = r3.bind(r0)(r1);
+        var _closure1_slot1 = r1;
+        r1 = 2;
+        r1 = r5[r1];
+        r1 = r4.bind(r0)(r1);
+        r1 = r3.bind(r0)(r1);
+        var _closure1_slot2 = r1;
+        r1 = 3;
+        r1 = r5[r1];
+        r1 = r4.bind(r0)(r1);
+        r1 = r3.bind(r0)(r1);
+        var _closure1_slot3 = r1;
+        r1 = 4;
+        r1 = r5[r1];
+        r1 = r4.bind(r0)(r1);
+        r1 = r3.bind(r0)(r1);
+        var _closure1_slot4 = r1;
+        r1 = 5;
+        r1 = r5[r1];
+        r1 = r4.bind(r0)(r1);
+        r1 = r3.bind(r0)(r1);
+        var _closure1_slot5 = r1;
+        return r0;
+    };
+    r7 = 1166;
+    r6 = [1167, 1171, 1168, 1169, 1170, 1185];
+    r6 = r9.bind(r2)(r8, r7, r6);
+    r9 = r0.__d;
+    r8 = function(a0, a1, a2, a3, a4, a5, a6) { // Environment: r3
+        r4 = a1;
+        r8 = a5;
+        r5 = a6;
+        r6 = function(a0) { // Original name: _interopDefault, environment: r2
+            _fun13026: for(var _fun13026_ip = 0; ; ) switch(_fun13026_ip) {
+case 0:
+                r2 = a0;
+                if(!r2) { _fun13026_ip = 17; continue _fun13026 }
+case 6:
+                r1 = r2.__esModule;
+                r0 = r2;
+                if(r1) { _fun13026_ip = 26; continue _fun13026 }
+case 17:
+                r1 = {};
+                r1['default'] = r2;
+                r0 = r1;
+case 26:
+                return r0;
+            }
+        };
+        r0 = ['id', 'initialRouteName', 'backBehavior', 'children', 'screenListeners', 'screenOptions', 'sceneContainerStyle'];
+        var _closure1_slot0 = r0;
+        r0 = ['lazy', 'tabBarOptions'];
+        var _closure1_slot1 = r0;
+        r1 = global;
+        r10 = r1.Object;
+        r9 = r10.defineProperty;
+        r7 = {};
+        r0 = true;
+        r7['value'] = r0;
+        r3 = '__esModule';
+        r3 = r9.bind(r10)(r8, r3, r7);
+        r7 = r1.Object;
+        r3 = r7.defineProperty;
+        r1 = {};
+        r1['enumerable'] = r0;
+        r0 = function() { // Original name: get, environment: r2
+            r0 = _closure1_slot7;
+            return r0;
+        };
+        r1['get'] = r0;
+        r0 = 'default';
+        r0 = r3.bind(r7)(r8, r0, r1);
+        r0 = 0;
+        r1 = r5[r0];
+        r0 = undefined;
+        r1 = r4.bind(r0)(r1);
+        r1 = r6.bind(r0)(r1);
+        var _closure1_slot2 = r1;
+        r1 = 1;
+        r1 = r5[r1];
+        r1 = r4.bind(r0)(r1);
+        var _closure1_slot3 = r1;
+        r3 = 2;
+        r3 = r5[r3];
+        r3 = r4.bind(r0)(r3);
+        r3 = 3;
+        r3 = r5[r3];
+        r3 = r4.bind(r0)(r3);
+        r3 = r6.bind(r0)(r3);
+        var _closure1_slot4 = r3;
+        r3 = 4;
+        r3 = r5[r3];
+        r3 = r4.bind(r0)(r3);
+        r3 = r6.bind(r0)(r3);
+        var _closure1_slot5 = r3;
+        r3 = 5;
+        r3 = r5[r3];
+        r3 = r4.bind(r0)(r3);
+        var _closure1_slot6 = r3;
+        r3 = r1.createNavigatorFactory;
+        r1 = function(a0) { // Original name: BottomTabNavigator, environment: r2
+            _fun13027: for(var _fun13027_ip = 0; ; ) switch(_fun13027_ip) {
+case 0:
+                r5 = a0;
+                r13 = r5.id;
+                r12 = r5.initialRouteName;
+                r11 = r5.backBehavior;
+                r10 = r5.children;
+                r9 = r5.screenListeners;
+                r6 = r5.screenOptions;
+                r8 = r5.sceneContainerStyle;
+                r0 = _closure1_slot2;
+                r1 = r0.default;
+                r0 = _closure1_slot0;
+                r3 = undefined;
+                r7 = r1.bind(r3)(r5, r0);
+                r0 = r7.lazy;
+                r14 = r7.tabBarOptions;
+                r1 = _closure1_slot2;
+                r5 = r1.default;
+                r1 = _closure1_slot1;
+                r7 = r5.bind(r3)(r7, r1);
+                r5 = {};
+                var _closure2_slot0 = r5;
+                if(!r14) { _fun13027_ip = 420; continue _fun13027 }
+case 112:
+                r1 = global;
+                r17 = r1.Object;
+                r16 = r17.assign;
+                r15 = {};
+                r18 = r14.keyboardHidesTabBar;
+                r15['tabBarHideOnKeyboard'] = r18;
+                r18 = r14.activeTintColor;
+                r15['tabBarActiveTintColor'] = r18;
+                r18 = r14.inactiveTintColor;
+                r15['tabBarInactiveTintColor'] = r18;
+                r18 = r14.activeBackgroundColor;
+                r15['tabBarActiveBackgroundColor'] = r18;
+                r18 = r14.inactiveBackgroundColor;
+                r15['tabBarInactiveBackgroundColor'] = r18;
+                r18 = r14.allowFontScaling;
+                r15['tabBarAllowFontScaling'] = r18;
+                r18 = r14.showLabel;
+                r15['tabBarShowLabel'] = r18;
+                r18 = r14.labelStyle;
+                r15['tabBarLabelStyle'] = r18;
+                r18 = r14.iconStyle;
+                r15['tabBarIconStyle'] = r18;
+                r18 = r14.tabStyle;
+                r15['tabBarItemStyle'] = r18;
+                r19 = r14.labelPosition;
+                r18 = null;
+                if(!(r19 == r18)) { _fun13027_ip = 270; continue _fun13027 }
+case 249:
+                r22 = r14.adaptive;
+                r21 = false;
+                r20 = undefined;
+                if(!(r22 === r21)) { _fun13027_ip = 267; continue _fun13027 }
+case 263:
+                r20 = 'below-icon';
+case 267:
+                r19 = r20;
+case 270:
+                r15['tabBarLabelPosition'] = r19;
+                r20 = {};
+                r21 = r14.tabBarVisible;
+                r19 = 'flex';
+                if(!r21) { _fun13027_ip = 294; continue _fun13027 }
+case 290:
+                r19 = 'none';
+case 294:
+                r20['display'] = r19;
+                r19 = new Array(2);
+                r19[0] = r20;
+                r20 = r5.tabBarStyle;
+                r19[1] = r20;
+                r15['tabBarStyle'] = r19;
+                r15 = r16.bind(r17)(r5, r15);
+                r16 = r1.Object;
+                r15 = r16.keys;
+                r16 = r15.bind(r16)(r5);
+                r15 = r16.forEach;
+                r2 = function(a0) { // Environment: r2
+                    _fun13028: for(var _fun13028_ip = 0; ; ) switch(_fun13028_ip) {
+case 0:
+                        r2 = a0;
+                  
+
+============================================================
+  AddMemoModal  (0 occurrences)
+============================================================
+
+
+============================================================
+  AddSourceModal  (0 occurrences)
+============================================================
