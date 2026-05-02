@@ -1,6 +1,7 @@
 export type RootStackParamList = {
   AuthScreen: undefined;
   AppStack: undefined;
+  MainTabs: undefined;
   AddMemoScreen: { memoId?: string } | undefined;
   MemoLibraryScreen: undefined;
   ReviewSessionScreen: { memoId?: string } | undefined;

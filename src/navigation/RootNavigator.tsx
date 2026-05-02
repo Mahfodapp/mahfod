@@ -3,24 +3,24 @@ import { View, StyleSheet, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { colors } from '../theme/colors';
+import { colors } from '../shared/theme/colors';
 
 import type { MainTabParamList, RootStackParamList } from './types';
-import { TabBar } from '../components/navigation/TabBar';
+import { TabBar } from '../shared/ui/TabBar';
 
 // Use actual screens if available, otherwise placeholders
-import AuthScreen from '../screens/AuthScreen';
-import HomeScreen from '../screens/HomeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import AddMemoScreen from '../screens/AddMemoScreen';
-import MemoLibraryScreen from '../screens/MemoLibraryScreen';
-import ReviewSessionScreen from '../screens/ReviewSessionScreen';
-import MohkamSessionScreen from '../screens/MohkamSessionScreen';
-import NoterHomeScreen from '../screens/NoterHomeScreen';
-import AddNoterBookScreen from '../screens/AddNoterBookScreen';
-import NoterDetailScreen from '../screens/NoterDetailScreen';
+import AuthScreen from '../features/auth/screens/AuthScreen';
+import HomeScreen from '../features/memo/screens/HomeScreen';
+import SettingsScreen from '../features/settings/screens/SettingsScreen';
+import AddMemoScreen from '../features/memo/screens/AddMemoScreen';
+import MemoLibraryScreen from '../features/memo/screens/MemoLibraryScreen';
+import ReviewSessionScreen from '../features/srs/screens/ReviewSessionScreen';
+import MohkamSessionScreen from '../features/srs/screens/MohkamSessionScreen';
+import NoterHomeScreen from '../features/memo/screens/NoterHomeScreen';
+import AddNoterBookScreen from '../features/memo/screens/AddNoterBookScreen';
+import NoterDetailScreen from '../features/memo/screens/NoterDetailScreen';
 
-import { useAuthStore } from '../store/auth.store';
+import { useAuthStore } from '../features/auth/store/auth.store';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();

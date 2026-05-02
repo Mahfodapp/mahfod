@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
-import { I18nManager } from 'react-native';
+import { I18nManager, AppState, AppStateStatus } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-gesture-handler';
 
-import './src/i18n'; // initialize i18n
-import { useAuthStore } from './src/store/auth.store';
+import './src/shared/i18n'; // initialize i18n
+import { useAuthStore } from './src/features/auth/store/auth.store';
 import RootNavigator from './src/navigation/RootNavigator';
-import { initDatabase } from './src/db/client';
-import { flushSyncQueue } from './src/services/offlineQueue';
+import { initDatabase } from './src/infrastructure/db/client';
+import { flushSyncQueue } from './src/features/sync/offlineQueue';
 
 import { useFonts } from 'expo-font';
 import { 
@@ -20,10 +20,21 @@ import {
 } from '@expo-google-fonts/cairo';
 import { Amiri_400Regular } from '@expo-google-fonts/amiri';
 import { ScheherazadeNew_400Regular } from '@expo-google-fonts/scheherazade-new';
+import { MMKV } from 'react-native-mmkv';
 
-// Force RTL for Arabic
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+const storage = new MMKV();
+const settingsStr = storage.getString('mahfod_settings');
+let isArabic = true;
+if (settingsStr) {
+  try {
+    const settings = JSON.parse(settingsStr);
+    isArabic = settings.language === 'ar';
+  } catch (e) { }
+}
+
+// Force RTL only if the user's language is Arabic
+I18nManager.allowRTL(isArabic);
+I18nManager.forceRTL(isArabic);
 
 export default function App() {
   const initializeAuth = useAuthStore((s) => s.initialize);
@@ -38,19 +49,29 @@ export default function App() {
   });
 
   useEffect(() => {
+    let appStateSubscription: any;
+    
     async function setupApp() {
       await initDatabase();
       initializeAuth();
       
-      // Attempt background sync every 30 seconds
-      setInterval(() => {
-        flushSyncQueue().catch(console.error);
-      }, 30000);
-      
       // Flush immediately on startup
       flushSyncQueue().catch(console.error);
+
+      // Safe background sync via AppState
+      appStateSubscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+        if (nextAppState === 'active') {
+          flushSyncQueue().catch(console.error);
+        }
+      });
     }
     setupApp();
+
+    return () => {
+      if (appStateSubscription) {
+        appStateSubscription.remove();
+      }
+    };
   }, [initializeAuth]);
 
   if (!fontsLoaded) {
