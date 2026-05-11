@@ -16,7 +16,7 @@
                 "backgroundColor": "#0B1437"
             },
             "package": "com.mahfod.app",
-            "permissions": [],
+            "permissions": ["WAKE_LOCK", "RECORD_AUDIO", "CAMERA", "READ_EXTERNAL_STORAGE"],
             "statusBar": {
                 "backgroundColor": "#0D0E10",
                 "barStyle": "light-content",

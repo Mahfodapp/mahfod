@@ -49,7 +49,7 @@ export function Input({
     const borderColor = interpolateColor(
       focusAnim.value,
       [0, 1],
-      [colors.border, colors.accentBorder]
+      [colors.accent, colors.accent]
     );
     return {
       borderColor: error ? colors.error : borderColor,

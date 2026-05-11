@@ -13,6 +13,20 @@ import { spacing, radius, zIndex, elevation } from './spacing';
 
 // ── Shadows ────────────────────────────────────────────────────────────────────
 export const Shadows = {
+  subtle: {
+    shadowColor:   '#000',
+    shadowOffset:  { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius:  6,
+    elevation:     4,
+  },
+  medium: {
+    shadowColor:   '#000',
+    shadowOffset:  { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius:  8,
+    elevation:     6,
+  },
   card: {
     shadowColor:   '#000',
     shadowOffset:  { width: 0, height: 4 },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Pressable } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Pressable, Image, Dimensions, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MotiView } from 'moti';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, withSequence } from 'react-native-reanimated';
@@ -13,8 +13,10 @@ import { MahfodPatternBackground } from '@/shared/ui/MahfodPatternBackground';
 import { colors, spacing, radius, typography, fonts, Shadows } from '@/shared/theme';
 import { useMemoStore } from '../../memo/store/memo.store';
 import { useSettingsStore } from '../../settings/store/settings.store';
-import { Star, X, BookOpen, Volume2, Pencil, ZoomIn, ZoomOut, ChevronDown } from 'lucide-react-native';
+import { Star, X, BookOpen, Volume2, Pencil, ZoomIn, ZoomOut, ChevronDown, Maximize } from 'lucide-react-native';
 import AudioWaveform from '@/shared/ui/AudioWaveform';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 type RoutePropType = RouteProp<RootStackParamList, 'LearningSessionScreen'>;
@@ -27,6 +29,7 @@ export function LearningSessionScreen() {
   const memos = useMemoStore(s => s.memos);
   const fetchMemos = useMemoStore(s => s.fetchMemos);
   const recordRepetition = useMemoStore(s => s.recordRepetition);
+  const updateMemo = useMemoStore(s => s.updateMemo);
   const { settings } = useSettingsStore();
 
   const initialReps = settings.initial_reps ?? 33;
@@ -44,8 +47,9 @@ export function LearningSessionScreen() {
   const [fontFamily, setFontFamily] = useState<'amiri' | 'quran' | 'reemKufi' | 'lateef' | 'tajawal'>('amiri');
   const [done, setDone] = useState(false);
   const [promoted, setPromoted] = useState<string[]>([]);
-  const [isBusy, setIsBusy] = useState(false);
+  const isBusy = useRef(false);
   const [isFontMenuOpen, setIsFontMenuOpen] = useState(false);
+  const [isImageFullscreen, setIsImageFullscreen] = useState(false);
 
   const FONTS = [
     { id: 'amiri', name: 'أميري' },
@@ -122,6 +126,17 @@ export function LearningSessionScreen() {
     }
   }, [memos]);
 
+  useEffect(() => {
+    if (!done && queueIds.length > 0) {
+      activateKeepAwakeAsync().catch(() => {});
+    } else {
+      deactivateKeepAwake();
+    }
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, [done, queueIds.length]);
+
   const queueProgressAnim = useSharedValue(0);
   useEffect(() => {
     const pct = queueIds.length > 0 ? (index + 1) / queueIds.length : 0;
@@ -155,41 +170,88 @@ export function LearningSessionScreen() {
   useEffect(() => { animateCardIn(); }, [index]);
 
   const btnScale = useSharedValue(1);
-  const btnStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
+  const btnStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: btnScale.value }]
+  }));
+
+  const favScale = useSharedValue(1);
+  const favRotation = useSharedValue(0);
+  const favStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: favScale.value },
+      { rotate: `${favRotation.value}deg` }
+    ]
+  }));
 
   const advance = useCallback(() => {
     if (index + 1 >= queueIds.length) setDone(true);
     else setIndex(i => i + 1);
   }, [index, queueIds.length]);
 
+  const handlePressIn = useCallback(() => {
+    if (isRepeatLocked) return;
+    btnScale.value = withSpring(0.94, { damping: 16, stiffness: 400 });
+  }, [isRepeatLocked, btnScale]);
+
+  const handlePressOut = useCallback(() => {
+    btnScale.value = withSpring(1, { damping: 12, stiffness: 300 });
+  }, [btnScale]);
+
   const handleRepeat = useCallback(async () => {
-    if (isBusy || !memo || isRepeatLocked) return;
-    setIsBusy(true);
+    if (isBusy.current || !memo || isRepeatLocked) return;
+    isBusy.current = true;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    btnScale.value = withSequence(
-      withTiming(0.93, { duration: 80 }),
-      withSpring(1, { damping: 12, stiffness: 300 }),
-    );
-
-    try {
-      const updated = await recordRepetition(memo.id);
-      if (updated && updated.stage === 'REVISION') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setPromoted(p => [...p, memo.id]);
-        advance();
-      } else if (memo.audio_url) {
-        replaySound(memo.audio_url);
+    setTimeout(async () => {
+      try {
+        const updated = await recordRepetition(memo.id);
+        if (updated && updated.stage === 'REVISION') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setPromoted(p => [...p, memo.id]);
+          advance();
+        } else if (memo.audio_url) {
+          replaySound(memo.audio_url);
+        }
+      } finally {
+        isBusy.current = false;
       }
-    } finally {
-      setIsBusy(false);
-    }
-  }, [isBusy, memo, isRepeatLocked, recordRepetition, advance, btnScale, replaySound]);
+    }, 150);
+  }, [memo, isRepeatLocked, recordRepetition, advance, replaySound]);
 
   const handleCancel = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   }, [navigation]);
+
+  const handleToggleFavorite = useCallback(async () => {
+    if (!memo) return;
+    
+    const isNowFav = !memo.is_favorite;
+    
+    if (isNowFav) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      favScale.value = withSequence(
+        withTiming(1.4, { duration: 150 }),
+        withSpring(1, { damping: 12, stiffness: 200 })
+      );
+      favRotation.value = withSequence(
+        withTiming(72, { duration: 150 }),
+        withTiming(0, { duration: 0 })
+      );
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      favScale.value = withSequence(
+        withTiming(0.8, { duration: 100 }),
+        withSpring(1, { damping: 12, stiffness: 200 })
+      );
+    }
+
+    try {
+      await updateMemo(memo.id, { is_favorite: isNowFav });
+    } catch (e) {
+      console.error('Failed to toggle favorite', e);
+    }
+  }, [memo, updateMemo, favScale, favRotation]);
 
   if (queueIds.length === 0) {
     return (
@@ -249,8 +311,10 @@ export function LearningSessionScreen() {
 
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.starBtn} hitSlop={10}>
-            <Star size={18} color={memo.is_favorite ? colors.accent : colors.textMuted} fill={memo.is_favorite ? colors.accent : 'none'} />
+          <TouchableOpacity style={styles.starBtn} hitSlop={10} onPress={handleToggleFavorite} activeOpacity={0.8}>
+            <Animated.View style={favStyle}>
+              <Star size={18} color={memo.is_favorite ? colors.accent : colors.textMuted} fill={memo.is_favorite ? colors.accent : 'none'} />
+            </Animated.View>
           </TouchableOpacity>
           <View style={styles.repPill}>
             <MText weight="bold" style={styles.repPillText}>{currentReps}</MText>
@@ -269,65 +333,78 @@ export function LearningSessionScreen() {
         <Animated.View style={[styles.queueFill, repBarStyle]} />
       </View>
 
-      <View style={styles.toolbar}>
-        <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigation.navigate('AddMemoScreen', { memoId: memo.id }); }}>
-          <Pencil size={15} color={colors.accent} />
-        </TouchableOpacity>
-        
-        <View style={styles.toolDivider} />
-        
-        <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFontSize(f => Math.max(12, f - 2)); }}>
-          <ZoomOut size={16} color={colors.accent} />
-        </TouchableOpacity>
-        <MText weight="semi" style={styles.toolSizeText}>{fontSize}%</MText>
-        <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFontSize(f => Math.min(40, f + 2)); }}>
-          <ZoomIn size={16} color={colors.accent} />
-        </TouchableOpacity>
-
-        <View style={{ flex: 1 }} />
-
-        <TouchableOpacity 
-          style={styles.fontSelectorBtn}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setIsFontMenuOpen(v => !v);
-          }}
-        >
-          <MText weight="semi" style={styles.fontSelectorText}>
-            {FONTS.find(f => f.id === fontFamily)?.name}
-          </MText>
-          <MotiView animate={{ rotate: isFontMenuOpen ? '180deg' : '0deg' }} transition={{ type: 'spring' }}>
-            <ChevronDown size={14} color={colors.accent} />
-          </MotiView>
-        </TouchableOpacity>
-      </View>
-
-      <MotiView
-        animate={{ 
-          height: isFontMenuOpen ? 50 : 0, 
-          opacity: isFontMenuOpen ? 1 : 0,
-        }}
-        transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-        style={styles.fontDropdownContainer}
-      >
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontPillScroll}>
-          {FONTS.map(f => {
-            const isActive = fontFamily === f.id;
-            return (
-              <TouchableOpacity key={f.id} style={[styles.toolPill, isActive && styles.toolPillActive]} onPress={() => { 
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); 
-                setFontFamily(f.id);
-                setIsFontMenuOpen(false);
-              }}>
-                <MText weight="semi" style={isActive ? styles.toolPillActiveText : styles.toolPillText}>{f.name}</MText>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </MotiView>
-
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} overScrollMode="never">
         <Animated.View style={cardStyle}>
+          {memo.image_url ? (
+            <Image 
+              source={{ uri: memo.image_url }} 
+              style={styles.memoImage}
+              resizeMode="contain"
+            />
+          ) : null}
+
+          <View style={[styles.toolbar, { borderBottomWidth: 0, paddingHorizontal: 0, paddingVertical: 0, marginBottom: spacing.md }]}>
+            <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigation.navigate('AddMemoScreen', { memoId: memo.id }); }}>
+              <Pencil size={15} color={colors.accent} />
+            </TouchableOpacity>
+            
+            <View style={styles.toolDivider} />
+            
+            <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFontSize(f => Math.max(12, f - 2)); }}>
+              <ZoomOut size={16} color={colors.accent} />
+            </TouchableOpacity>
+            <MText weight="semi" style={styles.toolSizeText}>{fontSize}%</MText>
+            <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFontSize(f => Math.min(40, f + 2)); }}>
+              <ZoomIn size={16} color={colors.accent} />
+            </TouchableOpacity>
+
+            <View style={{ flex: 1 }} />
+
+            {memo.image_url && (
+              <TouchableOpacity style={styles.fullscreenToolBtn} onPress={() => setIsImageFullscreen(true)}>
+                <Maximize size={15} color={colors.primary} />
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity 
+              style={styles.fontSelectorBtn}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setIsFontMenuOpen(v => !v);
+              }}
+            >
+              <MText weight="semi" style={styles.fontSelectorText}>
+                {FONTS.find(f => f.id === fontFamily)?.name}
+              </MText>
+              <MotiView animate={{ rotate: isFontMenuOpen ? '180deg' : '0deg' }} transition={{ type: 'spring' }}>
+                <ChevronDown size={14} color={colors.accent} />
+              </MotiView>
+            </TouchableOpacity>
+          </View>
+
+          <MotiView
+            animate={{ 
+              height: isFontMenuOpen ? 50 : 0, 
+              opacity: isFontMenuOpen ? 1 : 0,
+            }}
+            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+            style={[styles.fontDropdownContainer, { borderBottomWidth: 0, marginBottom: isFontMenuOpen ? spacing.md : 0 }]}
+          >
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.fontPillScroll, { paddingHorizontal: 0 }]}>
+              {FONTS.map(f => {
+                const isActive = fontFamily === f.id;
+                return (
+                  <TouchableOpacity key={f.id} style={[styles.toolPill, isActive && styles.toolPillActive]} onPress={() => { 
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); 
+                    setFontFamily(f.id);
+                    setIsFontMenuOpen(false);
+                  }}>
+                    <MText weight="semi" style={isActive ? styles.toolPillActiveText : styles.toolPillText}>{f.name}</MText>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </MotiView>
           {memo.is_poem ? (
             <View>
               <MText style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
@@ -368,10 +445,11 @@ export function LearningSessionScreen() {
         )}
         <Animated.View style={btnStyle}>
           <Pressable
-            style={[styles.ctaBtn, (isBusy || isRepeatLocked) && styles.ctaBtnBusy]}
+            style={[styles.ctaBtn, isRepeatLocked && styles.ctaBtnBusy]}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
             onPress={handleRepeat}
-            disabled={isBusy || isRepeatLocked}
-            android_ripple={{ color: 'rgba(0,0,0,0.15)', borderless: false }}
+            disabled={isRepeatLocked}
           >
             <MText weight="extra" style={[styles.ctaBtnText, isRepeatLocked && { opacity: 0.45 }]}>
               سجل تكرار ({currentReps}/{initialReps})
@@ -379,9 +457,52 @@ export function LearningSessionScreen() {
           </Pressable>
         </Animated.View>
       </View>
+
+      <Modal visible={isImageFullscreen} transparent animationType="fade" onRequestClose={() => setIsImageFullscreen(false)}>
+        <View style={styles.fullscreenContainer}>
+          <TouchableOpacity style={styles.fullscreenCloseBtn} onPress={() => setIsImageFullscreen(false)}>
+            <X size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          {memo.image_url && (
+            <View style={{ flex: 1 }}>
+              <ImageViewer 
+                imageUrls={[{ url: memo.image_url }]} 
+                backgroundColor={colors.primary}
+                renderIndicator={() => <View />}
+              />
+            </View>
+          )}
+          <View style={styles.footer}>
+            {isRepeatLocked && (
+              <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 180 }} style={styles.audioGateNotice}>
+                <Volume2 size={13} color={colors.textMuted} />
+                <MText weight="semi" style={styles.audioGateText}>انتظر انتهاء التشغيل</MText>
+              </MotiView>
+            )}
+            <Animated.View style={btnStyle}>
+              <Pressable
+                style={[styles.ctaBtn, isRepeatLocked && styles.ctaBtnBusy]}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={async () => {
+                  await handleRepeat();
+                  if (!isRepeatLocked) setIsImageFullscreen(false);
+                }}
+                disabled={isRepeatLocked}
+              >
+                <MText weight="extra" style={[styles.ctaBtnText, isRepeatLocked && { opacity: 0.45 }]}>
+                  سجل تكرار ({currentReps}/{initialReps})
+                </MText>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.primary },
@@ -391,8 +512,8 @@ const styles = StyleSheet.create({
   headerTitle: { ...typography.h3, color: colors.textPrimary, textAlign: 'center' },
   headerSub: { ...typography.caption, color: colors.textMuted, marginTop: 2 },
   starBtn: { width: 34, height: 34, borderRadius: radius.full, backgroundColor: colors.surfaceHigh, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  repPill: { backgroundColor: colors.accent, borderRadius: radius.full, paddingVertical: 4, paddingHorizontal: spacing.sm, minWidth: 44, alignItems: 'center' },
-  repPillText: { ...typography.label, color: colors.primary },
+  repPill: { width: 34, height: 34, backgroundColor: colors.accent, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
+  repPillText: { fontFamily: fonts.bold, fontSize: 15, color: colors.primary, textAlign: 'center', includeFontPadding: false, transform: [{ translateY: -1 }] },
   closeBtn: { width: 34, height: 34, borderRadius: radius.full, backgroundColor: colors.surfaceHigh, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   queueTrack: { height: 2, backgroundColor: colors.surfaceHigh },
   queueFill: { height: 2, backgroundColor: colors.accent, borderRadius: 99 },
@@ -410,6 +531,7 @@ const styles = StyleSheet.create({
   fontDropdownContainer: { overflow: 'hidden', backgroundColor: colors.primary, borderBottomWidth: 1, borderBottomColor: colors.border },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: spacing.md, paddingTop: spacing.lg, paddingBottom: 140 },
+  memoImage: { width: '100%', height: SCREEN_HEIGHT * 0.5, borderRadius: radius.md, marginBottom: spacing.md, backgroundColor: colors.surfaceHigh },
   memoText: { fontFamily: fonts.bold, color: colors.textPrimary, textAlign: 'left', lineHeight: 44, writingDirection: 'ltr' },
   poemDivider: { height: 1, width: '35%', backgroundColor: colors.border, alignSelf: 'center', marginVertical: spacing.md },
   audioIndicator: { marginTop: spacing.lg, alignItems: 'center', gap: spacing.xs },
@@ -418,7 +540,7 @@ const styles = StyleSheet.create({
   footer: { paddingHorizontal: spacing.md, paddingTop: spacing.xs, paddingBottom: spacing.lg, backgroundColor: colors.primary, borderTopWidth: 1, borderTopColor: colors.border, gap: spacing.xs },
   audioGateNotice: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingBottom: spacing.xs },
   audioGateText: { ...typography.caption, color: colors.textMuted },
-  ctaBtn: { backgroundColor: colors.accent, borderRadius: radius.lg, paddingVertical: 17, alignItems: 'center', justifyContent: 'center', ...Shadows.glow, elevation: 10 },
+  ctaBtn: { backgroundColor: colors.accent, borderRadius: radius.full, paddingVertical: 17, alignItems: 'center', justifyContent: 'center', ...Shadows.glow, elevation: 10 },
   ctaBtnBusy: { opacity: 0.6 },
   ctaBtnText: { fontFamily: fonts.extra, fontSize: 18, color: colors.primary },
   centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, gap: spacing.md },
@@ -428,6 +550,10 @@ const styles = StyleSheet.create({
   promotedText: { ...typography.bodySmall, color: colors.accent, textAlign: 'center' },
   doneBtn: { marginTop: spacing.sm, backgroundColor: colors.accent, paddingVertical: 14, paddingHorizontal: spacing.xl, borderRadius: radius.full, ...Shadows.glow, elevation: 8 },
   doneBtnText: { ...typography.h3, color: colors.primary },
+  fullscreenToolBtn: { width: 34, height: 34, borderRadius: radius.full, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
+  fullscreenContainer: { flex: 1, backgroundColor: colors.primary, paddingTop: 60 },
+  fullscreenCloseBtn: { position: 'absolute', top: 50, right: spacing.lg, width: 44, height: 44, borderRadius: radius.full, backgroundColor: colors.surfaceHigh, alignItems: 'center', justifyContent: 'center', zIndex: 10, borderWidth: 1, borderColor: colors.border },
+  fullscreenImage: { flex: 1, width: '100%', marginVertical: spacing.xl },
 });
 
 export default LearningSessionScreen;

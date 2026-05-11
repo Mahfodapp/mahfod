@@ -137,7 +137,6 @@ export default function MemoLibraryScreen() {
             value={search}
             onChangeText={setSearch}
             textAlign={isArabicText(search || 'ابحث') ? 'right' : 'left'}
-            style={[styles.searchInput, { textAlign: isArabicText(search || 'ابحث') ? 'right' : 'left' }]}
             returnKeyType="search"
           />
           {search.length > 0 && (

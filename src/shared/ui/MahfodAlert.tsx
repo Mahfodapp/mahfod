@@ -124,12 +124,12 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   buttonsContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     width: '100%',
     gap: spacing.sm,
   },
   button: {
-    flex: 1,
+    width: '100%',
     paddingVertical: 14,
     borderRadius: radius.lg,
     backgroundColor: colors.accent,

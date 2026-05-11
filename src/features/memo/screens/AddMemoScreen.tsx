@@ -17,8 +17,9 @@ import {
   TouchableOpacity,
   Switch,
   Image,
-  Alert,
   ActivityIndicator,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MText } from '@/shared/ui/MText';
@@ -28,12 +29,14 @@ import Input from '@/shared/ui/Input';
 import { X, Link, Camera, Mic, Play, Trash } from 'lucide-react-native';
 import { useSettingsStore } from '../../settings/store/settings.store';
 import { useMemoStore } from '../store/memo.store';
+import { useAlertStore } from '@/shared/store/alert.store';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Audio } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
 import AudioWaveform from '@/shared/ui/AudioWaveform';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -43,6 +46,7 @@ export default function AddMemoScreen() {
   const navigation = useNavigation<NavProp>();
   const { memos, addMemo, updateMemo } = useMemoStore();
   const { settings } = useSettingsStore();
+  const showAlert = useAlertStore(state => state.showAlert);
 
   const isEditing = !!route.params?.memoId;
   const existingMemo = isEditing ? memos.find(m => m.id === route.params!.memoId) : null;
@@ -54,6 +58,13 @@ export default function AddMemoScreen() {
 
   const [isLinked, setIsLinked] = useState(!!existingMemo?.related_memo_id);
   const [relatedMemoId, setRelatedMemoId] = useState(existingMemo?.related_memo_id || '');
+  const [isMemoPickerOpen, setIsMemoPickerOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredMemos = memos.filter(m => 
+    m.id !== existingMemo?.id && 
+    (m.title.includes(searchQuery) || m.text.includes(searchQuery))
+  );
 
   const [isPoetry, setIsPoetry] = useState(existingMemo?.is_poem || false);
   const [text, setText] = useState(existingMemo?.text || '');
@@ -75,6 +86,47 @@ export default function AddMemoScreen() {
 
   const [imageUrl, setImageUrl] = useState(existingMemo?.image_url || '');
   const [audioUrl, setAudioUrl] = useState(existingMemo?.audio_url || '');
+
+  const handleCaptureImage = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (permissionResult.granted === false) {
+      showAlert('خطأ', 'يرجى السماح بالوصول إلى الكاميرا');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImageUrl(result.assets[0].uri);
+    }
+  };
+
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      showAlert('خطأ', 'يرجى السماح بالوصول إلى المعرض');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImageUrl(result.assets[0].uri);
+    }
+  };
+
+  const handleImagePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    showAlert('إضافة صورة', 'اختر مصدر الصورة', [
+      { text: 'التقاط صورة', onPress: handleCaptureImage, style: 'default' },
+      { text: 'اختيار من المعرض', onPress: handlePickImage, style: 'default' },
+      { text: 'إلغاء', style: 'cancel' }
+    ]);
+  };
 
   // Audio Recording State
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -102,7 +154,7 @@ export default function AddMemoScreen() {
     try {
       const { granted } = await Audio.requestPermissionsAsync();
       if (!granted) {
-        Alert.alert('إذن مرفوض', 'يرجى السماح بالوصول إلى الميكروفون من الإعدادات');
+        showAlert('إذن مرفوض', 'يرجى السماح بالوصول إلى الميكروفون من الإعدادات');
         return;
       }
       // Stop any playing sound first
@@ -123,7 +175,7 @@ export default function AddMemoScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (err) {
       console.error('Failed to start recording', err);
-      Alert.alert('خطأ', 'فشل بدء التسجيل. تحقق من صلاحيات الميكروفون.');
+      showAlert('خطأ', 'فشل بدء التسجيل. تحقق من صلاحيات الميكروفون.');
     }
   }
 
@@ -172,7 +224,7 @@ export default function AddMemoScreen() {
     } catch (err) {
       console.error('Failed to play sound', err);
       setIsPlaying(false);
-      Alert.alert('خطأ', 'فشل تشغيل الصوت.');
+      showAlert('خطأ', 'فشل تشغيل الصوت.');
     }
   }
 
@@ -194,7 +246,7 @@ export default function AddMemoScreen() {
   const handleSave = async () => {
     if (!title.trim()) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('خطأ', 'يرجى إدخال العنوان');
+      showAlert('خطأ', 'يرجى إدخال العنوان');
       return;
     }
 
@@ -202,14 +254,14 @@ export default function AddMemoScreen() {
     if (isPoetry) {
       if (!firstHemistich.trim() && !secondHemistich.trim()) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        Alert.alert('خطأ', 'يرجى إدخال النص');
+        showAlert('خطأ', 'يرجى إدخال النص');
         return;
       }
       finalContent = `${firstHemistich} *** ${secondHemistich}`;
     } else {
       if (!text.trim() && !imageUrl && !audioUrl) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        Alert.alert('خطأ', 'يرجى إدخال نص أو إضافة وسائط');
+        showAlert('خطأ', 'يرجى إدخال نص أو إضافة وسائط');
         return;
       }
       finalContent = text;
@@ -269,7 +321,7 @@ export default function AddMemoScreen() {
       }
     } catch (e: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('خطأ', e.message);
+      showAlert('خطأ', e.message);
     } finally {
       setSaving(false);
     }
@@ -341,33 +393,57 @@ export default function AddMemoScreen() {
 
           {/* LINK CHAIN */}
           <Animated.View entering={FadeInDown.delay(240).springify()} style={styles.darkCard}>
-            <View style={styles.rowReverse}>
-              <View style={styles.rowReverse}>
-                <Link color={colors.textMuted} size={20} style={{ marginLeft: spacing.sm }} />
-                <View>
+            <View style={[styles.rowReverse, { alignItems: 'flex-start' }, !isLinked ? { marginBottom: 0 } : undefined]}>
+              <Link color={colors.textMuted} size={20} style={{ marginLeft: spacing.md, marginTop: 2 }} />
+              <View style={{ flex: 1 }}>
+                <View style={styles.rowReverse}>
                   <MText weight="semi" style={styles.cardTitle}>ربط بسلسلة</MText>
-                  <MText weight="regular" style={styles.cardSubtext}>
-                    اضغط لإضافة هذا المحفوظ كجزء من متن أطول
-                  </MText>
+                  <Switch
+                    style={{ transform: [{ scale: 0.85 }], marginRight: spacing.sm }}
+                    value={isLinked}
+                    onValueChange={(v) => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setIsLinked(v);
+                    }}
+                    trackColor={{ true: colors.accent, false: colors.surfaceBright }}
+                    thumbColor={Platform.OS === 'android' ? colors.accent : undefined}
+                  />
                 </View>
+                <MText weight="regular" style={styles.cardSubtext}>
+                  اضغط لإضافة هذا المحفوظ كجزء من متن أطول
+                </MText>
               </View>
-              <Switch
-                value={isLinked}
-                onValueChange={(v) => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setIsLinked(v);
-                }}
-                trackColor={{ true: colors.accent, false: colors.surfaceBright }}
-              />
             </View>
             {isLinked && (
               <View style={{ marginTop: spacing.sm }}>
-                {/* TODO: Replace with a memo-picker modal once implemented */}
-                <View style={styles.comingSoonChip}>
-                  <MText weight="regular" style={styles.comingSoonText}>
-                    اختيار المحفوظ المرتبط — قريباً
-                  </MText>
-                </View>
+                {relatedMemoId ? (
+                  <View style={styles.selectedMemoChip}>
+                    <MText weight="semi" style={styles.selectedMemoText} numberOfLines={1}>
+                      {memos.find(m => m.id === relatedMemoId)?.title || 'محفوظ مرتبط'}
+                    </MText>
+                    <TouchableOpacity
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setRelatedMemoId('');
+                      }}
+                      style={styles.clearLinkedMemoBtn}
+                    >
+                      <X size={16} color={colors.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.pickMemoBtn}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setIsMemoPickerOpen(true);
+                    }}
+                  >
+                    <MText weight="regular" style={styles.pickMemoBtnText}>
+                      اضغط لاختيار المحفوظ المرتبط
+                    </MText>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           </Animated.View>
@@ -383,12 +459,14 @@ export default function AddMemoScreen() {
                   شعر (شطرين)
                 </MText>
                 <Switch
+                  style={{ transform: [{ scale: 0.85 }] }}
                   value={isPoetry}
                   onValueChange={(v) => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     setIsPoetry(v);
                   }}
                   trackColor={{ true: colors.accent, false: colors.surfaceBright }}
+                  thumbColor={Platform.OS === 'android' ? colors.accent : undefined}
                 />
               </View>
             </View>
@@ -418,20 +496,11 @@ export default function AddMemoScreen() {
               الوسائط (اختياري)
             </MText>
             <View style={styles.mediaRow}>
-              <TouchableOpacity style={styles.mediaCard}>
-                {imageUrl ? (
-                  <View style={styles.mediaPreview}>
-                    <Image source={{ uri: imageUrl }} style={{ width: '100%', height: '100%' }} />
-                    <TouchableOpacity style={styles.removeMediaOverlay} onPress={() => setImageUrl('')}>
-                      <X color={colors.white} size={24} />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <>
-                    <Camera color={colors.textMuted} size={28} />
-                    <MText weight="regular" style={styles.mediaText}>إضافة صورة</MText>
-                  </>
-                )}
+              <TouchableOpacity style={styles.mediaCard} onPress={handleImagePress}>
+                <Camera color={imageUrl ? colors.accent : colors.textMuted} size={28} />
+                <MText weight="regular" style={[styles.mediaText, imageUrl ? { color: colors.accent } : undefined]}>
+                  {imageUrl ? 'تغيير الصورة' : 'إضافة صورة'}
+                </MText>
               </TouchableOpacity>
 
               <View style={[styles.mediaCard, { overflow: 'hidden' }]}>
@@ -469,7 +538,7 @@ export default function AddMemoScreen() {
                     )}
                     <MText
                       weight="regular"
-                      style={[styles.mediaText, recording && { color: colors.error }]}
+                      style={[styles.mediaText, recording ? { color: colors.error } : undefined]}
                     >
                       {recording ? 'إيقاف التسجيل' : 'تسجيل'}
                     </MText>
@@ -477,6 +546,15 @@ export default function AddMemoScreen() {
                 )}
               </View>
             </View>
+
+            {imageUrl ? (
+              <View style={styles.imagePreviewContainer}>
+                <Image source={{ uri: imageUrl }} style={styles.largeImagePreview} resizeMode="cover" />
+                <TouchableOpacity style={styles.removeImageBtn} onPress={() => setImageUrl('')}>
+                  <X color="#FFFFFF" size={20} />
+                </TouchableOpacity>
+              </View>
+            ) : null}
           </Animated.View>
         </ScrollView>
 
@@ -498,6 +576,46 @@ export default function AddMemoScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* ── Memo Picker Modal ── */}
+      <Modal visible={isMemoPickerOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setIsMemoPickerOpen(false)}>
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <MText weight="bold" style={styles.modalTitle}>اختر المحفوظ المرتبط</MText>
+            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setIsMemoPickerOpen(false)}>
+              <X size={20} color={colors.textPrimary} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalSearchContainer}>
+            <Input
+              placeholder="ابحث عن محفوظ..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+          <FlatList
+            data={filteredMemos}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.modalList}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.modalMemoItem}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setRelatedMemoId(item.id);
+                  setIsMemoPickerOpen(false);
+                }}
+              >
+                <MText weight="semi" style={styles.modalMemoTitle}>{item.title}</MText>
+                <MText weight="regular" style={styles.modalMemoSubtitle}>{item.label}</MText>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <MText weight="regular" style={styles.emptyListText}>لا توجد نتائج</MText>
+            }
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -521,21 +639,22 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     borderRadius: radius.full,
     backgroundColor: colors.surfaceHigh,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
+    ...Shadows.subtle,
   },
   scroll: {
     padding: spacing.lg,
-    paddingBottom: 120,
+    paddingBottom: 140,
   },
   spacer: {
-    height: spacing.lg,
+    height: spacing.xl,
   },
   sectionLabel: {
     ...typography.label,
@@ -545,19 +664,20 @@ const styles = StyleSheet.create({
   },
   chipScroll: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   chip: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceHigh,
+    backgroundColor: colors.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.accent,
   },
   chipSelected: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
+    ...Shadows.glow,
   },
   chipText: {
     ...typography.bodySmall,
@@ -565,13 +685,15 @@ const styles = StyleSheet.create({
   },
   chipTextSelected: {
     color: colors.primary,
+    fontFamily: fonts.cairoBold,
   },
   darkCard: {
     backgroundColor: colors.surfaceRaised,
-    borderRadius: radius.md,
-    padding: spacing.md,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.accent,
+    ...Shadows.subtle,
   },
   rowReverse: {
     flexDirection: 'row',
@@ -581,11 +703,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   cardTitle: {
-    ...typography.bodySmall,
-    fontFamily: fonts.semi,
+    ...typography.body,
+    fontFamily: fonts.bold,
     color: colors.textPrimary,
     textAlign: 'left',
   },
@@ -593,61 +715,77 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textMuted,
     textAlign: 'left',
-    marginTop: 2,
+    marginTop: 4,
   },
   poetryContainer: {
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   divider: {
     height: 1,
-    backgroundColor: colors.border,
-    width: '50%',
+    backgroundColor: colors.accent,
+    width: '40%',
     alignSelf: 'center',
-    marginVertical: spacing.xs,
+    marginVertical: spacing.sm,
+    opacity: 0.5,
   },
   mediaRow: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   mediaCard: {
     flex: 1,
-    height: 100,
+    height: 110,
     backgroundColor: colors.surfaceHigh,
-    borderRadius: radius.md,
-    borderWidth: 0.5,
-    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.md,
     overflow: 'hidden',
+    ...Shadows.subtle,
   },
   mediaText: {
     ...typography.caption,
-    color: colors.textMuted,
+    color: colors.textPrimary,
+    fontFamily: fonts.semi,
   },
-  mediaPreview: {
+  imagePreviewContainer: {
+    marginTop: spacing.lg,
+    width: '100%',
+    height: 220,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.accent,
+    ...Shadows.medium,
+  },
+  largeImagePreview: {
     width: '100%',
     height: '100%',
   },
-  removeMediaOverlay: {
+  removeImageBtn: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.overlay,
-    justifyContent: 'center',
+    top: spacing.md,
+    right: spacing.md,
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(0,0,0,0.7)',
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.accent,
   },
   stickyBottom: {
-    padding: spacing.md,
+    padding: spacing.lg,
     backgroundColor: colors.primary,
-    borderTopWidth: 0.5,
+    borderTopWidth: 1,
     borderTopColor: colors.border,
   },
   saveBtn: {
     backgroundColor: colors.accent,
-    paddingVertical: spacing.md,
+    paddingVertical: 16,
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -658,18 +796,19 @@ const styles = StyleSheet.create({
     ...typography.h3,
     color: colors.primary,
   },
-  comingSoonChip: {
-    backgroundColor: colors.surfaceHigh,
-    borderRadius: radius.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  comingSoonText: {
-    ...typography.bodySmall,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
+  selectedMemoChip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.surfaceHigh, borderRadius: radius.lg, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, borderWidth: 1, borderColor: colors.accent, ...Shadows.subtle },
+  selectedMemoText: { flex: 1, ...typography.body, fontFamily: fonts.semi, color: colors.textPrimary, textAlign: 'left' },
+  clearLinkedMemoBtn: { marginLeft: spacing.md, width: 28, height: 28, borderRadius: radius.full, backgroundColor: colors.surfaceRaised, alignItems: 'center', justifyContent: 'center' },
+  pickMemoBtn: { backgroundColor: colors.surfaceHigh, borderRadius: radius.lg, paddingVertical: 14, paddingHorizontal: spacing.lg, borderWidth: 1, borderColor: colors.accent, alignItems: 'center', ...Shadows.subtle },
+  pickMemoBtnText: { ...typography.body, fontFamily: fonts.semi, color: colors.textPrimary, textAlign: 'center' },
+  modalContainer: { flex: 1, backgroundColor: colors.primary },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingVertical: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.accent },
+  modalTitle: { ...typography.h3, color: colors.textPrimary },
+  modalCloseBtn: { width: 40, height: 40, borderRadius: radius.full, backgroundColor: colors.surfaceHigh, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: colors.accent },
+  modalSearchContainer: { padding: spacing.lg },
+  modalList: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
+  modalMemoItem: { backgroundColor: colors.surfaceRaised, padding: spacing.lg, borderRadius: radius.lg, marginBottom: spacing.md, borderWidth: 1, borderColor: colors.accent, ...Shadows.subtle },
+  modalMemoTitle: { ...typography.body, color: colors.textPrimary, textAlign: 'left', fontFamily: fonts.semi },
+  modalMemoSubtitle: { ...typography.caption, color: colors.textMuted, textAlign: 'left', marginTop: 6 },
+  emptyListText: { ...typography.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.xxl },
 });
