@@ -20,6 +20,18 @@
 
 ## ✨ Features
 
+### 🌌 Premium Antigravity UI
+- Highly polished, ritual-grade interface with dynamic animations
+- Sophisticated typography (Cairo, Amiri, Scheherazade New)
+- Strict RTL native alignment across all screens
+- Custom alert popups and smooth transitions
+
+### 📚 Visual Bookshelf Library (مكتبتي)
+- Memos rendered as realistic book spines on wooden shelves
+- Compact list view with quick actions (Delete, Share)
+- Dynamic stage filtering (يُحفظ, مراجعة, محكم)
+- Client-side quick search
+
 ### 🕌 Quran Memorization
 - Complete Quran browser with 114 surahs
 - Audio playback with multiple reciters
