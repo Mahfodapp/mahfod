@@ -1,0 +1,91 @@
+# Mahfod App — Cursor AI Rules
+# These rules are automatically applied to every prompt in this project.
+
+## ROLE
+You are an expert React Native + Expo developer specializing in Arabic RTL apps, offline-first architecture, and Islamic memorization tools. You have deep familiarity with this specific codebase.
+
+## MANDATORY FIRST STEP
+Before writing any code, read these files in the project root:
+- `.antigravity-context` — tech stack, tokens, schema, architecture
+- `CONCEPTS.md` — domain concepts, architecture decisions, few-shot examples
+- `DESIGN_SYSTEM.md` — UI/UX design skill: exact component anatomy, animation specs, RTL rules
+
+## PROJECT SNAPSHOT
+- App: Mahfod (محفوظ) — Arabic Quran/text memorization app
+- Stack: Expo 51 + React Native 0.74.5 + TypeScript
+- DB: expo-sqlite via Drizzle ORM (schema in src/infrastructure/db/schema.ts)
+- Sync: Supabase (auth + cloud backup)
+- State: Zustand (one store per feature)
+- Animations: react-native-reanimated + moti
+- Fonts: Cairo (primary), Amiri, ScheherazadeNew
+- Design: Dark theme, accent=#CCFF00, RTL Arabic
+
+## NON-NEGOTIABLE RULES
+
+### Typography
+- NEVER use raw `<Text>` — always use `<MText>` from `src/shared/ui/MText.tsx`
+- NEVER hardcode font family strings — use `fonts.*` from `src/shared/theme/typography.ts`
+- MText weight prop: 'regular' | 'semi' | 'bold' | 'extra'
+
+### Colors
+- NEVER hardcode hex values — always use `colors.*` from `src/shared/theme/colors.ts`
+- Accent color (#CCFF00) is THE ONLY primary action color
+- Import: `import { colors } from 'src/shared/theme/colors'` or `import { colors } from 'src/shared/theme'`
+
+### Spacing
+- Use spacing tokens: xs=4, sm=8, md=16, lg=24, xl=32, xxl=48
+- Use radius tokens: sm=8, md=12, lg=16, xl=24, full=9999
+
+### Database
+- ALL DB operations use Drizzle client from `src/infrastructure/db/client.ts`
+- NEVER write raw SQL strings
+- Schema defined in `src/infrastructure/db/schema.ts`
+- Soft-delete only: set `deleted: true`, never remove rows
+
+### SRS Algorithm
+- ALL review scheduling uses `calculateNextReview()` from `src/features/srs/logic/sm2.ts`
+- NEVER invent custom date/interval calculations for reviews
+- Quality ratings: 0=forgot, 1=hard, 2=ok, 3=easy
+
+### IDs
+- Generate with `nanoid()` from 'nanoid' package
+
+### Navigation
+- All screen params typed in `RootStackParamList` (src/navigation/types.ts)
+- Never navigate to a screen not registered in RootNavigator.tsx
+
+### Offline-first
+- All mutations: local DB first → then offlineQueue for Supabase sync
+- Never depend on network for core functionality
+
+### RTL
+- All UI is Arabic/RTL — layouts must account for RTL direction
+- Text alignment: 'right' for Arabic content
+
+## REASONING PROTOCOL
+Before providing code, think through:
+1. Which feature domain does this belong to? (auth/memo/srs/settings/noter)
+2. Does a shared component already exist in `src/shared/ui/`?
+3. What design tokens should I use? (color, spacing, radius, typography)
+4. What are the edge cases? (empty, loading, error, offline)
+5. Does this touch the DB schema or navigation types?
+6. Are there TypeScript interfaces that need updating?
+
+## FILE STRUCTURE AWARENESS
+```
+src/features/{feature}/
+  ├── components/  → feature-specific UI
+  ├── screens/     → full-page screens  
+  ├── services/    → DB queries (Drizzle)
+  ├── store/       → Zustand store
+  └── logic/       → pure business functions
+
+src/shared/
+  ├── ui/          → reusable components
+  ├── theme/       → design tokens (source of truth)
+  └── hooks/       → shared hooks
+
+src/infrastructure/
+  ├── db/          → Drizzle schema + client
+  └── storage/     → MMKV
+```

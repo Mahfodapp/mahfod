@@ -5,9 +5,11 @@ export type RootStackParamList = {
   AddMemoScreen: { memoId?: string } | undefined;
   MemoLibraryScreen: undefined;
   ReviewSessionScreen: { memoId?: string } | undefined;
+  LearningSessionScreen: { memoId?: string } | undefined;
   MohkamSessionScreen: undefined;
   SettingsScreen: undefined;
   AddNoterBookScreen: undefined;
+  MemoViewScreen: { memoId: string };
   NoterDetailScreen: { bookId: string };
 };
 

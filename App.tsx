@@ -20,6 +20,9 @@ import {
 } from '@expo-google-fonts/cairo';
 import { Amiri_400Regular } from '@expo-google-fonts/amiri';
 import { ScheherazadeNew_400Regular } from '@expo-google-fonts/scheherazade-new';
+import { ReemKufi_400Regular } from '@expo-google-fonts/reem-kufi';
+import { Lateef_400Regular } from '@expo-google-fonts/lateef';
+import { Tajawal_400Regular } from '@expo-google-fonts/tajawal';
 import { MMKV } from 'react-native-mmkv';
 
 const storage = new MMKV();
@@ -46,6 +49,9 @@ export default function App() {
     Cairo_800ExtraBold,
     Amiri_400Regular,
     ScheherazadeNew_400Regular,
+    ReemKufi_400Regular,
+    Lateef_400Regular,
+    Tajawal_400Regular,
   });
 
   useEffect(() => {
@@ -81,7 +87,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
+        <StatusBar style="light" backgroundColor="#0D0E10" translucent={false} />
         <RootNavigator />
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -1,3 +1,9 @@
+/**
+ * Supabase client — Single source of truth.
+ *
+ * All features MUST import `supabase` from this file (via @/lib/supabase).
+ * The infrastructure/api/supabase.ts re-exports from here.
+ */
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

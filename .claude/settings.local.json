@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la .git* .*ignore)",
+      "Bash(wc -l src/**/*.ts src/**/*.tsx)",
+      "Bash(xargs wc:*)",
+      "Bash(npm run:*)",
+      "Bash(git stash *)",
+      "Bash(npm list *)",
+      "Bash(npm info *)",
+      "Bash(npm uninstall *)",
+      "Bash(npm install *)",
+      "Bash(./gradlew clean *)",
+      "Bash(npm ls *)",
+      "Bash(dir C:\\\\Users\\\\dell\\\\Desktop\\\\mahfodap\\\\android)",
+      "Bash(Get-ChildItem C:\\\\Users\\\\dell\\\\Desktop\\\\mahfodap\\\\android)",
+      "Bash(Select-Object -First 20 Name)",
+      "Bash(powershell *)",
+      "Bash(npx expo *)",
+      "Bash(taskkill //F //IM adb.exe)",
+      "Bash(gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a --info)",
+      "Bash(./gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a)",
+      "Bash(taskkill *)",
+      "Bash(git restore *)",
+      "Bash(git reflog *)",
+      "Bash(dir /b /s \"C:\\\\Users\\\\dell\\\\Documents\")",
+      "Bash(findstr -i \"mahfod\\\\|app\\\\|backup\")",
+      "Bash(git fsck *)",
+      "Bash(unzip -l \"C:\\\\Users\\\\dell\\\\Desktop\\\\mahfod.zip\")",
+      "Bash(unzip -l \"C:\\\\Users\\\\dell\\\\Desktop\\\\AQA_BACKUP_2026-04-07.zip\")",
+      "Bash(dir /b /s \"C:\\\\Users\\\\dell\\\\*\")",
+      "Bash(findstr -i \"mahfod\")",
+      "Bash(dir /b /s \"C:\\\\Users\\\\dell\\\\*.zip\")"
+    ]
+  }
+}

@@ -1,0 +1,250 @@
+## MAHFOD — Antigravity Project Context
+## This file is automatically loaded by Antigravity to maintain full project awareness.
+## DO NOT DELETE. Last updated: 2026-05-08
+##
+## Companion files (always read together):
+##   CONCEPTS.md       — domain concepts, architecture, few-shot examples
+##   DB_SCHEMA.md      — full database schema + Drizzle query examples
+##   DESIGN_SYSTEM.md  — UI/UX design skill: colors, typography, animations, components
+##   .cursor/rules     — Cursor IDE AI rules
+##   .claude/CLAUDE.md — Claude system instructions
+
+---
+
+### APP IDENTITY
+- Name (AR): تطبيق محفوظ  |  Slug: mahfod-app
+- Platform: React Native (Expo SDK 51) — Android-first, dark mode only
+- Language: Arabic (RTL). All UI text is in Arabic. Code/comments in English.
+- Package ID: com.mahfod.app
+
+---
+
+### TECH STACK (exact versions — never suggest alternatives)
+- Runtime:         Expo ~51.0.28
+- Framework:       React Native 0.74.5 + React 18.2.0
+- Language:        TypeScript ~5.3.3
+- Navigation:      @react-navigation/native ^6 + native-stack + bottom-tabs
+- State:           Zustand ^4.5.2 (one store per feature)
+- Local DB:        expo-sqlite ~14.0.6 via Drizzle ORM ^0.36.0
+- Remote sync:     @supabase/supabase-js ^2.99.0
+- Animations:      react-native-reanimated ~3.10.1 + moti ^0.30.0
+- Icons:           lucide-react-native ^0.475.0
+- Fonts:           @expo-google-fonts/cairo, amiri, scheherazade-new
+- Gestures:        react-native-gesture-handler ~2.16.1
+- Storage (fast):  react-native-mmkv ^2.12.2
+- SVG:             react-native-svg 15.2.0
+- AI:              @google/generative-ai ^0.24.1
+- I18n:            i18next ^25 + react-i18next ^16
+- ID generation:   nanoid ^3.3.11 / uuid ^9.0.0
+
+---
+
+### DESIGN SYSTEM (STRICT — do NOT deviate)
+
+#### Color Tokens (import from `src/shared/theme/colors.ts` or `src/shared/theme/index.ts`)
+```
+colors.primary        = '#0D0E10'   ← app background
+colors.surface        = '#121316'   ← card bg
+colors.surfaceRaised  = '#181A1C'
+colors.surfaceHigh    = '#1E2022'
+colors.accent         = '#CCFF00'   ← THE ONLY primary action color (lime-green)
+colors.accentSoft     = 'rgba(204,255,0,0.10)'
+colors.accentBorder   = 'rgba(204,255,0,0.22)'
+colors.textPrimary    = '#FDFBFE'
+colors.textSecondary  = '#ABABAD'
+colors.textMuted      = '#757578'
+colors.border         = 'rgba(255,255,255,0.08)'
+colors.success        = '#00EDB4'
+colors.error          = '#FF7351'
+```
+- NEVER use hardcoded hex. Always use `colors.*` tokens.
+- Purple/pink ONLY for category chips, never for primary actions.
+
+#### Typography (import from `src/shared/theme/typography.ts`)
+- Primary font: Cairo (loaded in App.tsx via useFonts)
+  - fonts.regular = 'Cairo_400Regular'
+  - fonts.semi    = 'Cairo_600SemiBold'
+  - fonts.bold    = 'Cairo_700Bold'
+  - fonts.extra   = 'Cairo_800ExtraBold'
+- Special fonts: Amiri (quotes), ScheherazadeNew (Quran text only)
+- Scale: typography.display(34) / h1(28) / h2(22) / h3(18) / body(16) / bodySmall(14) / caption(12) / label(13)
+- ALWAYS use `<MText>` component (src/shared/ui/MText.tsx) instead of raw `<Text>`
+
+#### Spacing & Radius tokens
+```
+spacing: xs=4, sm=8, md=16, lg=24, xl=32, xxl=48
+radius:  sm=8, md=12, lg=16, xl=24, full=9999
+```
+
+#### Background pattern
+- Islamic geometric pattern: `assets/images/islamic_pattern.png`
+- Used via `<MahfodPatternBackground />` (opacity 0.045–0.15) or `<Screen>` wrapper
+- It is ALWAYS absolutely positioned, non-scrolling, behind all content
+
+---
+
+### PROJECT STRUCTURE (Feature-Sliced Design)
+```
+src/
+├── features/
+│   ├── auth/          → Auth screens, auth.store.ts (Zustand), Supabase auth
+│   ├── memo/          → Core memo CRUD: screens, components, services, store
+│   ├── srs/           → Spaced-Repetition review sessions + SM-2 logic
+│   ├── settings/      → User preferences (daily_review_count, initial_reps, etc.)
+│   ├── ai/            → Gemini AI integration
+│   ├── analytics/     → Activity heatmap, stats
+│   ├── quran/         → Quran feature (in progress)
+│   └── sync/          → Offline queue, Supabase sync
+├── shared/
+│   ├── theme/         → colors.ts, typography.ts, spacing.ts, index.ts (single source of truth)
+│   ├── ui/            → Shared components: MText, Screen, Button, Card, TabBar, etc.
+│   ├── hooks/         → Shared hooks
+│   ├── i18n/          → i18next config
+│   └── utils/         → Utility functions
+├── infrastructure/
+│   ├── db/            → Drizzle schema (schema.ts) + client (client.ts)
+│   ├── api/           → API clients
+│   └── storage/       → MMKV storage
+├── navigation/
+│   ├── RootNavigator.tsx  → Auth gate + AppStack + MainTabs
+│   └── types.ts           → RootStackParamList, MainTabParamList
+└── types/
+    └── index.ts       → Memo, NoterBook, NoterNote, UserSettings, MemoStage types
+```
+
+---
+
+### NAVIGATION STRUCTURE
+```
+RootNavigator
+├── AuthScreen          (if not authenticated)
+└── AppStack (modal presentation)
+    ├── MainTabs (bottom tabs — custom TabBar)
+    │   ├── HomeTab         → HomeScreen
+    │   ├── QuranTab        → (placeholder)
+    │   ├── CenterFabPlaceholder
+    │   ├── NoterTab        → NoterHomeScreen
+    │   └── ToolsTab        → (placeholder)
+    ├── AddMemoScreen
+    ├── MemoLibraryScreen
+    ├── ReviewSessionScreen
+    ├── MohkamSessionScreen
+    ├── SettingsScreen
+    ├── AddNoterBookScreen
+    └── NoterDetailScreen
+```
+Navigation params type: `RootStackParamList` (import from `src/navigation/types.ts`)
+
+---
+
+### DATABASE SCHEMA (Drizzle ORM + expo-sqlite)
+
+#### `memos` table — core entity
+```typescript
+id: text (PK, nanoid)
+user_id: text
+title: text (required)
+text: text (required)
+label: text          // Arabic category: متن, شعر, حديث, فقه, عقيدة, etc.
+tags: text           // JSON array string
+stage: text          // 'LEARNING' | 'REVIEWING' | 'MASTERED'
+review_count: integer
+repetition_count: integer
+next_review_at: text // ISO datetime string
+last_reviewed_at: text
+is_favorite: boolean
+is_poem: boolean
+deleted: boolean     // soft delete
+version: integer     // conflict resolution
+device_id: text
+```
+
+#### `noter_books` / `noter_chapters` / `noter_notes` — noter feature
+#### `user_settings` — per-user preferences
+#### `offlineQueue` — sync queue for Supabase
+
+---
+
+### SRS / MEMORIZATION ALGORITHM
+
+#### SM-2 Implementation (`src/features/srs/logic/sm2.ts`)
+- Stages: LEARNING → REVISION → MASTERED
+- Quality scale: 0=forgot, 1=hard, 2=ok, 3=easy
+- Key variables: easeFactor (default 2.5), intervalDays, reviewCount
+- Stage transitions:
+  - LEARNING → REVISION when reviewCount >= settings.initial_reps (default: 33)
+  - REVISION → MASTERED when reviewCount >= settings.masteryThreshold
+- `calculateNextReview(state, quality, settings)` → returns new SM2State
+- ALWAYS use this function for review logic; do NOT invent new scheduling logic
+
+#### Settings that govern SRS
+```typescript
+initial_reps: 33       // reps to graduate from LEARNING
+review_days: 30        // days until MASTERED
+daily_review_count: 5  // memos shown per session
+reinforce_reps: 5
+```
+
+#### Memo Stages → Colors
+- LEARNING  → colors.stageLearning (#AAFFDC, cyan)  → label: 'يُحفظ'
+- REVISION → colors.stageReview (#CCFF00, lime)    → label: 'مراجعة'
+- MASTERED  → colors.stageMastered (#00EDB4, teal)  → label: 'محكم'
+Use `StageColors` and `StageLabels` from `src/shared/theme/index.ts`
+
+---
+
+### STATE MANAGEMENT PATTERNS (Zustand)
+```typescript
+// Pattern: one file per feature domain
+import { create } from 'zustand';
+
+interface FeatureStore { ... }
+export const useFeatureStore = create<FeatureStore>((set, get) => ({ ... }));
+```
+- Stores: useAuthStore, useMemoStore, useSettingsStore
+- Access cross-store state via `useOtherStore.getState()` (not hooks inside actions)
+
+---
+
+### KEY SHARED UI COMPONENTS
+```
+<MText weight="regular|semi|bold|extra">    ← ALWAYS use instead of <Text>
+<Screen>                                    ← SafeAreaView + pattern bg + ScrollView
+<MahfodPatternBackground />                 ← standalone pattern layer
+<Card>                                      ← glass card surface
+<Button variant="primary|secondary|ghost">  ← or <MahfodButton>
+<StageBadge stage="LEARNING|REVIEWING|MASTERED" />
+<ProgressRing progress={0..1} />
+<SearchField />
+<EmptyState title="..." subtitle="..." />
+<TabBar />                                  ← custom bottom tab bar (src/shared/ui/TabBar.tsx)
+<FloatingTabBar />                          ← floating pill tab bar (src/shared/navigation/FloatingTabBar.tsx)
+<GlassPanel />
+```
+
+---
+
+### CODING RULES & PATTERNS
+1. **RTL first** — The app enforces RTL via `I18nManager.forceRTL(true)`. Use `flexDirection: 'row'`, which will naturally flow Right-To-Left. Do NOT use `row-reverse` to force RTL, as it will invert the layout.
+2. **No raw `<Text>`** — always `<MText>` to ensure Cairo font.
+3. **No hardcoded colors** — always `colors.*` tokens.
+4. **No raw `StyleSheet.create` font families** — use `fonts.*` from typography.ts.
+5. **Drizzle for DB** — never use raw SQLite queries. Use the drizzle client from `src/infrastructure/db/client.ts`.
+6. **Supabase for auth** — via `src/lib/supabase.ts`.
+7. **Soft deletes** — set `deleted: true`, never hard-delete memos.
+8. **Offline-first** — all mutations go through local DB first, then offlineQueue for Supabase sync.
+9. **nanoid for IDs** — `import { nanoid } from 'nanoid'`.
+10. **Reanimated for animations** — use `useSharedValue`, `useAnimatedStyle`, `withTiming`, `withSpring`.
+11. **Feature isolation** — each feature in `src/features/X` is self-contained; shared logic lives in `src/shared/`.
+12. **TypeScript strict** — all props must be typed, no `any`.
+
+---
+
+### BEFORE WRITING CODE — THINK STEP BY STEP
+1. Identify which feature domain the change belongs to.
+2. Check if a shared component exists in `src/shared/ui/` before creating a new one.
+3. Verify the color/spacing token exists before using it.
+4. Confirm the navigation route exists in `RootStackParamList` before navigating.
+5. For DB changes, verify the Drizzle schema column exists.
+6. For SRS changes, always use `calculateNextReview()` from sm2.ts.
+7. Identify edge cases: empty state, loading state, error state.

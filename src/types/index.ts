@@ -1,4 +1,4 @@
-export type MemoStage = 'LEARNING' | 'REVIEWING' | 'MASTERED';
+export type MemoStage = 'LEARNING' | 'REVISION' | 'MASTERED';
 export type NoteType = 'فكرة' | 'قلت' | 'تلخيص' | 'أبيات' | 'تعقيب';
 
 export interface Memo {
@@ -14,6 +14,8 @@ export interface Memo {
   stage: MemoStage;
   review_count: number;
   repetition_count: number;
+  ease_factor?: number | null;      // SM-2: persisted ease factor (default 2.5)
+  interval_days?: number | null;    // SM-2: persisted interval in days (default 1)
   next_review_at?: string | null;
   last_reviewed_at?: string | null;
   is_favorite: boolean;
@@ -51,17 +53,31 @@ export interface NoterNote {
   created_at?: string;
 }
 
+/**
+ * 'fixed' — user sets a solid revision_reps count; daily cadence; no rating needed.
+ * 'sm2'   — full SM-2 algorithm; user rates each session (0-3); auto-schedules intervals.
+ */
+export type RevisionMode = 'fixed' | 'sm2';
+
 export interface UserSettings {
   user_id?: string;
   language: string;
-  initial_reps: number;
-  review_days: number;
-  daily_review_count: number;
-  reinforce_reps: number;
+  // ── LEARNING stage ──────────────────────────────────────────────────────────
+  initial_reps: number;         // reps to memorize before → REVISION
+  // ── REVISION stage ──────────────────────────────────────────────────────────
+  revision_mode: RevisionMode;  // which system drives REVISION
+  revision_reps: number;        // [fixed mode] total sessions needed → MASTERED
+  session_reps: number;         // [fixed mode] reps per session (كررت N/M)
+  review_days: number;          // legacy alias kept for backward-compat
+  daily_review_count: number;   // max memos per session
+  // ── MASTERED (Mohkam) stage ─────────────────────────────────────────────────
+  reinforce_reps: number;       // mohkam: reps before considered truly mastered
+  // ── Notifications ───────────────────────────────────────────────────────────
   daily_notif_enabled: boolean;
   daily_notif_time: string;
   weekly_notif_enabled: boolean;
   weekly_notif_time: string;
+  // ── Misc ────────────────────────────────────────────────────────────────────
   categories: string[];
   vanish_mode: string;
 }

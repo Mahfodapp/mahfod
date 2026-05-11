@@ -1,0 +1,334 @@
+# Mahfod App — Full Codebase Audit Report
+**Conducted:** 2026-05-10 | **Scope:** All `src/` TypeScript/TSX files + context docs
+
+---
+
+## 🏆 Overall Rating: **7.4 / 10**
+
+The app has a clear vision, a solid design system, and strong bones. Several screens are genuinely premium-grade. However, there are critical logic bugs, naming inconsistencies, and design-system violations that prevent it from reaching production quality.
+
+---
+
+## 🔴 CRITICAL — Bugs & Logic Errors
+
+### 1. `AddMemoScreen` — Wrong redirect after create
+**File:** `src/features/memo/screens/AddMemoScreen.tsx:176`
+```tsx
+// ❌ After creating a LEARNING-stage memo, it sends the user to ReviewSessionScreen
+navigation.replace('ReviewSessionScreen', { memoId: newMemo.id });
+```
+A brand new memo is always in `LEARNING` stage. `ReviewSessionScreen` filters for `stage === 'REVISION'`. The queue will be empty and the user lands on the "no reviews today" empty state. **It should navigate to `LearningSessionScreen`.**
+
+---
+
+### 2. `recordRepetition` in `memo.service.ts` — stage reset is wrong
+**File:** `src/features/memo/services/memo.service.ts:160–178`
+```ts
+if (newCount >= initialReps && memo.stage === 'LEARNING') {
+  updates.stage = 'REVISION';
+  updates.next_review_at = tomorrow.toISOString();
+  updates.repetition_count = 0;  // ← resets to 0
+} else if (memo.stage === 'REVISION') {
+  // ← BUG: also increments review_count here when called from a LEARNING session
+  updates.review_count = memo.review_count + 1;
+}
+```
+When a LEARNING memo hasn't yet graduated, falling into the `else if (stage === 'REVISION')` branch should never happen because the guard is `stage === 'LEARNING'`. However, when a memo IS already `REVISION` and `recordRepetition` is accidentally called (e.g., by someone calling it instead of `applyRevision`), it increments `review_count` instead of going through the revision engine — completely bypassing SM-2 and the `session_reps` threshold. This is a silent logic error.
+
+---
+
+### 3. `MohkamSessionScreen` — Bypasses revision engine, invents scheduling logic
+**File:** `src/features/srs/screens/MohkamSessionScreen.tsx:99–108`
+```ts
+// ❌ Manual date calculation — FORBIDDEN per CONCEPTS.md
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+tomorrow.setHours(0, 0, 0, 0);
+await memoService.updateMemo(memo.id, {
+  stage: 'REVISION',
+  review_count: 0,           // ← resets without using revisionEngine
+  next_review_at: tomorrow.toISOString(),
+});
+```
+This completely ignores `applyRevision()` / `revisionEngine.ts`. It also hardcodes a 1-day interval (duplicating logic) and arbitrarily resets `review_count` to 0 when a user forgets — meaning a memo that was reviewed 25/30 sessions suddenly resets back to day 1. That's a terrible UX and breaks progression.
+
+---
+
+### 4. `ReviewSessionScreen` — queue built from stale snapshot, never re-validated
+**File:** `src/features/srs/screens/ReviewSessionScreen.tsx:81–90`
+```tsx
+const [queue, setQueue] = useState(() => {
+  // ❌ Captures a frozen snapshot of memos at mount time
+  return memos.filter(m => m.stage === 'REVISION' && ...);
+});
+```
+Unlike `LearningSessionScreen` (which correctly reads IDs and resolves against live store), `ReviewSessionScreen` freezes the memo objects at mount. If the store updates during the session, it silently uses stale memo data. The `advance()` handler also reads `queue[index]` directly. This is inconsistent architecture.
+
+---
+
+### 5. `sm2.ts` — `REVIEWING` stage name vs. codebase using `REVISION`
+**File:** `src/features/srs/logic/sm2.ts:1`
+```ts
+export type Stage = 'LEARNING' | 'REVISION' | 'MASTERED';
+```
+`sm2.ts` uses `REVISION`. The `types/index.ts` also uses `REVISION`. But `.antigravity-context` says:
+```
+LEARNING → REVIEWING when reviewCount >= settings.initial_reps
+```
+And `CONCEPTS.md` §2 calls the middle stage `REVISION`. However, `StageColors` in `theme/index.ts` maps **both** `REVISION` and `REVIEW` (line 57: `REVIEW: colors.stageReview`) indicating a legacy confusion that was patched over instead of cleaned up. `ReviewSessionScreen` queries for `stage === 'REVISION'` which is correct, but the `.antigravity-context` comment says `REVIEWING` — this is pure documentation debt and a potential onboarding trap for new AI sessions.
+
+---
+
+## 🟠 SIGNIFICANT — Design-System Violations
+
+### 6. `SettingsScreen` — Hardcoded font family strings (multiple violations)
+**File:** `src/features/settings/screens/SettingsScreen.tsx`
+
+Lines 103, 148, 178, 214, 437 — all use raw strings like `'Cairo_700Bold'`, `'Cairo_400Regular'`, `'Cairo_800ExtraBold'` instead of `fonts.bold`, `fonts.regular`, `fonts.extra` from the typography tokens.
+
+> Rule 4 of `.antigravity-context`: **"No raw `StyleSheet.create` font families — use `fonts.*` from typography.ts."**
+
+This is a clear violation documented in CONCEPTS.md's "Wrong ❌" section.
+
+---
+
+### 7. `SettingsScreen` — Hardcoded font sizes outside scale
+**File:** `src/features/settings/screens/SettingsScreen.tsx:102, 148, 178, 214`
+```ts
+fontSize: 20   // st.val
+fontSize: 11   // ch.pillText, cr.sub  
+fontSize: 10   // mp.sub
+```
+The typography scale is `caption(12) / label(13) / bodySmall(14) / body(16) / h3(18) / h2(22)`. Values of `11` and `10` are below the defined scale and not in any token.
+
+---
+
+### 8. `ReviewSessionScreen` — Hardcoded RGBA values that duplicate tokens
+**File:** `src/features/srs/screens/ReviewSessionScreen.tsx:61–63, 562, 566`
+```ts
+bg: 'rgba(255,193,7,0.1)'           // warning soft — not a token
+bg: 'rgba(204,255,0,0.08)'          // should be colors.accentSoft (0.10)
+backgroundColor: 'rgba(204,255,0,0.06)'  // ← not in tokens
+borderColor: 'rgba(204,255,0,0.18)'      // ← not in tokens
+```
+`colors.accentSoft` is `rgba(204,255,0,0.10)` but `0.06` and `0.08` are used inline. No `warningSoft` used for the `صعب` rating. These should use existing color tokens.
+
+---
+
+### 9. `MemoViewScreen` — Hardcoded purple hex for poem badge
+**File:** `src/features/memo/screens/MemoViewScreen.tsx:515, 520`
+```ts
+backgroundColor: 'rgba(139,92,246,0.12)',  // ← hardcoded
+borderColor: 'rgba(139,92,246,0.25)',       // ← hardcoded
+```
+These map to `colors.catMatn` but the soft/border variants aren't in the token system. Should be expressed using the same pattern (`colors.catMatn + '1F'`) or added as tokens.
+
+---
+
+### 10. `BookSpine.tsx` — Hardcoded color
+**File:** `src/features/memo/components/BookSpine.tsx:120`
+```ts
+color: '#FAFAF0',  // "off-white — legible on dark green leather"
+```
+No token for this. Should be `colors.textPrimary` or added as a named token.
+
+---
+
+### 11. `MohkamSessionScreen` — Progress display is reversed/confusing
+**File:** `src/features/srs/screens/MohkamSessionScreen.tsx:231–233`
+```tsx
+<MText weight="regular" style={styles.progressText}>
+  {queue.length} / {currentIndex + 1}   {/* ← REVERSED */}
+</MText>
+```
+The convention across `LearningSessionScreen` and `ReviewSessionScreen` is `current / total` (e.g., `2 / 10`). Here it's `total / current` which is backwards and confusing.
+
+---
+
+## 🟡 MODERATE — Architecture & Logic Issues
+
+### 12. `MohkamSessionScreen` — Bypasses `useMemoStore`, calls service directly
+**File:** `src/features/srs/screens/MohkamSessionScreen.tsx:22`
+```ts
+import * as memoService from '../../memo/services/memo.service';
+```
+This completely bypasses the Zustand store. When `handleForgot` updates a memo's stage via `memoService.updateMemo`, the store (`useMemoStore.memos`) is not updated. Any other screen showing this memo will display stale data. The pattern should be `useMemoStore.getState().updateMemo(...)`.
+
+---
+
+### 13. `AddMemoScreen` — Edit path resets `stage`, `review_count`, `repetition_count`
+**File:** `src/features/memo/screens/AddMemoScreen.tsx:161–163`
+```ts
+const payload = {
+  ...
+  stage: 'LEARNING' as const,   // ← ALWAYS forces LEARNING
+  review_count: 0,               // ← ALWAYS resets progress
+  repetition_count: 0,           // ← ALWAYS resets progress
+  ...
+};
+if (isEditing && existingMemo) {
+  await updateMemo(existingMemo.id, payload);  // ← Destroys progress on edit!
+}
+```
+If a user edits a memo that is in `REVISION` stage with 25/30 review sessions, saving the edit **resets it back to LEARNING with 0 reps**. This is catastrophic data loss. Edit should preserve `stage`, `review_count`, `repetition_count`.
+
+---
+
+### 14. `memo.service.ts` — Uses `Crypto.randomUUID()` instead of `nanoid`
+**File:** `src/features/memo/services/memo.service.ts:4, 81`
+```ts
+import * as Crypto from 'expo-crypto';
+...
+const id = Crypto.randomUUID();
+```
+`.antigravity-context` Rule 9: **"nanoid for IDs — `import { nanoid } from 'nanoid'`"**. `nanoid` is listed in the stack, `expo-crypto` is not mentioned for this purpose.
+
+---
+
+### 15. `revisionEngine.ts` — SM-2 easeFactor always starts at 2.5 (never persisted)
+**File:** `src/features/srs/logic/revisionEngine.ts:70`
+```ts
+easeFactor: 2.5,  // stored on memo in future
+```
+The comment "stored on memo in future" has been there for multiple sessions. The DB schema and `Memo` type have no `easeFactor` column. This means SM-2 mode **loses ease factor state between sessions**. A memo rated "easy" 10 times in a row still gets `easeFactor = 2.5` because it always resets. The SM-2 interval computation is therefore broken unless this is stored.
+
+---
+
+### 16. `CONCEPTS.md` vs `types/index.ts` — stage name inconsistency
+- `CONCEPTS.md §2`: "**REVISION** (مراجعة)"
+- `types/index.ts:1`: `'LEARNING' | 'REVISION' | 'MASTERED'` ✓
+- `.antigravity-context §SRS Algorithm`: `"LEARNING → REVIEWING when reviewCount >= settings.initial_reps"` — uses **REVIEWING** (wrong!)
+- `revisionEngine.ts` result: maps to `'REVISION'` via sm2.ts Stage type ✓
+
+`.antigravity-context` has a documentation bug: it says `REVIEWING` instead of `REVISION` in the transition description. This will confuse future AI sessions and cause silent bugs.
+
+---
+
+### 17. `ReviewSessionScreen` — header count order is reversed vs. Learning
+**File:** `src/features/srs/screens/ReviewSessionScreen.tsx:293`
+```tsx
+{queue.length} / {index + 1}   {/* ← reversed: "10 / 2" instead of "2 / 10" */}
+```
+`LearningSessionScreen` shows `{index + 1} / {queueIds.length}` (current/total). ReviewSession shows it reversed. Inconsistent UX across the same app.
+
+---
+
+### 18. `settings/store/settings.store.ts` — not reviewed as part of the shared store map
+The `.antigravity-context` lists 3 stores: `useAuthStore`, `useMemoStore`, `useSettingsStore`. But there's no `useSRSStore` (mentioned in context doc) anywhere in the actual codebase. Either it was never implemented or was removed — the context doc is outdated.
+
+---
+
+## 🔵 MINOR — Polish & Code Quality
+
+### 19. `LearningSessionScreen` — `useEffect` missing dependency warnings
+```tsx
+useEffect(() => { if (memos.length === 0) fetchMemos(); }, []);
+//                                                         ↑ missing deps: fetchMemos, memos.length
+```
+This is a React hook lint warning that could cause stale-closure bugs in edge cases.
+
+---
+
+### 20. `MohkamSessionScreen` — card flip animation broken on Android
+**File:** `src/features/srs/screens/MohkamSessionScreen.tsx:115–139`
+```ts
+transform: [{ rotateX: `${spin}deg` }]
+```
+`rotateX` 3D transforms have known reliability issues on Android with React Native. Combined with `backfaceVisibility: 'hidden'` (which is inconsistently supported), the card flip effect may not work as intended. The `rotateY` axis is generally more reliable and commonly used for card-flip effects.
+
+---
+
+### 21. `RootNavigator.tsx` — `ToolsTab` renders "الإعدادات" title but is labeled "ToolsTab"
+**File:** `src/navigation/RootNavigator.tsx:50`
+```tsx
+<Tab.Screen name="ToolsTab" children={() => <PlaceholderScreen title="الإعدادات" />} />
+```
+"الإعدادات" means "Settings" in Arabic, but `SettingsScreen` is a separate route accessible only via the navigation stack. The tab is called "Tools" but displays "Settings". Naming mismatch and potential UX confusion.
+
+---
+
+### 22. Root directory — excessive junk files
+The project root contains 78 files, many of which are development artifacts:
+- `mahfod_recovered.js` — 36.8 MB (!!) recovery file
+- `bg_1.png`, `bg_2.png`, `bg_3.png` — background images in root, not in `assets/`
+- `replay_pid23500.log`, `replay_pid23748.log` — 1.7MB JVM crash logs
+- `hs_err_pid*.log` — JVM crash dumps
+- `_apk_extract/`, `_decompiled/`, `apk_recovery/` — APK reverse engineering artifacts
+- `claudememostudies/`, `stitch/`, `patches/`, `scratch/` — scratch dirs
+- Multiple `.js` recovery scripts (`apply_patch.js`, `decompile.js`, etc.)
+
+These should live outside the project or be gitignored. They bloat the workspace and could accidentally be bundled.
+
+---
+
+### 23. `AddMemoScreen` — "ربط بسلسلة" feature is non-functional
+**File:** `src/features/memo/screens/AddMemoScreen.tsx:270–279`
+```tsx
+{isLinked && (
+  <Input
+    placeholder="ابحث عن محفوظ للربط..."
+    value={relatedMemoId}
+    onChangeText={setRelatedMemoId}  // ← accepts raw text, not a memo ID
+  />
+)}
+```
+The "link to chain" feature lets users type free text as a `related_memo_id`, but there's no search/picker UI. The user cannot feasibly find a valid memo nanoid to type in. This is a stub implementation that should either be completed or hidden.
+
+---
+
+### 24. `FloatingTabBar.tsx` — hardcoded RGBA for background
+**File:** `src/shared/navigation/FloatingTabBar.tsx:53`
+```ts
+backgroundColor: 'rgba(18,18,18,0.96)',  // should be colors.surface with opacity
+```
+`#121316` is `colors.surface` — this should be expressed as a token, not inline.
+
+---
+
+### 25. `SettingsScreen` — `colors.warning` accessed with `??` fallback in RATINGS
+**File:** `src/features/srs/screens/ReviewSessionScreen.tsx:61`
+```ts
+color: colors.warning ?? colors.accent
+```
+`colors.warning` IS defined (`'#ffaa00'`), so the `??` is never triggered. But the `warningSoft` equivalent (`'rgba(255,193,7,0.1)'`) is used raw instead of `colors.warningSoft`. Inconsistent handling of the warning semantic color.
+
+---
+
+## Summary Table
+
+| # | Severity | Location | Issue |
+|---|---|---|---|
+| 1 | 🔴 Critical | `AddMemoScreen` | Wrong redirect after create (goes to REVISION screen for a LEARNING memo) |
+| 2 | 🔴 Critical | `memo.service.ts` | `recordRepetition` incorrectly increments `review_count` in wrong branch |
+| 3 | 🔴 Critical | `MohkamSessionScreen` | Bypasses `revisionEngine`, invents scheduling, resets review_count to 0 |
+| 4 | 🔴 Critical | `AddMemoScreen` | Edit path destroys memo's `stage`/`review_count`/`repetition_count` |
+| 5 | 🔴 Critical | `revisionEngine.ts` | SM-2 easeFactor never persisted — SM-2 mode is functionally broken |
+| 6 | 🟠 Significant | `ReviewSessionScreen` | Stale queue snapshot; inconsistent with LearningSession pattern |
+| 7 | 🟠 Significant | `SettingsScreen` | 5 hardcoded font family strings violating `fonts.*` rule |
+| 8 | 🟠 Significant | Multiple screens | Hardcoded `rgba()` values that bypass or diverge from token system |
+| 9 | 🟠 Significant | `MohkamSessionScreen` | Direct service call bypasses Zustand store → stale UI state |
+| 10 | 🟠 Significant | `.antigravity-context` | `REVIEWING` vs `REVISION` doc bug → confuses future AI sessions |
+| 11 | 🟡 Moderate | `MohkamSessionScreen` | Progress counter is reversed (`total/current` instead of `current/total`) |
+| 12 | 🟡 Moderate | `ReviewSessionScreen` | Header count also reversed vs. LearningSession |
+| 13 | 🟡 Moderate | `memo.service.ts` | Uses `Crypto.randomUUID()` instead of mandated `nanoid` |
+| 14 | 🟡 Moderate | `RootNavigator.tsx` | ToolsTab shows "الإعدادات" but is named "Tools", creating confusion |
+| 15 | 🟡 Moderate | `AddMemoScreen` | "ربط بسلسلة" is a non-functional stub |
+| 16 | 🔵 Minor | `LearningSessionScreen` | Missing `useEffect` dependency array entries |
+| 17 | 🔵 Minor | `MohkamSessionScreen` | `rotateX` flip may not work reliably on Android |
+| 18 | 🔵 Minor | `BookSpine.tsx` | One hardcoded `'#FAFAF0'` color |
+| 19 | 🔵 Minor | Root dir | 78 root-level files — junk recovery files, logs, scripts bloating workspace |
+| 20 | 🔵 Minor | Context docs | `useSRSStore` referenced in docs but doesn't exist in code |
+
+---
+
+## What's Done Well ✅
+
+- **Design system discipline is good overall** — `colors.*` tokens used consistently in the majority of code; no raw `<Text>` components found
+- **`LearningSessionScreen`** — excellent architecture: ID-only queue resolved against live store is correct and reactive
+- **RTL-first** — `flexDirection: 'row-reverse'`, `textAlign: 'right'`, `writingDirection: 'rtl'` applied consistently
+- **`revisionEngine.ts` + `sm2.ts`** — clean separation, well-documented (modulo the easeFactor persisting gap)
+- **`MemoViewScreen`** — clean, complete, follows all design rules; date helper with Latin digits is a nice touch
+- **`SettingsScreen`** — excellent component decomposition (Stepper, Card, CardHeader, CardRow, ModePicker) and fully wired to store
+- **Offline-first pattern** — `offlineQueue` + Drizzle + Supabase sync architecture is sound
+- **Haptics everywhere** — interactive elements consistently trigger feedback
+- **Reanimated throughout** — no `Animated` API from RN detected; Reanimated + Moti used correctly

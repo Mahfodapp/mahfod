@@ -1,0 +1,46 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        ".",
+        "-p",
+        "*test.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.suggest.autoImports": true,
+
+    "files.associations": {
+        "*.antigravity-context": "markdown"
+    },
+
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/.expo": true,
+        "**/dist": true,
+        "**/_apk_extract": true,
+        "**/_decompiled": true,
+        "**/android_backup": true,
+        "**/mahfod_recovered.js": true
+    },
+
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+
+    "github.copilot.chat.codeGeneration.instructions": [
+        {
+            "file": ".antigravity-context"
+        },
+        {
+            "file": "CONCEPTS.md"
+        }
+    ]
+}
