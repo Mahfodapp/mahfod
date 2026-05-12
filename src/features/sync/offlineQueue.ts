@@ -19,7 +19,7 @@ export interface SyncOp {
 
 const QUEUE_KEY = 'mahfod_sync_queue';
 
-let debounceTimer: NodeJS.Timeout | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function debouncedFlushSyncQueue() {
   if (debounceTimer) clearTimeout(debounceTimer);

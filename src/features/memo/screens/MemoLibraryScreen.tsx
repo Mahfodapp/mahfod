@@ -72,12 +72,18 @@ export default function MemoLibraryScreen() {
     );
   }, [memos, search]);
 
-  const counts = useMemo(() => ({
-    ALL:       filteredMemosBySearch.length,
-    LEARNING:  filteredMemosBySearch.filter(m => m.stage === 'LEARNING').length,
-    REVISION: filteredMemosBySearch.filter(m => m.stage === 'REVISION').length,
-    MASTERED:  filteredMemosBySearch.filter(m => m.stage === 'MASTERED').length,
-  }), [filteredMemosBySearch]);
+  const counts = useMemo(() => {
+    return filteredMemosBySearch.reduce(
+      (acc, m) => {
+        acc.ALL++;
+        if (m.stage === 'LEARNING') acc.LEARNING++;
+        else if (m.stage === 'REVISION') acc.REVISION++;
+        else if (m.stage === 'MASTERED') acc.MASTERED++;
+        return acc;
+      },
+      { ALL: 0, LEARNING: 0, REVISION: 0, MASTERED: 0 }
+    );
+  }, [filteredMemosBySearch]);
 
   const finalMemos = useMemo(() => 
     activeFilter === 'ALL'
@@ -201,7 +207,7 @@ export default function MemoLibraryScreen() {
       </View>
 
       {/* ── Scrollable content ── */}
-      {isLoading ? (
+      {isLoading && memos.length === 0 ? (
         <View style={styles.loader}>
           <ActivityIndicator color={colors.accent} size="large" />
           <MText weight="regular" style={styles.loadingText}>

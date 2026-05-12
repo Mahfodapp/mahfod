@@ -3,16 +3,12 @@
  * wooden shelf plank (assets/shelf.png).
  */
 import React from 'react';
-import { View, Image, StyleSheet, Dimensions } from 'react-native';
-import { BookSpine, BOOK_W, BOOK_H } from './BookSpine';
+import { View, Image, StyleSheet, useWindowDimensions } from 'react-native';
+import { BookSpine, useBookDimensions } from './BookSpine';
 import { Memo } from '@/types';
 
 // Real wooden shelf photograph
-const SHELF_IMG = require('../../../../assets/shelf_bg.png');
-
-const { width: SW } = Dimensions.get('window');
-// Shelf image fills full screen width; height is proportional (the source is ~8:1)
-const SHELF_H = Math.round((SW / 8) * 1.1);
+const SHELF_IMG = require('@/../assets/shelf_bg.png');
 
 interface RowProps {
   memos: Memo[];
@@ -22,6 +18,10 @@ interface RowProps {
 }
 
 export function LibraryShelfRow({ memos, onPress, onLongPress, rowIndex }: RowProps) {
+  const { width: SW } = useWindowDimensions();
+  const SHELF_H = Math.round((SW / 8) * 1.1);
+  const { BOOK_W, BOOK_H } = useBookDimensions();
+
   // Always fill 4 slots — empty ones are invisible spacers
   const slots = [
     ...memos,
@@ -43,7 +43,7 @@ export function LibraryShelfRow({ memos, onPress, onLongPress, rowIndex }: RowPr
               index={rowIndex * 4 + i}
             />
           ) : (
-            <View key={`empty-${rowIndex}-${i}`} style={styles.emptySlot} />
+            <View key={`empty-${rowIndex}-${i}`} style={[styles.emptySlot, { width: BOOK_W, height: BOOK_H }]} />
           ),
         )}
       </View>
@@ -72,8 +72,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   emptySlot: {
-    width: BOOK_W,
-    height: BOOK_H,
   },
   shelfImage: {
     width: '100%',

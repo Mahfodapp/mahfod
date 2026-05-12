@@ -9,7 +9,7 @@
  * at a premium, readable size. Exported so LibraryShelfRow can match.
  */
 import React, { useCallback } from 'react';
-import { Pressable, StyleSheet, View, Image, Dimensions } from 'react-native';
+import { Pressable, StyleSheet, View, Image, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,7 +22,14 @@ import { Memo } from '@/types';
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // The book PNG asset (green leather spine)
-const BOOK_IMG = require('../../../../assets/book.png');
+const BOOK_IMG = require('@/../assets/book.png');
+
+export function useBookDimensions() {
+  const { width: SCREEN_W } = useWindowDimensions();
+  const BOOK_W = Math.floor((SCREEN_W - 10) / 4);
+  const BOOK_H = Math.floor(BOOK_W * 2.1);
+  return { BOOK_W, BOOK_H };
+}
 
 interface Props {
   memo: Memo;
@@ -38,6 +45,7 @@ const STAGE_DOT_COLOR: Record<string, string> = {
 };
 
 export function BookSpine({ memo, onPress, onLongPress, index = 0 }: Props) {
+  const { BOOK_W, BOOK_H } = useBookDimensions();
   const translateY = useSharedValue(0);
   const scale      = useSharedValue(1);
   const dotColor   = STAGE_DOT_COLOR[memo.stage] ?? colors.textMuted;
@@ -63,7 +71,7 @@ export function BookSpine({ memo, onPress, onLongPress, index = 0 }: Props) {
 
   return (
     <AnimatedPressable
-      style={[styles.wrapper, animatedStyle]}
+      style={[styles.wrapper, { width: BOOK_W, height: BOOK_H }, animatedStyle]}
       onPress={() => onPress?.(memo)}
       onLongPress={() => onLongPress?.(memo)}
       onPressIn={handlePressIn}
@@ -71,10 +79,10 @@ export function BookSpine({ memo, onPress, onLongPress, index = 0 }: Props) {
       delayLongPress={400}
     >
       {/* Real book image */}
-      <Image source={BOOK_IMG} style={styles.bookImage} resizeMode="stretch" />
+      <Image source={BOOK_IMG} style={[styles.bookImage, { width: BOOK_W + 28, height: BOOK_H }]} resizeMode="stretch" />
 
       {/* Rotated title overlay */}
-      <View style={styles.titleOverlay} pointerEvents="none">
+      <View style={[styles.titleOverlay, { width: BOOK_W + 5, height: BOOK_H }]} pointerEvents="none">
         <MText
           weight="semi"
           numberOfLines={3}
@@ -93,14 +101,9 @@ export function BookSpine({ memo, onPress, onLongPress, index = 0 }: Props) {
 // ─── Responsive book dimensions ────────────────────────────────────────────
 // 4 books per shelf row, with 16px horizontal padding on each side + 12px
 // internal padding per side = ~56px total horizontal offset, divided evenly.
-const { width: SCREEN_W } = Dimensions.get('window');
-export const BOOK_W = Math.floor((SCREEN_W - 10) / 4);
-export const BOOK_H = Math.floor(BOOK_W * 2.1); // ~1.5:1 spine aspect ratio (thicker, not longer)
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: BOOK_W,
-    height: BOOK_H,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
@@ -108,16 +111,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: -14, // shift left to keep it centered while making it wider
-    width: BOOK_W + 28, // stretch the image to be wider than the wrapper
-    height: BOOK_H,
   },
   titleOverlay: {
     position: 'absolute',
     // center the rotated text block inside the book spine area
     top: 0,
     left: 0,
-    width: BOOK_W +5,
-    height: BOOK_H,
     alignItems: 'center',
     justifyContent: 'center',
     // rotate so text runs bottom-to-top like a real book spine

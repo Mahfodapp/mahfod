@@ -1,8 +1,9 @@
-import { NativeEventEmitter, NativeModules, EmitterSubscription } from 'react-native';
-import { showFloatingBubble, hideFloatingBubble, checkPermission, initialize } from 'react-native-floating-bubble';
+import { NativeEventEmitter, NativeModules, EmitterSubscription, Vibration } from 'react-native';
+import { showFloatingBubble, hideFloatingBubble, checkPermission, requestPermission, initialize, setBubbleText, triggerLastRepSequence } from 'react-native-floating-bubble';
 
 class FloatingBubbleService {
   private disabled: boolean = false;
+  private isShown: boolean = false;
   private listeners: EmitterSubscription[] = [];
 
   async prewarm() {
@@ -12,6 +13,16 @@ class FloatingBubbleService {
     } catch (error) {
       console.warn('Bubble prewarm failed', error);
       this.disabled = true;
+    }
+  }
+
+  async requestBubblePermission() {
+    if (this.disabled) return false;
+    try {
+      await requestPermission();
+      return true;
+    } catch {
+      return false;
     }
   }
 
@@ -36,9 +47,10 @@ class FloatingBubbleService {
       if (!isInitialized) return;
 
       await showFloatingBubble(x, y);
-      // Assuming setBubbleText is exposed or handled natively? 
-      // Some forks of RNFloatingBubble have it. 
-      // If not, we just show it.
+      this.isShown = true;
+      if (setBubbleText) {
+        setBubbleText(text);
+      }
     } catch (error) {
       console.warn('showBubble failed', error);
     }
@@ -48,8 +60,15 @@ class FloatingBubbleService {
     if (this.disabled) return;
     try {
       await hideFloatingBubble();
+      this.isShown = false;
     } catch (error) {
       console.warn('hideBubble failed', error);
+    }
+  }
+
+  updateText(text: string) {
+    if (!this.disabled && this.isShown && setBubbleText) {
+      setBubbleText(text);
     }
   }
 

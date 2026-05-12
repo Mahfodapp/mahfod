@@ -20,6 +20,8 @@ export interface Memo {
   last_reviewed_at?: string | null;
   is_favorite: boolean;
   is_poem: boolean;
+  deleted?: boolean;
+  deleted_at?: string;
   created_at?: string;
   updated_at?: string;
 }

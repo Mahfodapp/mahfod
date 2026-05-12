@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Pressable, Image, Dimensions, Modal } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Pressable, Image, Dimensions, Modal, AppState, AppStateStatus, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MotiView } from 'moti';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, withSequence } from 'react-native-reanimated';
@@ -17,6 +17,7 @@ import { Star, X, BookOpen, Volume2, Pencil, ZoomIn, ZoomOut, ChevronDown, Maxim
 import AudioWaveform from '@/shared/ui/AudioWaveform';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import FloatingBubbleService from '../services/FloatingBubbleService';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 type RoutePropType = RouteProp<RootStackParamList, 'LearningSessionScreen'>;
@@ -137,6 +138,47 @@ export function LearningSessionScreen() {
     };
   }, [done, queueIds.length]);
 
+  useEffect(() => {
+    FloatingBubbleService.requestBubblePermission().catch(() => {});
+
+    FloatingBubbleService.setupListeners(
+      async () => {
+        // On bubble press
+        Vibration.vibrate(40);
+        await handleRepeat();
+      },
+      () => {
+        // On bubble removed
+        FloatingBubbleService.hideBubble();
+      }
+    );
+
+    return () => {
+      FloatingBubbleService.clearListeners();
+      FloatingBubbleService.hideBubble();
+    };
+  }, [handleRepeat]);
+
+  useEffect(() => {
+    FloatingBubbleService.updateText(`${currentReps}/${initialReps}`);
+  }, [currentReps, initialReps]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        if (!done && queueIds.length > 0) {
+          FloatingBubbleService.showBubble(100, 200, `${currentReps}/${initialReps}`);
+        }
+      } else if (nextAppState === 'active') {
+        FloatingBubbleService.hideBubble();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [done, queueIds.length, currentReps, initialReps]);
+
   const queueProgressAnim = useSharedValue(0);
   useEffect(() => {
     const pct = queueIds.length > 0 ? (index + 1) / queueIds.length : 0;
@@ -190,6 +232,7 @@ export function LearningSessionScreen() {
 
   const handlePressIn = useCallback(() => {
     if (isRepeatLocked) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     btnScale.value = withSpring(0.94, { damping: 16, stiffness: 400 });
   }, [isRepeatLocked, btnScale]);
 
@@ -197,25 +240,44 @@ export function LearningSessionScreen() {
     btnScale.value = withSpring(1, { damping: 12, stiffness: 300 });
   }, [btnScale]);
 
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
   const handleRepeat = useCallback(async () => {
     if (isBusy.current || !memo || isRepeatLocked) return;
     isBusy.current = true;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    // Only wait visually if app is active. Background Android throttles setTimeout indefinitely.
+    if (AppState.currentState === 'active') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await new Promise(r => setTimeout(r, 150));
+      if (!mounted.current) {
+        isBusy.current = false;
+        return;
+      }
+    }
 
-    setTimeout(async () => {
-      try {
-        const updated = await recordRepetition(memo.id);
-        if (updated && updated.stage === 'REVISION') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          setPromoted(p => [...p, memo.id]);
-          advance();
-        } else if (memo.audio_url) {
-          replaySound(memo.audio_url);
-        }
-      } finally {
+    try {
+      const updated = await recordRepetition(memo.id);
+      if (!mounted.current) return;
+
+      if (updated && updated.stage === 'REVISION') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setPromoted(p => [...p, memo.id]);
+        advance();
+      } else if (memo.audio_url) {
+        replaySound(memo.audio_url);
+      }
+    } catch (e) {
+      console.error('[LearningSession] handleRepeat failed', e);
+    } finally {
+      if (mounted.current) {
         isBusy.current = false;
       }
-    }, 150);
+    }
   }, [memo, isRepeatLocked, recordRepetition, advance, replaySound]);
 
   const handleCancel = useCallback(() => {

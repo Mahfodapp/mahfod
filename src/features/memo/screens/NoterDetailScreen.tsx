@@ -244,7 +244,6 @@ export default function NoterDetailScreen() {
           <View style={styles.searchBar}>
             <Search size={14} color={colors.textMuted} />
             <TextInput
-              style={styles.searchInput}
               placeholder="بحث..."
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
@@ -343,7 +342,6 @@ export default function NoterDetailScreen() {
               keyboardType="numeric"
             />
             <BottomSheetTextInput
-              style={styles.mainInput}
               placeholder="نص الملاحظة..."
               placeholderTextColor={colors.textMuted}
               multiline

@@ -1,0 +1,14 @@
+﻿src/features/memo/components/FavMemoCarousel.tsx(34,44): error TS2304: Cannot find name 'Memo'.
+src/features/memo/screens/NoterDetailScreen.tsx(253,15): error TS17001: JSX elements cannot have multiple attributes with the same name.
+src/features/memo/screens/NoterDetailScreen.tsx(353,15): error TS17001: JSX elements cannot have multiple attributes with the same name.
+src/features/settings/screens/SettingsScreen.tsx(55,16): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/features/settings/screens/SettingsScreen.tsx(55,16): error TS2345: Argument of type '(v: any) => any' is not assignable to parameter of type 'number'.
+src/features/srs/screens/MohkamSessionScreen.tsx(61,53): error TS2339: Property 'deleted' does not exist on type 'Memo'.
+src/features/srs/screens/MohkamSessionScreen.tsx(80,51): error TS2339: Property 'deleted' does not exist on type 'Memo'.
+src/features/srs/screens/ReviewSessionScreen.tsx(333,14): error TS18048: 'memo' is possibly 'undefined'.
+src/features/srs/screens/ReviewSessionScreen.tsx(392,12): error TS18048: 'memo' is possibly 'undefined'.
+src/features/srs/screens/ReviewSessionScreen.tsx(395,18): error TS18048: 'memo' is possibly 'undefined'.
+src/features/srs/screens/ReviewSessionScreen.tsx(399,18): error TS18048: 'memo' is possibly 'undefined'.
+src/features/srs/screens/ReviewSessionScreen.tsx(404,16): error TS18048: 'memo' is possibly 'undefined'.
+src/features/sync/offlineQueue.ts(26,3): error TS2322: Type 'number' is not assignable to type 'Timeout'.
+src/shared/theme/surfaces.ts(4,22): error TS2339: Property 'background' does not exist on type '{ readonly primary: "#0D0E10"; readonly primaryMid: "#121316"; readonly primaryLight: "#181A1C"; readonly surface: "#121316"; readonly surfaceRaised: "#181A1C"; readonly surfaceHigh: "#1E2022"; ... 43 more ...; readonly transparent: "transparent"; }'.

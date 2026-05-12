@@ -18,6 +18,7 @@ import * as Haptics from 'expo-haptics';
 import { useMemoStore } from '../store/memo.store';
 import { colors, spacing, radius, fonts } from '@/shared/theme';
 import IslamicPatternBg from '@/shared/ui/IslamicPatternBg';
+import { Memo } from '@/types';
 
 const STAGE_COLORS: Record<string, string> = {
   LEARNING: colors.stageLearning,

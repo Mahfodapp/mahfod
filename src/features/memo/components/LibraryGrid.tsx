@@ -11,8 +11,8 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  Animated,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, runOnJS } from 'react-native-reanimated';
 import { MText } from '@/shared/ui/MText';
 import { colors, spacing, radius } from '@/shared/theme';
 import { Memo } from '@/types';
@@ -34,7 +34,7 @@ interface Props {
 
 export function LibraryGrid({ memos, viewMode, onMemoPress, onMemoEdit, onMemoDelete }: Props) {
   const [selectedMemo, setSelectedMemo] = React.useState<Memo | null>(null);
-  const slideAnim = React.useRef(new Animated.Value(300)).current;
+  const slideAnim = useSharedValue(300);
 
   // Split into rows of 4 for shelf rendering
   const rows = useMemo(() => {
@@ -49,25 +49,22 @@ export function LibraryGrid({ memos, viewMode, onMemoPress, onMemoEdit, onMemoDe
 
   const openPopup = (memo: Memo) => {
     setSelectedMemo(memo);
-    slideAnim.setValue(300);
-    Animated.spring(slideAnim, {
-      toValue: 0,
-      useNativeDriver: true,
-      tension: 65,
-      friction: 11,
-    }).start();
+    slideAnim.value = 300;
+    slideAnim.value = withSpring(0, { damping: 11, stiffness: 65 });
   };
 
   const closePopup = (cb?: () => void) => {
-    Animated.timing(slideAnim, {
-      toValue: 300,
-      duration: 220,
-      useNativeDriver: true,
-    }).start(() => {
-      setSelectedMemo(null);
-      cb?.();
+    slideAnim.value = withTiming(300, { duration: 220 }, (finished) => {
+      if (finished) {
+        runOnJS(setSelectedMemo)(null);
+        if (cb) runOnJS(cb)();
+      }
     });
   };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: slideAnim.value }],
+  }));
 
   const handleLongPress = (memo: Memo) => openPopup(memo);
 
@@ -132,7 +129,7 @@ export function LibraryGrid({ memos, viewMode, onMemoPress, onMemoEdit, onMemoDe
           <Animated.View
             style={[
               styles.sheet,
-              { transform: [{ translateY: slideAnim }] },
+              animatedStyle,
             ]}
           >
             {/* drag handle */}

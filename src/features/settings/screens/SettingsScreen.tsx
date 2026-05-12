@@ -40,19 +40,28 @@ function Stepper({
   const [draft,   setDraft]   = useState('');
   const inputRef  = useRef<TextInput>(null);
   const repeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const valRef    = useRef(value);
+
+  useEffect(() => {
+    valRef.current = value;
+  }, [value]);
 
   const stop = () => { if (repeatRef.current) { clearInterval(repeatRef.current); repeatRef.current = null; } };
 
   const go = (dir: 1 | -1) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onChange(Math.min(max, Math.max(min, value + dir * step)));
+    const nextVal = Math.min(max, Math.max(min, valRef.current + dir * step));
+    valRef.current = nextVal;
+    onChange(nextVal);
   };
 
   const startRepeat = (dir: 1 | -1) => {
     go(dir);
     repeatRef.current = setInterval(() => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      onChange(v => Math.min(max, Math.max(min, v + dir * step)) as any);
+      const nextVal = Math.min(max, Math.max(min, valRef.current + dir * step));
+      valRef.current = nextVal;
+      onChange(nextVal);
     }, 110);
   };
 

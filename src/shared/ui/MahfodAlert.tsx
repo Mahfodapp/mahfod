@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, runOnJS } from 'react-native-reanimated';
 import { useAlertStore } from '../store/alert.store';
 import { colors, spacing, radius } from '../theme';
 import { MText } from './MText';
@@ -7,47 +8,33 @@ import { MText } from './MText';
 export function MahfodAlert() {
   const { visible, title, message, buttons, hideAlert } = useAlertStore();
   const [show, setShow] = useState(visible);
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.9)).current;
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.9);
 
   useEffect(() => {
     if (visible) {
       setShow(true);
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scale, {
-          toValue: 1,
-          friction: 8,
-          tension: 65,
-          useNativeDriver: true,
-        })
-      ]).start();
+      opacity.value = withTiming(1, { duration: 200 });
+      scale.value = withSpring(1, { damping: 14, stiffness: 200 });
     } else {
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scale, {
-          toValue: 0.9,
-          duration: 150,
-          useNativeDriver: true,
-        })
-      ]).start(() => setShow(false));
+      opacity.value = withTiming(0, { duration: 150 });
+      scale.value = withTiming(0.9, { duration: 150 }, (finished) => {
+        if (finished) runOnJS(setShow)(false);
+      });
     }
   }, [visible]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
 
   if (!show) return null;
 
   return (
     <Modal transparent visible={show} onRequestClose={hideAlert} animationType="none" statusBarTranslucent>
       <View style={styles.overlay}>
-        <Animated.View style={[styles.container, { opacity, transform: [{ scale }] }]}>
+        <Animated.View style={[styles.container, animatedStyle]}>
           <MText weight="bold" style={styles.title}>{title}</MText>
           {!!message && (
             <MText weight="regular" style={styles.message}>{message}</MText>

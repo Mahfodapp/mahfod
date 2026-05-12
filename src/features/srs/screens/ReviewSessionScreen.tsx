@@ -273,8 +273,20 @@ export default function ReviewSessionScreen() {
 
   // ── Active session ─────────────────────────────────────────────────────────
   // `memo` is already declared on line 114 — live from store, no snapshot needed
-  const isFav     = memo?.is_favorite ?? false;
-  const reviewDay = (memo?.review_count ?? 0) + 1;
+  
+  if (!memo) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top','left','right']}>
+        <MahfodPatternBackground />
+        <View style={styles.centerState}>
+          <MText weight="regular" style={styles.doneSub}>جاري التحميل...</MText>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const isFav     = memo.is_favorite;
+  const reviewDay = (memo.review_count ?? 0) + 1;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top','left','right']}>

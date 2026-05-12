@@ -1,7 +1,7 @@
 import { colors } from './colors';
 
 export const surfaces = {
-  background: colors.background,
+  background: colors.primary,
   level1: colors.surface,
   level2: colors.surfaceRaised,
   level3: colors.surfaceHigh,
