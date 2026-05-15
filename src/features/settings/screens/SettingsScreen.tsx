@@ -15,13 +15,13 @@ import { useSettingsStore } from '../store/settings.store';
 import { useAuthStore } from '../../auth/store/auth.store';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import type { RevisionMode } from '@/types';
 import {
   BookOpen, RefreshCw, Trophy, Bell, LogOut,
   User, Calendar, BrainCircuit, Repeat2,
   ListChecks, AlarmClock, Dumbbell, Info,
-  ChevronLeft, Minus, Plus, Languages,
+  ChevronLeft, Minus, Plus, Languages, EyeOff,
 } from 'lucide-react-native';
+import type { RevisionMode, VanishMode } from '@/types';
 import i18n from '@/shared/i18n';
 import { MMKV } from 'react-native-mmkv';
 
@@ -287,6 +287,65 @@ const si = StyleSheet.create({
   text: { flex: 1, ...typography.caption, color: colors.accent, textAlign: 'left', lineHeight: 19 },
 });
 
+// ─── Vanish Mode Picker ───────────────────────────────────────────────────────────────────
+
+const VANISH_OPTIONS: { key: VanishMode; label: string; sub: string }[] = [
+  { key: 'none',    label: 'بدون تلاشي',   sub: 'النص يظهر دائماً' },
+  { key: 'opacity', label: 'تلاشي تدريجي', sub: 'يختفي تدريجياً' },
+  { key: 'sudden',  label: 'تلاشي مفاجئ',  sub: 'يختفي دفعةً واحدة' },
+  { key: 'words',   label: 'كلمات عشوائية', sub: 'تختفي كلمات' },
+];
+
+function VanishModePicker({ value, onChange }: { value: VanishMode; onChange: (m: VanishMode) => void }) {
+  return (
+    <View style={vm.wrap}>
+      <View style={vm.row}>
+        {VANISH_OPTIONS.slice(0, 2).map(opt => {
+          const active = value === opt.key;
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              style={[vm.opt, active && vm.optActive]}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onChange(opt.key); }}
+              activeOpacity={0.8}
+            >
+              <MText weight="bold" style={[vm.label, active && vm.labelActive]}>{opt.label}</MText>
+              <MText weight="regular" style={[vm.sub, active && vm.subActive]}>{opt.sub}</MText>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      <View style={vm.row}>
+        {VANISH_OPTIONS.slice(2, 4).map(opt => {
+          const active = value === opt.key;
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              style={[vm.opt, active && vm.optActive]}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onChange(opt.key); }}
+              activeOpacity={0.8}
+            >
+              <MText weight="bold" style={[vm.label, active && vm.labelActive]}>{opt.label}</MText>
+              <MText weight="regular" style={[vm.sub, active && vm.subActive]}>{opt.sub}</MText>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const vm = StyleSheet.create({
+  wrap:       { gap: spacing.xs, marginHorizontal: spacing.md, marginBottom: spacing.md },
+  row:        { flexDirection: 'row', gap: spacing.xs },
+  opt:        { flex: 1, paddingVertical: spacing.sm, paddingHorizontal: spacing.xs, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignItems: 'center', gap: 3 },
+  optActive:  { backgroundColor: colors.accent, borderColor: colors.accent },
+  label:      { ...typography.label, color: colors.textMuted, textAlign: 'center' },
+  labelActive:{ color: colors.primary },
+  sub:        { ...typography.caption, color: colors.textMuted, textAlign: 'center', fontFamily: fonts.regular },
+  subActive:  { color: colors.primary },
+});
+
 // ─── Screen ────────────────────────────────────────────────────────────────────
 
 export default function SettingsScreen() {
@@ -491,6 +550,43 @@ export default function SettingsScreen() {
               trackColor={{ true: colors.accent, false: colors.surfaceBright }}
             />
           </CardRow>
+        </Card>
+
+        {/* ══ وضع التلاشي ══════════════════════════════════════════════════════ */}
+        <Card delay={310}>
+          <CardHeader
+            icon={<EyeOff size={16} color={colors.textSecondary} />}
+            label="وضع التلاشي"
+            color={colors.textSecondary}
+          />
+          <VanishModePicker
+            value={(settings.vanish_mode ?? 'none') as VanishMode}
+            onChange={m => update({ vanish_mode: m })}
+          />
+          {/* Reps trigger — hidden when mode is 'none' */}
+          {(settings.vanish_mode ?? 'none') !== 'none' && (
+            <CardRow
+              icon={<Repeat2 size={16} color={colors.textSecondary} />}
+              iconColor={colors.textSecondary}
+              title="عدد التكرارات قبل التلاشي"
+              subtitle="كم تكرار يمر قبل أن يبدأ وضع التلاشي"
+              last
+            >
+              <Stepper
+                value={settings.vanish_reps ?? 3}
+                min={1}
+                max={50}
+                onChange={v => update({ vanish_reps: v })}
+              />
+            </CardRow>
+          )}
+          {(settings.vanish_mode ?? 'none') === 'none' && (
+            <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.md }}>
+              <MText weight="regular" style={{ ...typography.caption, color: colors.textMuted, textAlign: 'left' }}>
+                اختر وضع تلاشي لتحدي ذاكرتك خلال جلسات الحفظ والمراجعة.
+              </MText>
+            </View>
+          )}
         </Card>
 
         {/* ══ عن التطبيق ══════════════════════════════════════════════════ */}

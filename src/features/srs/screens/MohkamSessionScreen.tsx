@@ -25,6 +25,8 @@ import { useMemoStore } from '../../memo/store/memo.store';
 import { useSettingsStore } from '../../settings/store/settings.store';
 import { addDays } from '../logic/revisionEngine';
 import { X, Eye, Check, XCircle, Award, Star } from 'lucide-react-native';
+import type { VanishMode } from '@/types';
+import { VanishText } from '../components/VanishText';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -51,6 +53,23 @@ export default function MohkamSessionScreen() {
 
   const [rememberedCount, setRememberedCount] = useState(0);
   const [forgotCount, setForgotCount] = useState(0);
+
+  // ── Vanish mode ─────────────────────────────────────────────────────────────
+  // Vanish triggers the moment the card is flipped (isRevealed = true).
+  // Eye button lets the user re-show if needed. Audio is never affected.
+  const vanishMode = (settings.vanish_mode ?? 'none') as VanishMode;
+  const vanishReps = settings.vanish_reps ?? 3;
+  const [isVanishRevealed, setIsVanishRevealed] = useState(false);
+  // Reset when advancing to the next card
+  const resetVanish = () => setIsVanishRevealed(false);
+
+  // In Mohkam there is one "event" per card (the reveal), so we vanish
+  // immediately when the card flips — the reps threshold is treated as 0.
+  const vanishThresholdMet = vanishMode !== 'none' && isRevealed;
+  const isVanishActive  = vanishThresholdMet && !isVanishRevealed;
+  const textImgOpacity  = isVanishActive && vanishMode === 'opacity' ? 0.07 : 1;
+  const textImgHidden   = isVanishActive && vanishMode === 'sudden';
+  const isWordsMode     = isVanishActive && vanishMode === 'words';
 
   useEffect(() => {
     const init = async () => {
@@ -109,6 +128,7 @@ export default function MohkamSessionScreen() {
   const advance = useCallback(() => {
     setIsRevealed(false);
     flip.value = 0;
+    resetVanish();
     if (currentIndex + 1 >= queueIds.length) {
       setSessionComplete(true);
     } else {
@@ -290,18 +310,56 @@ export default function MohkamSessionScreen() {
           </Animated.View>
 
           <Animated.View style={backStyle} pointerEvents={!isRevealed ? 'none' : 'auto'}>
-            {memo.is_poem ? (
-              <View>
-                <MText weight="bold" style={styles.revealedText}>
-                  {memo.text.split('***')[0]?.trim()}
-                </MText>
-                <View style={styles.poemDivider} />
-                <MText weight="bold" style={styles.revealedText}>
-                  {memo.text.split('***')[1]?.trim()}
-                </MText>
+            {/* Vanish mode applied to revealed text; words mode skips images */}
+            {textImgHidden ? null : (
+              <View style={{ opacity: textImgOpacity }}>
+                {memo.is_poem ? (
+                  <View>
+                    {isWordsMode ? (
+                      <VanishText
+                        text={memo.text.split('***')[0]?.trim() ?? ''}
+                        memoId={memo.id}
+                        style={[styles.revealedText,
+                          memo.font_size ? { fontSize: memo.font_size } : undefined,
+                          memo.font_family ? { fontFamily: fonts[memo.font_family as keyof typeof fonts] } : undefined,
+                        ]}
+                      />
+                    ) : (
+                      <MText weight="bold" style={[styles.revealedText, memo.font_size ? { fontSize: memo.font_size } : undefined, memo.font_family ? { fontFamily: fonts[memo.font_family as keyof typeof fonts] } : undefined]}>
+                        {memo.text.split('***')[0]?.trim()}
+                      </MText>
+                    )}
+                    <View style={styles.poemDivider} />
+                    {isWordsMode ? (
+                      <VanishText
+                        text={memo.text.split('***')[1]?.trim() ?? ''}
+                        memoId={memo.id + '-2'}
+                        style={[styles.revealedText,
+                          memo.font_size ? { fontSize: memo.font_size } : undefined,
+                          memo.font_family ? { fontFamily: fonts[memo.font_family as keyof typeof fonts] } : undefined,
+                        ]}
+                      />
+                    ) : (
+                      <MText weight="bold" style={[styles.revealedText, memo.font_size ? { fontSize: memo.font_size } : undefined, memo.font_family ? { fontFamily: fonts[memo.font_family as keyof typeof fonts] } : undefined]}>
+                        {memo.text.split('***')[1]?.trim()}
+                      </MText>
+                    )}
+                  </View>
+                ) : (
+                  isWordsMode ? (
+                    <VanishText
+                      text={memo.text}
+                      memoId={memo.id}
+                      style={[styles.revealedText,
+                        memo.font_size ? { fontSize: memo.font_size } : undefined,
+                        memo.font_family ? { fontFamily: fonts[memo.font_family as keyof typeof fonts] } : undefined,
+                      ]}
+                    />
+                  ) : (
+                    <MText weight="bold" style={[styles.revealedText, memo.font_size ? { fontSize: memo.font_size } : undefined, memo.font_family ? { fontFamily: fonts[memo.font_family as keyof typeof fonts] } : undefined]}>{memo.text}</MText>
+                  )
+                )}
               </View>
-            ) : (
-              <MText weight="bold" style={styles.revealedText}>{memo.text}</MText>
             )}
           </Animated.View>
         </View>
@@ -315,16 +373,29 @@ export default function MohkamSessionScreen() {
             <MText weight="bold" style={styles.revealBtnText}>إظهار النص</MText>
           </TouchableOpacity>
         ) : (
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.successBtn} onPress={handleRemembered} activeOpacity={0.85}>
-              <Check color={colors.success} size={24} />
-              <MText weight="bold" style={styles.successBtnText}>تذكرت</MText>
-            </TouchableOpacity>
+          <View style={{ gap: spacing.sm }}>
+            {/* Eye re-reveal button — sits above action row when vanish is active */}
+            {isVanishActive && (
+              <TouchableOpacity
+                style={styles.eyeRevealBtn}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setIsVanishRevealed(true); }}
+                activeOpacity={0.85}
+              >
+                <Eye color={colors.accent} size={18} />
+                <MText weight="semi" style={styles.eyeRevealBtnText}>أظهر النص</MText>
+              </TouchableOpacity>
+            )}
+            <View style={styles.actionRow}>
+              <TouchableOpacity style={styles.successBtn} onPress={handleRemembered} activeOpacity={0.85}>
+                <Check color={colors.success} size={24} />
+                <MText weight="bold" style={styles.successBtnText}>تذكرت</MText>
+              </TouchableOpacity>
 
-            <TouchableOpacity style={styles.dangerBtn} onPress={handleForgot} activeOpacity={0.85}>
-              <XCircle color={colors.error} size={24} />
-              <MText weight="bold" style={styles.dangerBtnText}>لم أتذكر</MText>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.dangerBtn} onPress={handleForgot} activeOpacity={0.85}>
+                <XCircle color={colors.error} size={24} />
+                <MText weight="bold" style={styles.dangerBtnText}>لم أتذكر</MText>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </View>
@@ -524,6 +595,21 @@ const styles = StyleSheet.create({
   },
   revealBtnText: {
     ...typography.body,
+    color: colors.accent,
+  },
+  eyeRevealBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.accentSoft,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.accentBorder,
+  },
+  eyeRevealBtnText: {
+    ...typography.bodySmall,
     color: colors.accent,
   },
   actionRow: {

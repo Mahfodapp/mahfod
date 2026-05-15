@@ -28,6 +28,7 @@ const defaultSettings: UserSettings = {
   weekly_notif_time: '20:00',
   categories: ['متن', 'شعر', 'حديث', 'فقه', 'عقيدة'],
   vanish_mode: 'none',
+  vanish_reps: 3,
 };
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
@@ -35,18 +36,30 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   isLoaded: false,
   load: async (userId?: string) => {
     try {
+      // 1. Immediately hydrate from MMKV (fast, synchronous)
       const localData = storage.getString(SETTINGS_KEY);
-      let loadedSettings = defaultSettings;
+      let loadedSettings: UserSettings = { ...defaultSettings };
       if (localData) {
         loadedSettings = { ...defaultSettings, ...JSON.parse(localData) };
       }
       set({ settings: loadedSettings, isLoaded: true });
-      
+
+      // 2. If authenticated, fetch from Supabase and merge
       if (userId) {
         const remoteSettings = await settingsService.getSettings(userId).catch(() => null);
         if (remoteSettings) {
-          loadedSettings = { ...loadedSettings, ...remoteSettings };
+          // Only apply remote values that are non-null/undefined.
+          // This prevents a missing Supabase column from clobbering a good local value.
+          const cleanRemote = Object.fromEntries(
+            Object.entries(remoteSettings).filter(([, v]) => v !== null && v !== undefined)
+          ) as Partial<UserSettings>;
+          loadedSettings = { ...loadedSettings, ...cleanRemote, user_id: userId };
           storage.set(SETTINGS_KEY, JSON.stringify(loadedSettings));
+          set({ settings: loadedSettings });
+        } else {
+          // Remote fetch failed but we have a userId — attach it to local settings
+          // so update() can still sync when back online
+          loadedSettings = { ...loadedSettings, user_id: userId };
           set({ settings: loadedSettings });
         }
       }

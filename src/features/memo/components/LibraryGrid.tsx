@@ -1,24 +1,22 @@
 /**
- * LibraryGrid — renders all filtered memos as books on wooden shelves.
- * Supports shelf mode (default) and list mode toggle.
- * Shows empty state when no memos match.
+ * LibraryGrid — list-mode renderer for the memo library.
+ * Popup / long-press actions are delegated to the parent screen via onLongPress.
+ * Shelf mode is handled directly in MemoLibraryScreen using LibraryShelfRow.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   FlatList,
+  FlatListProps,
   Pressable,
   StyleSheet,
-  Modal,
   TouchableOpacity,
 } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, runOnJS } from 'react-native-reanimated';
 import { MText } from '@/shared/ui/MText';
 import { colors, spacing, radius } from '@/shared/theme';
 import { Memo } from '@/types';
-import { LibraryShelfRow } from './LibraryShelfRow';
 import { StageBadge } from '@/shared/ui/StageBadge';
-import { BookOpen, Trash2, Eye, Pencil, X, Share2 } from 'lucide-react-native';
+import { BookOpen, Trash2, Share2 } from 'lucide-react-native';
 
 interface Props {
   memos: Memo[];
@@ -26,178 +24,64 @@ interface Props {
   onMemoPress?: (memo: Memo) => void;
   onMemoEdit?: (memo: Memo) => void;
   onMemoDelete?: (memo: Memo) => void;
+  /** Called when a row is long-pressed — parent owns the popup */
+  onLongPress?: (memo: Memo) => void;
+  // FlatList passthrough for infinite scroll
+  ListHeaderComponent?: FlatListProps<Memo>['ListHeaderComponent'];
+  ListFooterComponent?: FlatListProps<Memo>['ListFooterComponent'];
+  onEndReached?: FlatListProps<Memo>['onEndReached'];
+  onEndReachedThreshold?: number;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-// ─── Component ───────────────────────────────────────────────────────────────
+export function LibraryGrid({
+  memos,
+  onMemoPress,
+  onMemoEdit,
+  onMemoDelete,
+  onLongPress,
+  ListHeaderComponent,
+  ListFooterComponent,
+  onEndReached,
+  onEndReachedThreshold = 0.3,
+}: Props) {
 
-export function LibraryGrid({ memos, viewMode, onMemoPress, onMemoEdit, onMemoDelete }: Props) {
-  const [selectedMemo, setSelectedMemo] = React.useState<Memo | null>(null);
-  const slideAnim = useSharedValue(300);
-
-  // Split into rows of 4 for shelf rendering
-  const rows = useMemo(() => {
-    const result: Memo[][] = [];
-    for (let i = 0; i < memos.length; i += 4) {
-      result.push(memos.slice(i, i + 4));
-    }
-    return result;
-  }, [memos]);
-
-  // ── Popup helpers ────────────────────────────────────────────────────────
-
-  const openPopup = (memo: Memo) => {
-    setSelectedMemo(memo);
-    slideAnim.value = 300;
-    slideAnim.value = withSpring(0, { damping: 11, stiffness: 65 });
-  };
-
-  const closePopup = (cb?: () => void) => {
-    slideAnim.value = withTiming(300, { duration: 220 }, (finished) => {
-      if (finished) {
-        runOnJS(setSelectedMemo)(null);
-        if (cb) runOnJS(cb)();
-      }
-    });
-  };
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: slideAnim.value }],
-  }));
-
-  const handleLongPress = (memo: Memo) => openPopup(memo);
+  if (memos.length === 0) {
+    return (
+      <FlatList
+        data={[]}
+        keyExtractor={() => 'empty'}
+        renderItem={() => null}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={<EmptyLibrary />}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        overScrollMode="never"
+      />
+    );
+  }
 
   return (
-    <View style={styles.container}>
-
-      {/* ── Hint ── */}
-      <MText weight="regular" style={styles.hint}>
-        رف الكتب — اضغط مطولاً لخيارات
-      </MText>
-
-      {/* ── Content ── */}
-      {memos.length === 0 ? (
-        <EmptyLibrary />
-      ) : viewMode === 'shelf' ? (
-        // ── SHELF MODE ──
-        <FlatList
-          data={rows}
-          keyExtractor={(_, i) => `row-${i}`}
-          renderItem={({ item, index }) => (
-            <LibraryShelfRow
-              memos={item}
-              onPress={(memo) => onMemoPress?.(memo)}
-              onLongPress={handleLongPress}
-              rowIndex={index}
-            />
-          )}
-          scrollEnabled={false}
-          contentContainerStyle={styles.shelvesContent}
-        />
-      ) : (
-        // ── LIST MODE ──
-        <FlatList
-          data={memos}
-          keyExtractor={m => m.id}
-          renderItem={({ item }) => (
-            <ListRow
-              memo={item}
-              onPress={() => onMemoPress?.(item)}
-              onLongPress={() => handleLongPress(item)}
-              onDelete={() => onMemoDelete?.(item)}
-            />
-          )}
-          scrollEnabled={false}
-          contentContainerStyle={styles.listContent}
+    <FlatList
+      data={memos}
+      keyExtractor={m => m.id}
+      renderItem={({ item }) => (
+        <ListRow
+          memo={item}
+          onPress={() => onMemoPress?.(item)}
+          onLongPress={() => onLongPress?.(item)}
+          onDelete={() => onMemoDelete?.(item)}
         />
       )}
-
-      {/* ── Mahfod Custom Action Popup ── */}
-      <Modal
-        visible={!!selectedMemo}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={() => closePopup()}
-      >
-        <TouchableOpacity
-          style={styles.overlay}
-          activeOpacity={1}
-          onPress={() => closePopup()}
-        >
-          <Animated.View
-            style={[
-              styles.sheet,
-              animatedStyle,
-            ]}
-          >
-            {/* drag handle */}
-            <View style={styles.handle} />
-
-            {/* header: title + close button */}
-            <View style={styles.sheetHeader}>
-              <MText weight="bold" style={styles.sheetTitle} numberOfLines={1}>
-                {selectedMemo?.title}
-              </MText>
-              <TouchableOpacity
-                onPress={() => closePopup()}
-                style={styles.closeBtn}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <X size={18} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            <MText weight="regular" style={styles.sheetSubtitle}>
-              ماذا تريد أن تفعل بهذا المحفوظ؟
-            </MText>
-
-            {/* ── Action buttons ── */}
-            <View style={styles.actionsRow}>
-
-              {/* DELETE */}
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionDelete]}
-                onPress={() => closePopup(() => onMemoDelete?.(selectedMemo!))}
-                activeOpacity={0.75}
-              >
-                <Trash2 size={22} color={colors.error} />
-                <MText weight="semi" style={[styles.actionLabel, { color: colors.error }]}>
-                  حذف
-                </MText>
-              </TouchableOpacity>
-
-              {/* OPEN */}
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionOpen]}
-                onPress={() => closePopup(() => onMemoPress?.(selectedMemo!))}
-                activeOpacity={0.75}
-              >
-                <Eye size={22} color={colors.primary} />
-                <MText weight="semi" style={[styles.actionLabel, { color: colors.primary }]}>
-                  فتح
-                </MText>
-              </TouchableOpacity>
-
-              {/* EDIT */}
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionEdit]}
-                onPress={() => closePopup(() => onMemoEdit?.(selectedMemo!))}
-                activeOpacity={0.75}
-              >
-                <Pencil size={22} color={colors.accent} />
-                <MText weight="semi" style={[styles.actionLabel, { color: colors.accent }]}>
-                  تعديل
-                </MText>
-              </TouchableOpacity>
-
-            </View>
-          </Animated.View>
-        </TouchableOpacity>
-      </Modal>
-
-    </View>
+      ListHeaderComponent={ListHeaderComponent}
+      ListFooterComponent={ListFooterComponent}
+      onEndReached={onEndReached}
+      onEndReachedThreshold={onEndReachedThreshold}
+      contentContainerStyle={styles.listContent}
+      showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+    />
   );
 }
 
@@ -273,23 +157,10 @@ function EmptyLibrary() {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 12,
-    textAlign: 'left',
-    marginBottom: spacing.sm,
-    marginRight: spacing.xs,
-  },
-  shelvesContent: {
-    paddingTop: spacing.md,
-    paddingBottom: 20,
-  },
   listContent: {
     gap: spacing.sm,
     paddingBottom: 20,
+    paddingHorizontal: spacing.md,
   },
   listRow: {
     flexDirection: 'row',
@@ -356,86 +227,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     textAlign: 'center',
-  },
-
-  // ── Custom action popup ──────────────────────────────────────────────────
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlayHeavy,
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.surfaceRaised,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    paddingBottom: 36,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-    borderColor: colors.borderStrong,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 99,
-    backgroundColor: colors.surfaceBright,
-    alignSelf: 'center',
-    marginBottom: 18,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  sheetTitle: {
-    fontSize: 17,
-    color: colors.textPrimary,
-    flex: 1,
-    textAlign: 'left',
-  },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 99,
-    backgroundColor: colors.surfaceHigh,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  sheetSubtitle: {
-    fontSize: 13,
-    color: colors.textMuted,
-    textAlign: 'left',
-    marginBottom: 24,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionBtn: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 18,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  actionLabel: {
-    fontSize: 14,
-  },
-  actionDelete: {
-    backgroundColor: colors.errorSoft,
-    borderColor: 'rgba(255,115,81,0.25)',
-  },
-  actionOpen: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accentBorder,
-  },
-  actionEdit: {
-    backgroundColor: colors.surfaceHigh,
-    borderColor: colors.borderStrong,
   },
 });

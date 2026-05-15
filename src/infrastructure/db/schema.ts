@@ -19,6 +19,8 @@ export const memos = sqliteTable('memos', {
   last_reviewed_at: text('last_reviewed_at'),
   is_favorite: integer('is_favorite', { mode: 'boolean' }).notNull().default(false),
   is_poem: integer('is_poem', { mode: 'boolean' }).notNull().default(false),
+  font_size: integer('font_size'),
+  font_family: text('font_family'),
   created_at: text('created_at').notNull(),
   updated_at: text('updated_at').notNull(),
   synced_at: text('synced_at'),
@@ -92,6 +94,7 @@ export const user_settings = sqliteTable('user_settings', {
   weekly_notif_time: text('weekly_notif_time').notNull().default('20:00'),
   categories: text('categories').notNull().default('["متن","شعر","حديث","فقه","عقيدة"]'),
   vanish_mode: text('vanish_mode').notNull().default('none'),
+  vanish_reps: integer('vanish_reps').notNull().default(3),
 });
 
 export const offlineQueue = sqliteTable('offline_queue', {

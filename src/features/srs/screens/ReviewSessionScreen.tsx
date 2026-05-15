@@ -20,13 +20,16 @@
  * - applyRevision() from revisionEngine.ts
  * - RTL: row, textAlign:'right'
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   Image,
+  Pressable,
+  Modal,
+  AppState,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MotiView } from 'moti';
@@ -35,8 +38,10 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   withSpring,
+  withSequence,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { Audio } from 'expo-av';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
@@ -46,7 +51,12 @@ import { colors, spacing, radius, typography, fonts, Shadows } from '@/shared/th
 import { useMemoStore } from '../../memo/store/memo.store';
 import { useSettingsStore } from '../../settings/store/settings.store';
 import { applyRevision } from '../logic/revisionEngine';
-import { Star, X, Eye, Info } from 'lucide-react-native';
+import { Star, X, Eye, EyeOff, Info, ChevronDown, ZoomIn, ZoomOut, Pencil, Volume2, Maximize } from 'lucide-react-native';
+import type { VanishMode } from '@/types';
+import { VanishText } from '../components/VanishText';
+import AudioWaveform from '@/shared/ui/AudioWaveform';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,6 +72,17 @@ const RATINGS: { quality: Quality; label: string; color: string; bg: string }[] 
   { quality: 2, label: 'حسناً', color: colors.stageReview,  bg: colors.accentSoft },
   { quality: 3, label: 'سهل',   color: colors.success,      bg: colors.successSoft },
 ];
+
+// ─── Font options ────────────────────────────────────────────────────────────
+
+const FONTS = [
+  { id: 'amiri',    name: 'أميري'   },
+  { id: 'quran',    name: 'شهرزاد' },
+  { id: 'reemKufi', name: 'كوفي'   },
+  { id: 'lateef',   name: 'مغاربي' },
+  { id: 'tajawal',  name: 'رقعة'   },
+] as const;
+type FontId = typeof FONTS[number]['id'];
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -92,7 +113,6 @@ export default function ReviewSessionScreen() {
 
   const [index,    setIndex]    = useState(0);
   const [reps,     setReps]     = useState(0);      // fixed mode: taps on current memo
-  const [fontSize, setFontSize] = useState(18);
   const [revealed, setRevealed] = useState(false);  // sm2: has user signaled they read it?
   const [done,     setDone]     = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
@@ -113,14 +133,153 @@ export default function ReviewSessionScreen() {
   const currentId = queueIds[index];
   const memo      = memos.find(m => m.id === currentId);
 
+  const [fontSize,         setFontSize]         = useState(Number(memo?.font_size) || 18);
+  const [fontFamily,       setFontFamily]       = useState<FontId>((memo?.font_family as FontId) ?? 'amiri');
+  const [isFontMenuOpen,   setIsFontMenuOpen]   = useState(false);
+  const [isImageFullscreen, setIsImageFullscreen] = useState(false);
+  const [isAudioPlaying,   setIsAudioPlaying]   = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const isBusy   = useRef(false);
+  const mounted  = useRef(true);
+
+  useEffect(() => {
+    if (memo) {
+      setFontSize(Number(memo.font_size) || 18);
+      setFontFamily((memo.font_family as FontId) ?? 'amiri');
+    }
+  }, [currentId]);
+
+  const handleZoomOut = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setFontSize(f => {
+      const newSize = Math.max(12, f - 2);
+      if (memo && newSize !== f) updateMemo(memo.id, { font_size: newSize }).catch(console.error);
+      return newSize;
+    });
+  }, [memo, updateMemo]);
+
+  const handleZoomIn = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setFontSize(f => {
+      const newSize = Math.min(32, f + 2);
+      if (memo && newSize !== f) updateMemo(memo.id, { font_size: newSize }).catch(console.error);
+      return newSize;
+    });
+  }, [memo, updateMemo]);
+
+  const handleFontFamilyChange = useCallback((newFont: FontId) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setFontFamily(newFont);
+    setIsFontMenuOpen(false);
+    if (memo) updateMemo(memo.id, { font_family: newFont }).catch(console.error);
+  }, [memo, updateMemo]);
+
+  // ── Audio ────────────────────────────────────────────────────────────────────
+  const attachFinishListener = useCallback((sound: Audio.Sound) => {
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.isLoaded && status.didJustFinish) setIsAudioPlaying(false);
+    });
+  }, []);
+
+  const unloadSound = useCallback(async () => {
+    const s = soundRef.current;
+    if (!s) return;
+    soundRef.current = null;
+    setIsAudioPlaying(false);
+    try { await s.stopAsync(); } catch (_) {}
+    try { await s.unloadAsync(); } catch (_) {}
+  }, []);
+
+  const loadAndPlaySound = useCallback(async (uri: string) => {
+    await unloadSound();
+    setIsAudioPlaying(true);
+    try {
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
+      const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
+      soundRef.current = sound;
+      attachFinishListener(sound);
+    } catch (err) {
+      console.error('[ReviewSession] loadAndPlaySound failed', err);
+      setIsAudioPlaying(false);
+    }
+  }, [unloadSound, attachFinishListener]);
+
+  const replaySound = useCallback(async (uri: string) => {
+    const s = soundRef.current;
+    if (!s) return await loadAndPlaySound(uri);
+    setIsAudioPlaying(true);
+    try {
+      await s.setPositionAsync(0);
+      await s.playAsync();
+    } catch (err) {
+      console.error('[ReviewSession] replaySound failed', err);
+      await loadAndPlaySound(uri);
+    }
+  }, [loadAndPlaySound]);
+
+  useEffect(() => {
+    if (memo?.audio_url) loadAndPlaySound(memo.audio_url);
+    else setIsAudioPlaying(false);
+    return () => { unloadSound(); };
+  }, [currentId]);
+
+  useEffect(() => () => { unloadSound(); }, [unloadSound]);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!done && queueIds.length > 0) {
+      activateKeepAwakeAsync().catch(() => {});
+    } else {
+      deactivateKeepAwake();
+    }
+    return () => { deactivateKeepAwake(); };
+  }, [done, queueIds.length]);
+
+  // ── Vanish mode ─────────────────────────────────────────────────────────────
+  const vanishMode = (settings.vanish_mode ?? 'none') as VanishMode;
+  const vanishReps = settings.vanish_reps ?? 3;
+  const [isVanishRevealed, setIsVanishRevealed] = useState(false);
+  // Reset manual reveal when the displayed memo changes
+  useEffect(() => { setIsVanishRevealed(false); }, [currentId]);
+
+  // Use lifetime review_count as the vanish comparator — same pattern as
+  // LearningSessionScreen which uses memo.repetition_count.
+  // This is stable across memo advances and correctly reflects how many times
+  // the user has reviewed this specific memo throughout all sessions.
+  // The old approach used `reps` (in-session counter) which resets to 0 on
+  // every advance, so the threshold was never met in fixed mode, and in SM-2
+  // mode `revealed ? vanishReps : 0` always hit the threshold the instant the
+  // user pressed "قرأت", regardless of actual repetition history.
+  const lifetimeReviews     = memo?.review_count ?? 0;
+  const vanishThresholdMet  = vanishMode !== 'none' && lifetimeReviews >= vanishReps;
+  const isVanishActive      = vanishThresholdMet && !isVanishRevealed;
+  const textImgOpacity      = isVanishActive && vanishMode === 'opacity' ? 0.07 : 1;
+  const textImgHidden       = isVanishActive && vanishMode === 'sudden';
+  const isWordsMode         = isVanishActive && vanishMode === 'words';
+
   // ── Animated progress bar ──────────────────────────────────────────────────
 
   const progressAnim = useSharedValue(0);
   useEffect(() => {
     const pct = queueIds.length > 0 ? (index + 1) / queueIds.length : 0;
-    progressAnim.value = withTiming(pct, { duration: 400 });
+    progressAnim.value = withTiming(pct, { duration: 450 });
   }, [index, queueIds.length]);
-  const progressStyle = useAnimatedStyle(() => ({ width: `${progressAnim.value * 100}%` }));
+  const progressStyle = useAnimatedStyle(() => ({
+    width: `${progressAnim.value * 100}%`,
+    backgroundColor: progressAnim.value >= 1 ? colors.success : colors.accent,
+  }));
+
+  const favScale    = useSharedValue(1);
+  const favRotation = useSharedValue(0);
+  const favStyle    = useAnimatedStyle(() => ({
+    transform: [{ scale: favScale.value }, { rotate: `${favRotation.value}deg` }],
+  }));
+  const btnScale = useSharedValue(1);
+  const btnStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
 
   // ── Card entrance ─────────────────────────────────────────────────────────
 
@@ -217,10 +376,19 @@ export default function ReviewSessionScreen() {
     advance();
   }, [memo, settings, updateMemo, advance]);
 
-  const handleFavorite = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (memo) updateMemo(memo.id, { is_favorite: !memo.is_favorite });
-  }, [memo, updateMemo]);
+  const handleFavorite = useCallback(async () => {
+    if (!memo) return;
+    const isNowFav = !memo.is_favorite;
+    if (isNowFav) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      favScale.value    = withSequence(withTiming(1.4, { duration: 150 }), withSpring(1, { damping: 12, stiffness: 200 }));
+      favRotation.value = withSequence(withTiming(72, { duration: 150 }), withTiming(0, { duration: 0 }));
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      favScale.value = withSequence(withTiming(0.8, { duration: 100 }), withSpring(1, { damping: 12, stiffness: 200 }));
+    }
+    try { await updateMemo(memo.id, { is_favorite: isNowFav }); } catch (e) { console.error('fav toggle', e); }
+  }, [memo, updateMemo, favScale, favRotation]);
 
   const handleCancel = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -299,12 +467,14 @@ export default function ReviewSessionScreen() {
           style={styles.headerIconBtn}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Star
-            size={20}
-            color={isFav ? colors.accent : colors.textMuted}
-            fill={isFav ? colors.accent : 'transparent'}
-            strokeWidth={1.8}
-          />
+          <Animated.View style={favStyle}>
+            <Star
+              size={20}
+              color={isFav ? colors.accent : colors.textMuted}
+              fill={isFav ? colors.accent : 'transparent'}
+              strokeWidth={1.8}
+            />
+          </Animated.View>
         </TouchableOpacity>
 
         <View style={styles.headerCenter}>
@@ -377,46 +547,159 @@ export default function ReviewSessionScreen() {
           </MotiView>
         )}
 
-        {/* ── Font size controls ── */}
-        <View style={styles.fontControls}>
-          <TouchableOpacity style={styles.fontBtn} onPress={() => setFontSize(f => Math.max(12, f - 2))}>
-            <MText weight="semi" style={[styles.fontBtnText, { fontSize: 13 }]}>أ-</MText>
-          </TouchableOpacity>
-          <View style={styles.fontSizeDisplay}>
-            <MText weight="semi" style={styles.fontSizeText}>{fontSize}</MText>
+        {/* ── Toolbar: edit · zoom · font · image · vanish ── */}
+        <View style={styles.fontControlsWrap}>
+          <View style={styles.fontControls}>
+            <TouchableOpacity
+              style={styles.fontBtn}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigation.navigate('AddMemoScreen', { memoId: memo.id }); }}
+            >
+              <Pencil size={15} color={colors.accent} />
+            </TouchableOpacity>
+
+            <View style={styles.fontDivider} />
+
+            <TouchableOpacity style={styles.fontBtn} onPress={handleZoomOut}>
+              <ZoomOut size={16} color={colors.accent} />
+            </TouchableOpacity>
+            <View style={styles.fontSizeDisplay}>
+              <MText weight="semi" style={styles.fontSizeText}>{fontSize}</MText>
+            </View>
+            <TouchableOpacity style={styles.fontBtn} onPress={handleZoomIn}>
+              <ZoomIn size={16} color={colors.accent} />
+            </TouchableOpacity>
+
+            <View style={styles.fontDivider} />
+
+            <TouchableOpacity
+              style={styles.fontFamilyBtn}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setIsFontMenuOpen(v => !v);
+              }}
+            >
+              <MText weight="semi" style={styles.fontFamilyBtnText}>
+                {FONTS.find(f => f.id === fontFamily)?.name}
+              </MText>
+              <MotiView animate={{ rotate: isFontMenuOpen ? '180deg' : '0deg' }} transition={{ type: 'spring' }}>
+                <ChevronDown size={14} color={colors.accent} />
+              </MotiView>
+            </TouchableOpacity>
+
+            {memo.image_url && (
+              <TouchableOpacity style={styles.fullscreenToolBtn} onPress={() => setIsImageFullscreen(true)}>
+                <Maximize size={15} color={colors.primary} />
+              </TouchableOpacity>
+            )}
+
+            {/* Vanish toggle — shown whenever the vanish threshold is met;
+                Eye    = text is hidden  → press to reveal
+                EyeOff = text is visible → press to re-hide */}
+            {vanishThresholdMet && (
+              <>
+                <View style={styles.fontDivider} />
+                <TouchableOpacity
+                  style={[styles.fontBtn, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setIsVanishRevealed(v => !v); }}
+                  hitSlop={8}
+                >
+                  {isVanishRevealed
+                    ? <EyeOff size={16} color={colors.accent} />
+                    : <Eye    size={16} color={colors.accent} />}
+                </TouchableOpacity>
+              </>
+            )}
           </View>
-          <TouchableOpacity style={styles.fontBtn} onPress={() => setFontSize(f => Math.min(32, f + 2))}>
-            <MText weight="semi" style={[styles.fontBtnText, { fontSize: 18 }]}>أ+</MText>
-          </TouchableOpacity>
+
+          <MotiView
+            animate={{ height: isFontMenuOpen ? 48 : 0, opacity: isFontMenuOpen ? 1 : 0 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+            style={styles.fontPillsContainer}
+          >
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontPillScroll}>
+              {FONTS.map(f => {
+                const isActive = fontFamily === f.id;
+                return (
+                  <TouchableOpacity
+                    key={f.id}
+                    style={[styles.fontPill, isActive && styles.fontPillActive]}
+                    onPress={() => handleFontFamilyChange(f.id)}
+                  >
+                    <MText weight="semi" style={isActive ? styles.fontPillActiveText : styles.fontPillText}>
+                      {f.name}
+                    </MText>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </MotiView>
         </View>
 
-        {/* ── Main text card ── */}
-        <Animated.View style={[styles.textCard, cardStyle]}>
-          <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Image
-              source={require('../../../../assets/images/islamic_pattern.png')}
-              style={StyleSheet.absoluteFill}
-              resizeMode="repeat"
-              fadeDuration={0}
-            />
+        {/* ── Image (if attached) ── */}
+        {memo.image_url && !textImgHidden && (
+          <View style={{ opacity: textImgOpacity }}>
+            <Image source={{ uri: memo.image_url }} style={styles.memoImage} resizeMode="contain" />
           </View>
+        )}
 
-          {memo.is_poem ? (
-            <View style={styles.poemWrap}>
-              <MText weight="bold" style={[styles.memoText, { fontSize }]}>
-                {memo.text.split('***')[0]?.trim()}
-              </MText>
-              <View style={styles.poemDivider} />
-              <MText weight="bold" style={[styles.memoText, { fontSize }]}>
-                {memo.text.split('***')[1]?.trim()}
-              </MText>
-            </View>
-          ) : (
-            <MText weight="bold" style={[styles.memoText, { fontSize }]}>
-              {memo.text}
-            </MText>
-          )}
-        </Animated.View>
+        {/* ── Memo text (no card frame) ── */}
+        {textImgHidden ? null : (
+          <Animated.View style={[{ opacity: textImgOpacity }, cardStyle]}>
+            {memo.is_poem ? (
+              <View style={styles.poemWrap}>
+                {isWordsMode ? (
+                  <VanishText
+                    text={memo.text.split('***')[0]?.trim() ?? ''}
+                    memoId={memo.id}
+                    style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}
+                  />
+                ) : (
+                  <MText weight="bold" style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
+                    {memo.text.split('***')[0]?.trim()}
+                  </MText>
+                )}
+                <View style={styles.poemDivider} />
+                {isWordsMode ? (
+                  <VanishText
+                    text={memo.text.split('***')[1]?.trim() ?? ''}
+                    memoId={memo.id + '-2'}
+                    style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}
+                  />
+                ) : (
+                  <MText weight="bold" style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
+                    {memo.text.split('***')[1]?.trim()}
+                  </MText>
+                )}
+              </View>
+            ) : (
+              isWordsMode ? (
+                <VanishText
+                  text={memo.text}
+                  memoId={memo.id}
+                  style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}
+                />
+              ) : (
+                <MText weight="bold" style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
+                  {memo.text}
+                </MText>
+              )
+            )}
+          </Animated.View>
+        )}
+
+        {/* ── Audio indicator ── */}
+        {memo.audio_url ? (
+          <View style={styles.audioIndicator}>
+            {isAudioPlaying ? (
+              <><AudioWaveform isActive /><MText weight="semi" style={styles.audioLabel}>جاري التشغيل...</MText></>
+            ) : (
+              <TouchableOpacity style={styles.audioReplayBtn} onPress={() => replaySound(memo.audio_url!)}>
+                <Volume2 size={16} color={colors.accent} />
+                <MText weight="semi" style={[styles.audioLabel, { color: colors.accent }]}>إعادة التشغيل</MText>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : null}
 
         {/* ── Dot progress indicator ── */}
         <View style={styles.dotsRow}>
@@ -438,15 +721,25 @@ export default function ReviewSessionScreen() {
           ══════════════════════════════════════════════════════════════════ */}
       {mode === 'fixed' && (
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.ctaBtn}
-            onPress={handleRepeat}
-            activeOpacity={0.85}
-          >
-            <MText weight="bold" style={styles.ctaBtnText}>
-              كررت ({reps}/{sessionReps})
-            </MText>
-          </TouchableOpacity>
+          {isAudioPlaying && (
+            <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 180 }} style={styles.audioGateNotice}>
+              <Volume2 size={13} color={colors.textMuted} />
+              <MText weight="semi" style={styles.audioGateText}>انتظر انتهاء التشغيل</MText>
+            </MotiView>
+          )}
+          <Animated.View style={btnStyle}>
+            <Pressable
+              style={[styles.ctaBtn, isAudioPlaying && styles.ctaBtnBusy]}
+              onPressIn={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); btnScale.value = withSpring(0.94, { damping: 16, stiffness: 400 }); }}
+              onPressOut={() => { btnScale.value = withSpring(1, { damping: 12, stiffness: 300 }); }}
+              onPress={handleRepeat}
+              disabled={isAudioPlaying}
+            >
+              <MText weight="extra" style={[styles.ctaBtnText, isAudioPlaying && { opacity: 0.45 }]}>
+                كررت ({reps}/{sessionReps})
+              </MText>
+            </Pressable>
+          </Animated.View>
         </View>
       )}
 
@@ -455,18 +748,25 @@ export default function ReviewSessionScreen() {
           ══════════════════════════════════════════════════════════════════ */}
       {mode === 'sm2' && (
         <View style={styles.footer}>
+          {isAudioPlaying && (
+            <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 180 }} style={styles.audioGateNotice}>
+              <Volume2 size={13} color={colors.textMuted} />
+              <MText weight="semi" style={styles.audioGateText}>انتظر انتهاء التشغيل</MText>
+            </MotiView>
+          )}
           {!revealed ? (
-            /* Step 1: user hasn't tapped "قرأت" yet */
-            <TouchableOpacity
-              style={styles.ctaBtn}
-              onPress={handleRevealed}
-              activeOpacity={0.85}
-            >
-              <Eye size={20} color={colors.primary} />
-              <MText weight="bold" style={styles.ctaBtnText}> قرأت</MText>
-            </TouchableOpacity>
+            <Animated.View style={btnStyle}>
+              <Pressable
+                style={styles.ctaBtn}
+                onPressIn={() => { btnScale.value = withSpring(0.94, { damping: 16, stiffness: 400 }); }}
+                onPressOut={() => { btnScale.value = withSpring(1, { damping: 12, stiffness: 300 }); }}
+                onPress={handleRevealed}
+              >
+                <Eye size={20} color={colors.primary} />
+                <MText weight="extra" style={styles.ctaBtnText}> قرأت</MText>
+              </Pressable>
+            </Animated.View>
           ) : (
-            /* Step 2: rating bar slides in */
             <Animated.View style={[styles.ratingRow, ratingStyle]}>
               {RATINGS.map(r => (
                 <TouchableOpacity
@@ -484,6 +784,24 @@ export default function ReviewSessionScreen() {
           )}
         </View>
       )}
+
+      {/* ── Fullscreen image modal ── */}
+      <Modal visible={isImageFullscreen} transparent animationType="fade" onRequestClose={() => setIsImageFullscreen(false)}>
+        <View style={styles.fullscreenContainer}>
+          <TouchableOpacity style={styles.fullscreenCloseBtn} onPress={() => setIsImageFullscreen(false)}>
+            <X size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          {memo.image_url && (
+            <View style={{ flex: 1 }}>
+              <ImageViewer
+                imageUrls={[{ url: memo.image_url }]}
+                backgroundColor={colors.primary}
+                renderIndicator={() => <View />}
+              />
+            </View>
+          )}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -544,12 +862,11 @@ const styles = StyleSheet.create({
 
   // ── Progress bar ─────────────────────────────────────────────────────
   progressTrack: {
-    height: 3,
+    height: 2,
     backgroundColor: colors.surfaceHigh,
   },
   progressFill: {
-    height: 3,
-    backgroundColor: colors.accent,
+    height: 2,
     borderRadius: 99,
   },
 
@@ -599,6 +916,9 @@ const styles = StyleSheet.create({
   },
 
   // ── Font controls ─────────────────────────────────────────────────────
+  fontControlsWrap: {
+    gap: spacing.xs,
+  },
   fontControls: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -625,36 +945,75 @@ const styles = StyleSheet.create({
     ...typography.label,
     color: colors.textMuted,
   },
-
-  // ── Text card ─────────────────────────────────────────────────────────
-  textCard: {
-    backgroundColor: colors.surfaceRaised,
-    borderRadius: radius.xl,
-    padding: spacing.xl,
-    minHeight: 220,
-    justifyContent: 'center',
+  fontDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.xs,
+  },
+  fontFamilyBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 7,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceRaised,
     borderWidth: 1,
     borderColor: colors.border,
-    overflow: 'hidden',
-    ...Shadows.deep,
   },
+  fontFamilyBtnText: {
+    ...typography.caption,
+    color: colors.textPrimary,
+  },
+  fontPillsContainer: {
+    overflow: 'hidden',
+  },
+  fontPillScroll: {
+    gap: spacing.xs,
+    paddingHorizontal: spacing.xs,
+    alignItems: 'center' as const,
+  },
+  fontPill: {
+    paddingVertical: 8,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  fontPillActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  fontPillText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
+  fontPillActiveText: {
+    ...typography.caption,
+    color: colors.primary,
+  },
+
   memoText: {
     fontFamily: fonts.bold,
-    color: colors.accent,
-    textAlign: 'center',
-    lineHeight: 40,
+    color: colors.textPrimary,
+    textAlign: 'left',
+    lineHeight: 44,
     writingDirection: 'ltr',
   },
   poemWrap: {
-    alignItems: 'center',
     gap: spacing.md,
     width: '100%',
   },
   poemDivider: {
     height: 1,
-    width: '40%',
+    width: '35%',
     backgroundColor: colors.border,
+    alignSelf: 'center',
+    marginVertical: spacing.md,
   },
 
   // ── Dot indicators ────────────────────────────────────────────────────
@@ -753,4 +1112,18 @@ const styles = StyleSheet.create({
     ...typography.h3,
     color: colors.primary,
   },
+
+  // ── Audio ──────────────────────────────────────────────────────────────────
+  audioIndicator: { marginTop: spacing.sm, alignItems: 'center', gap: spacing.xs },
+  audioLabel: { ...typography.caption, color: colors.textMuted, textAlign: 'center' },
+  audioReplayBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, backgroundColor: colors.accentSoft, borderRadius: radius.full, borderWidth: 1, borderColor: colors.accentBorder },
+  audioGateNotice: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingBottom: spacing.xs },
+  audioGateText: { ...typography.caption, color: colors.textMuted },
+  ctaBtnBusy: { opacity: 0.6 },
+
+  // ── Image + fullscreen ─────────────────────────────────────────────────────
+  memoImage: { width: '100%', height: 280, borderRadius: radius.md, marginBottom: spacing.sm, backgroundColor: colors.surfaceHigh },
+  fullscreenToolBtn: { width: 34, height: 34, borderRadius: radius.full, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
+  fullscreenContainer: { flex: 1, backgroundColor: colors.primary, paddingTop: 60 },
+  fullscreenCloseBtn: { position: 'absolute', top: 50, right: spacing.lg, width: 44, height: 44, borderRadius: radius.full, backgroundColor: colors.surfaceHigh, alignItems: 'center', justifyContent: 'center', zIndex: 10, borderWidth: 1, borderColor: colors.border },
 });

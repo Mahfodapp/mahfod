@@ -90,7 +90,8 @@ export async function initDatabase() {
       weekly_notif_enabled INTEGER NOT NULL DEFAULT 0,
       weekly_notif_time TEXT NOT NULL DEFAULT '20:00',
       categories TEXT NOT NULL DEFAULT '["متن","شعر","حديث","فقه","عقيدة"]',
-      vanish_mode TEXT NOT NULL DEFAULT 'none'
+      vanish_mode TEXT NOT NULL DEFAULT 'none',
+      vanish_reps INTEGER NOT NULL DEFAULT 3
     );
 
     CREATE TABLE IF NOT EXISTS offline_queue (
@@ -181,4 +182,9 @@ export async function initDatabase() {
   await tryExec(`ALTER TABLE user_settings ADD COLUMN revision_mode TEXT NOT NULL DEFAULT 'fixed';`);
   await tryExec(`ALTER TABLE user_settings ADD COLUMN revision_reps INTEGER NOT NULL DEFAULT 30;`);
   await tryExec(`ALTER TABLE user_settings ADD COLUMN session_reps  INTEGER NOT NULL DEFAULT 5;`);
+  await tryExec(`ALTER TABLE user_settings ADD COLUMN vanish_mode   TEXT NOT NULL DEFAULT 'none';`);
+  await tryExec(`ALTER TABLE user_settings ADD COLUMN vanish_reps   INTEGER NOT NULL DEFAULT 3;`);
+  // ── memos: font persistence columns ─────────────────────────────────────────
+  await tryExec(`ALTER TABLE memos ADD COLUMN font_size    INTEGER;`);
+  await tryExec(`ALTER TABLE memos ADD COLUMN font_family  TEXT;`);
 }

@@ -4,7 +4,7 @@ import { Memo } from '../../../types';
 import { nanoid } from 'nanoid/non-secure';
 import { supabase } from '../../../lib/supabase';
 import { enqueueSync } from '../../sync/offlineQueue';
-import { eq, desc, and, or, isNull, lte } from 'drizzle-orm';
+import { eq, desc, and, or, isNull, lte, count } from 'drizzle-orm';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -65,6 +65,70 @@ export async function getMemos(filters?: { stage?: string; label?: string; searc
     ...r,
     tags: parseTags(r.tags),
   })) as Memo[];
+}
+
+// ── Paginated variant ─────────────────────────────────────────────────────────
+
+const PAGE_SIZE = 20;
+
+/**
+ * Returns total count of non-deleted memos for the current user,
+ * optionally filtered by stage / label / search.
+ */
+export async function getMemosCount(
+  filters?: { stage?: string; label?: string; search?: string },
+): Promise<number> {
+  const userId = await getUserId();
+
+  // For search we can't do an exact DB count, so fall back to full query
+  if (filters?.search) {
+    const all = await getMemos(filters);
+    return all.length;
+  }
+
+  let conditions: any[] = [eq(memos.user_id, userId), eq(memos.deleted, false)];
+  if (filters?.stage) conditions.push(eq(memos.stage, filters.stage));
+  if (filters?.label) conditions.push(eq(memos.label, filters.label));
+
+  const result = await db
+    .select({ total: count() })
+    .from(memos)
+    .where(and(...conditions))
+    .get();
+
+  return result?.total ?? 0;
+}
+
+/**
+ * Returns a single page of memos (LIMIT / OFFSET at the DB level).
+ * Pages are 0-indexed.
+ */
+export async function getMemosPage(
+  page: number,
+  filters?: { stage?: string; label?: string; search?: string },
+  pageSize: number = PAGE_SIZE,
+): Promise<Memo[]> {
+  const userId = await getUserId();
+
+  // For search we have to do the full query then slice (SQLite has no ILIKE)
+  if (filters?.search) {
+    const all = await getMemos(filters);
+    return all.slice(page * pageSize, (page + 1) * pageSize);
+  }
+
+  let conditions: any[] = [eq(memos.user_id, userId), eq(memos.deleted, false)];
+  if (filters?.stage) conditions.push(eq(memos.stage, filters.stage));
+  if (filters?.label) conditions.push(eq(memos.label, filters.label));
+
+  const results = await db
+    .select()
+    .from(memos)
+    .where(and(...conditions))
+    .orderBy(desc(memos.created_at))
+    .limit(pageSize)
+    .offset(page * pageSize);
+
+  return results.map(r => ({ ...r, tags: parseTags(r.tags) })) as Memo[];
 }
 
 export async function getMemoById(id: string): Promise<Memo> {

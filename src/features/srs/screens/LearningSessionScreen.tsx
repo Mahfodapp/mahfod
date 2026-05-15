@@ -13,7 +13,9 @@ import { MahfodPatternBackground } from '@/shared/ui/MahfodPatternBackground';
 import { colors, spacing, radius, typography, fonts, Shadows } from '@/shared/theme';
 import { useMemoStore } from '../../memo/store/memo.store';
 import { useSettingsStore } from '../../settings/store/settings.store';
-import { Star, X, BookOpen, Volume2, Pencil, ZoomIn, ZoomOut, ChevronDown, Maximize } from 'lucide-react-native';
+import { Star, X, BookOpen, Volume2, Pencil, ZoomIn, ZoomOut, ChevronDown, Maximize, Eye, EyeOff } from 'lucide-react-native';
+import type { VanishMode } from '@/types';
+import { VanishText } from '../components/VanishText';
 import AudioWaveform from '@/shared/ui/AudioWaveform';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
@@ -44,8 +46,6 @@ export function LearningSessionScreen() {
   });
 
   const [index, setIndex] = useState(0);
-  const [fontSize, setFontSize] = useState(20);
-  const [fontFamily, setFontFamily] = useState<'amiri' | 'quran' | 'reemKufi' | 'lateef' | 'tajawal'>('amiri');
   const [done, setDone] = useState(false);
   const [promoted, setPromoted] = useState<string[]>([]);
   const isBusy = useRef(false);
@@ -65,6 +65,55 @@ export function LearningSessionScreen() {
   const currentReps = memo?.repetition_count ?? 0;
   const repPct = Math.min(currentReps / initialReps, 1);
 
+  const [fontSize, setFontSize] = useState(Number(memo?.font_size) || 20);
+  const [fontFamily, setFontFamily] = useState<'amiri' | 'quran' | 'reemKufi' | 'lateef' | 'tajawal'>((memo?.font_family as any) ?? 'amiri');
+
+  useEffect(() => {
+    if (memo) {
+      setFontSize(Number(memo.font_size) || 20);
+      setFontFamily((memo.font_family as any) ?? 'amiri');
+    }
+  }, [currentId]);
+
+  // ── Vanish mode ─────────────────────────────────────────────────────────────
+  const vanishMode   = (settings.vanish_mode ?? 'none') as VanishMode;
+  const vanishReps   = settings.vanish_reps   ?? 3;
+  // currentReps = total repetitions this memo has accumulated across all sessions
+  const [isVanishRevealed, setIsVanishRevealed] = useState(false);
+  // Reset manual reveal when the displayed memo changes
+  useEffect(() => { setIsVanishRevealed(false); }, [currentId]);
+
+  const vanishThresholdMet = vanishMode !== 'none' && currentReps >= vanishReps;
+  const isVanishActive     = vanishThresholdMet && !isVanishRevealed;
+  // For 'opacity' mode: reduce to near-invisible; for 'sudden': fully hide
+  const textImgOpacity = isVanishActive && vanishMode === 'opacity' ? 0.07 : 1;
+  const textImgHidden  = isVanishActive && vanishMode === 'sudden';
+  const isWordsMode    = isVanishActive && vanishMode === 'words';
+
+  const handleZoomOut = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setFontSize(f => {
+      const newSize = Math.max(12, f - 2);
+      if (memo && newSize !== f) updateMemo(memo.id, { font_size: newSize }).catch(console.error);
+      return newSize;
+    });
+  }, [memo, updateMemo]);
+
+  const handleZoomIn = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setFontSize(f => {
+      const newSize = Math.min(40, f + 2);
+      if (memo && newSize !== f) updateMemo(memo.id, { font_size: newSize }).catch(console.error);
+      return newSize;
+    });
+  }, [memo, updateMemo]);
+
+  const handleFontFamilyChange = useCallback((newFont: 'amiri' | 'quran' | 'reemKufi' | 'lateef' | 'tajawal') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setFontFamily(newFont);
+    setIsFontMenuOpen(false);
+    if (memo) updateMemo(memo.id, { font_family: newFont }).catch(console.error);
+  }, [memo, updateMemo]);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
 
@@ -397,12 +446,15 @@ export function LearningSessionScreen() {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} overScrollMode="never">
         <Animated.View style={cardStyle}>
-          {memo.image_url ? (
-            <Image 
-              source={{ uri: memo.image_url }} 
-              style={styles.memoImage}
-              resizeMode="contain"
-            />
+          {/* Image — words mode leaves images untouched; opacity dims; sudden hides */}
+          {memo.image_url && !textImgHidden ? (
+            <View style={{ opacity: textImgOpacity }}>
+              <Image
+                source={{ uri: memo.image_url }}
+                style={styles.memoImage}
+                resizeMode="contain"
+              />
+            </View>
           ) : null}
 
           <View style={[styles.toolbar, { borderBottomWidth: 0, paddingHorizontal: 0, paddingVertical: 0, marginBottom: spacing.md }]}>
@@ -412,13 +464,31 @@ export function LearningSessionScreen() {
             
             <View style={styles.toolDivider} />
             
-            <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFontSize(f => Math.max(12, f - 2)); }}>
+            <TouchableOpacity style={styles.toolBtn} onPress={handleZoomOut}>
               <ZoomOut size={16} color={colors.accent} />
             </TouchableOpacity>
             <MText weight="semi" style={styles.toolSizeText}>{fontSize}%</MText>
-            <TouchableOpacity style={styles.toolBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFontSize(f => Math.min(40, f + 2)); }}>
+            <TouchableOpacity style={styles.toolBtn} onPress={handleZoomIn}>
               <ZoomIn size={16} color={colors.accent} />
             </TouchableOpacity>
+
+            {/* Vanish toggle — shown whenever the vanish threshold is met;
+                Eye   = text is hidden  → press to reveal
+                EyeOff = text is visible → press to re-hide */}
+            {vanishThresholdMet && (
+              <>
+                <View style={styles.toolDivider} />
+                <TouchableOpacity
+                  style={[styles.toolBtn, { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder }]}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setIsVanishRevealed(v => !v); }}
+                  hitSlop={8}
+                >
+                  {isVanishRevealed
+                    ? <EyeOff size={16} color={colors.accent} />
+                    : <Eye    size={16} color={colors.accent} />}
+                </TouchableOpacity>
+              </>
+            )}
 
             <View style={{ flex: 1 }} />
 
@@ -456,31 +526,56 @@ export function LearningSessionScreen() {
               {FONTS.map(f => {
                 const isActive = fontFamily === f.id;
                 return (
-                  <TouchableOpacity key={f.id} style={[styles.toolPill, isActive && styles.toolPillActive]} onPress={() => { 
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); 
-                    setFontFamily(f.id);
-                    setIsFontMenuOpen(false);
-                  }}>
+                  <TouchableOpacity key={f.id} style={[styles.toolPill, isActive && styles.toolPillActive]} onPress={() => handleFontFamilyChange(f.id)}>
                     <MText weight="semi" style={isActive ? styles.toolPillActiveText : styles.toolPillText}>{f.name}</MText>
                   </TouchableOpacity>
                 );
               })}
             </ScrollView>
           </MotiView>
-          {memo.is_poem ? (
-            <View>
-              <MText style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
-                {memo.text.split('***')[0]?.trim()}
-              </MText>
-              <View style={styles.poemDivider} />
-              <MText style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
-                {memo.text.split('***')[1]?.trim()}
-              </MText>
+          {/* ── Memo text — vanish mode applied (audio never affected) ── */}
+          {textImgHidden ? null : (
+            <View style={{ opacity: textImgOpacity }}>
+              {memo.is_poem ? (
+                <View>
+                  {isWordsMode ? (
+                    <VanishText
+                      text={memo.text.split('***')[0]?.trim() ?? ''}
+                      memoId={memo.id}
+                      style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}
+                    />
+                  ) : (
+                    <MText style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
+                      {memo.text.split('***')[0]?.trim()}
+                    </MText>
+                  )}
+                  <View style={styles.poemDivider} />
+                  {isWordsMode ? (
+                    <VanishText
+                      text={memo.text.split('***')[1]?.trim() ?? ''}
+                      memoId={memo.id + '-2'}
+                      style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}
+                    />
+                  ) : (
+                    <MText style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
+                      {memo.text.split('***')[1]?.trim()}
+                    </MText>
+                  )}
+                </View>
+              ) : (
+                isWordsMode ? (
+                  <VanishText
+                    text={memo.text}
+                    memoId={memo.id}
+                    style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}
+                  />
+                ) : (
+                  <MText style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
+                    {memo.text}
+                  </MText>
+                )
+              )}
             </View>
-          ) : (
-            <MText style={[styles.memoText, { fontSize, fontFamily: fonts[fontFamily] }]}>
-              {memo.text}
-            </MText>
           )}
         </Animated.View>
 

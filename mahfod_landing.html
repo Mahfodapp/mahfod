@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محفوظ | الرفيق الذكي لطالب العلم</title>
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ─── DESIGN SYSTEM TOKENS ─── */
+        :root {
+            --bg-primary: #0D0E10;
+            --bg-surface: #121316;
+            --bg-surface-raised: #181A1C;
+            --bg-surface-high: #1E2022;
+            
+            --accent: #CCFF00;
+            --accent-soft: rgba(204, 255, 0, 0.12);
+            --accent-border: rgba(204, 255, 0, 0.22);
+            
+            --text-primary: #FDFBFE;
+            --text-secondary: #ABABAD;
+            --text-muted: #757578;
+            
+            --stage-learning: #AAFFDC;
+            --stage-review: #CCFF00;
+            --stage-mastered: #00EDB4;
+            
+            --border: rgba(255, 255, 255, 0.05);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --radius-pill: 9999px;
+            
+            --spring-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --ease-transition: all 0.3s ease;
+        }
+
+        /* ─── RESET & BASE ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Cairo', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(204, 255, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(0, 237, 180, 0.03) 0%, transparent 50%);
+        }
+
+        /* ─── TYPOGRAPHY ─── */
+        h1, h2, h3 { font-weight: 700; line-height: 1.4; }
+        .display { font-size: 4rem; font-weight: 800; letter-spacing: -0.02em; }
+        .h1 { font-size: 2.5rem; }
+        .h2 { font-size: 2rem; }
+        .h3 { font-size: 1.5rem; }
+        .body-lg { font-size: 1.125rem; color: var(--text-secondary); }
+        
+        .text-accent { color: var(--accent); }
+
+        /* ─── COMPONENTS ─── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            border-radius: var(--radius-pill);
+            font-size: 1.125rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--spring-transition);
+            cursor: pointer;
+            border: none;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            box-shadow: 0 8px 24px rgba(204, 255, 0, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 32px rgba(204, 255, 0, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-hover);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Cards */
+        .glass-card {
+            background-color: var(--bg-surface-raised);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            transition: var(--spring-transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: var(--ease-transition);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            border-color: var(--border-hover);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+            background-color: var(--bg-surface-high);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.875rem;
+            font-weight: 700;
+            gap: 8px;
+        }
+
+        .badge-review {
+            background-color: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
+        }
+
+        .badge-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        /* ─── LAYOUT SECTIONS ─── */
+        /* Navbar */
+        nav {
+            padding: 24px 0;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(13, 14, 16, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo span {
+            color: var(--accent);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+            position: relative;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .hero-visual {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .app-mockup {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 24px;
+            box-shadow: 
+                0 0 0 10px rgba(255,255,255,0.02),
+                0 32px 64px rgba(0,0,0,0.5);
+            transform: rotateY(-15deg) rotateX(5deg);
+            transition: var(--spring-transition);
+        }
+
+        .hero-visual:hover .app-mockup {
+            transform: rotateY(0deg) rotateX(0deg) scale(1.02);
+            box-shadow: 
+                0 0 0 1px var(--accent-border),
+                0 0 0 10px rgba(204,255,0,0.05),
+                0 32px 64px rgba(0,0,0,0.6);
+        }
+
+        /* Mockup Internals */
+        .mockup-header { display: flex; justify-content: space-between; margin-bottom: 32px; }
+        .mockup-skeleton-title { height: 24px; width: 40%; background: var(--bg-surface-high); border-radius: 8px; }
+        .mockup-skeleton-badge { height: 24px; width: 20%; background: var(--accent-soft); border-radius: 12px; border: 1px solid var(--accent-border); }
+        .mockup-card { background: var(--bg-surface-raised); border-radius: 24px; padding: 24px; border: 1px solid var(--border); margin-bottom: 16px; }
+        .mockup-text-line { height: 16px; background: var(--bg-surface-high); border-radius: 4px; margin-bottom: 12px; }
+        .mockup-text-line:last-child { width: 70%; margin-bottom: 0; }
+        .mockup-controls { display: flex; gap: 12px; margin-top: 24px; }
+        .mockup-btn { height: 48px; border-radius: 24px; flex: 1; }
+        .mockup-btn-primary { background: var(--accent); }
+        .mockup-btn-secondary { background: var(--bg-surface-high); }
+
+        /* Features */
+        .features {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-icon {
+            width: 56px; height: 56px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            color: var(--accent);
+            font-size: 24px;
+            transition: var(--spring-transition);
+        }
+
+        .glass-card:hover .feature-icon {
+            background: var(--accent-soft);
+            border-color: var(--accent-border);
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        /* Animations */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+            .hero-content { align-items: center; }
+            .features-grid { grid-template-columns: 1fr; }
+            .display { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container nav-content">
+            <a href="#" class="logo">محفوظ<span>.</span></a>
+            <a href="#download" class="btn btn-outline" style="padding: 8px 24px; font-size: 1rem;">النسخة التجريبية</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <div class="badge badge-review fade-up" style="transition-delay: 0.1s">
+                    <div class="badge-dot"></div>
+                    التحديث الجديد 2.0 متاح الآن
+                </div>
+                
+                <h1 class="display fade-up" style="transition-delay: 0.2s">
+                    الرفيق الذكي<br>
+                    <span class="text-accent">لطالب العلم.</span>
+                </h1>
+                
+                <p class="body-lg fade-up" style="transition-delay: 0.3s">
+                    نظام مراجعة مبني على التباعد الزمني (SM-2) مع واجهة ليلية صُممت خصيصاً لجلسات الحفظ العميقة والتركيز المطلق.
+                </p>
+                
+                <div class="fade-up" style="transition-delay: 0.4s; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                    <a href="#" class="btn btn-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        حمل التطبيق مجاناً
+                    </a>
+                    <a href="#features" class="btn btn-outline">اكتشف المميزات</a>
+                </div>
+            </div>
+
+            <!-- Interactive Mockup (Glassmorphism + Sacred Dark concept) -->
+            <div class="hero-visual fade-up" style="transition-delay: 0.5s">
+                <div class="app-mockup">
+                    <div class="mockup-header">
+                        <div class="mockup-skeleton-title"></div>
+                        <div class="mockup-skeleton-badge"></div>
+                    </div>
+                    <div class="mockup-card">
+                        <div class="mockup-text-line"></div>
+                        <div class="mockup-text-line"></div>
+                        <div class="mockup-text-line"></div>
+                    </div>
+                    <div class="mockup-card" style="opacity: 0.5; transform: scale(0.95); margin-top: -30px; z-index: -1;">
+                        <div class="mockup-text-line"></div>
+                        <div class="mockup-text-line"></div>
+                    </div>
+                    <div class="mockup-controls">
+                        <div class="mockup-btn mockup-btn-secondary"></div>
+                        <div class="mockup-btn mockup-btn-secondary"></div>
+                        <div class="mockup-btn mockup-btn-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header fade-up">
+                <h2 class="h1">صُمم لعمق الإنجاز</h2>
+                <p class="body-lg" style="margin-top: 16px;">كل زاوية في التطبيق بُنيت لتحترم تركيزك ووقتك.</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="glass-card fade-up">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h3 class="h3" style="margin-bottom: 12px;">خوارزمية SM-2 الذكية</h3>
+                    <p class="text-muted">يتتبع التطبيق قوة ذاكرتك لكل نص، ويجدول المراجعات تلقائياً في الوقت المثالي قبل أن تنسى.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card fade-up" style="transition-delay: 0.1s">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </div>
+                    <h3 class="h3" style="margin-bottom: 12px;">تجربة OLED ليلية</h3>
+                    <p class="text-muted">بيئة "Sacred Dark" خالية من التشتت والوهج، لتمنحك هدوءاً بصرياً أثناء جلسات الحفظ الليلية الطويلة.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card fade-up" style="transition-delay: 0.2s">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <h3 class="h3" style="margin-bottom: 12px;">وضع التلاشي والتحدي</h3>
+                    <p class="text-muted">اختبر قوة حفظك مع وضع التلاشي المتدرج الذي يخفي الكلمات بذكاء ليدفع عقلك للاسترجاع النشط.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Intersection Observer for scroll animations
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-up').forEach(element => {
+                observer.observe(element);
+            });
+            
+            // Interactive 3D hover effect for the mockup
+            const visual = document.querySelector('.hero-visual');
+            const mockup = document.querySelector('.app-mockup');
+            
+            if (visual && mockup) {
+                visual.addEventListener('mousemove', (e) => {
+                    const rect = visual.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = ((y - centerY) / centerY) * -10;
+                    const rotateY = ((x - centerX) / centerX) * 10;
+                    
+                    mockup.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                });
+                
+                visual.addEventListener('mouseleave', () => {
+                    mockup.style.transform = `rotateY(-15deg) rotateX(5deg)`;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

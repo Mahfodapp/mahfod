@@ -20,6 +20,8 @@ export interface Memo {
   last_reviewed_at?: string | null;
   is_favorite: boolean;
   is_poem: boolean;
+  font_size?: number | null;
+  font_family?: string | null;
   deleted?: boolean;
   deleted_at?: string;
   created_at?: string;
@@ -61,6 +63,15 @@ export interface NoterNote {
  */
 export type RevisionMode = 'fixed' | 'sm2';
 
+/**
+ * Vanish modes for memo sessions:
+ * 'none'     — no vanishing
+ * 'opacity'  — text/images fade out after vanish_reps repetitions
+ * 'sudden'   — text/images disappear abruptly after vanish_reps repetitions
+ * 'words'    — random words disappear after vanish_reps repetitions (text only, no images)
+ */
+export type VanishMode = 'none' | 'opacity' | 'sudden' | 'words';
+
 export interface UserSettings {
   user_id?: string;
   language: string;
@@ -81,5 +92,6 @@ export interface UserSettings {
   weekly_notif_time: string;
   // ── Misc ────────────────────────────────────────────────────────────────────
   categories: string[];
-  vanish_mode: string;
+  vanish_mode: VanishMode;    // which vanish mode is active
+  vanish_reps: number;        // number of reps before vanishing triggers
 }
